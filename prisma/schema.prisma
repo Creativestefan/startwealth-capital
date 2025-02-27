@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum CryptoType {
+  BTC
+  USDT
+}
+
+model User {
+  id                    String    @id @default(cuid())
+  name                  String?
+  email                 String    @unique
+  password              String
+  emailVerified         DateTime?
+  verificationToken     String?   
+  verificationExpires   DateTime? 
+  image                 String?
+  role                 Role      @default(USER)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // KYC Information
+  kyc                  KYC?
+
+  // Wallet
+  wallet               Wallet?
+
+  // Relations for NextAuth
+  accounts             Account[]
+  sessions            Session[]
+}
+
+model KYC {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  status          KycStatus @default(PENDING)
+  country         String
+  documentType    String
+  documentNumber  String?
+  documentImage   String    // URL to stored image
+  submittedAt     DateTime  @default(now())
+  reviewedAt      DateTime?
+  rejectionReason String?
+
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Wallet {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  balance         Float     @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+}
+
+model Transaction {
+  id          String            @id @default(cuid())
+  walletId    String
+  type        TransactionType
+  amount      Float
+  status      TransactionStatus @default(PENDING)
+  cryptoType  CryptoType
+  txHash      String?          // Blockchain transaction hash
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  // Relations
+  wallet      Wallet           @relation(fields: [walletId], references: [id], onDelete: Cascade)
+}
+
+// NextAuth Models
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
