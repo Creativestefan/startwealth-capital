@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -14,13 +14,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { toast } from "sonner"
-import { LoginSchema } from "@/lib/auth-utils"
+import { LoginSchema } from "@/lib/auth.config"
 
 type FormData = z.infer<typeof LoginSchema>
 
 export function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = React.useState(false)
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
 
   const form = useForm<FormData>({
     resolver: zodResolver(LoginSchema),
@@ -31,6 +33,7 @@ export function LoginForm() {
   })
 
   async function onSubmit(values: FormData) {
+    console.log("Login attempt for:", values.email) // Debug log
     setIsLoading(true)
 
     try {
@@ -40,20 +43,35 @@ export function LoginForm() {
         redirect: false,
       })
 
+      console.log("Login result:", result) // Debug log
+
       if (result?.error) {
-        toast.error("Invalid email or password")
-        return
+        throw new Error(result.error)
       }
 
       toast.success("Logged in successfully")
-      router.push("/dashboard")
+      router.push(callbackUrl)
       router.refresh()
     } catch (error) {
-      toast.error("Something went wrong. Please try again.")
+      console.error("Login error:", error) // Debug log
+      toast.error(error instanceof Error ? error.message : "Invalid email or password")
+
+      // Log form state in case of error
+      console.log("Form state at error:", {
+        values: form.getValues(),
+        errors: form.formState.errors,
+      })
     } finally {
       setIsLoading(false)
     }
   }
+
+  // Log form errors when they occur
+  React.useEffect(() => {
+    if (Object.keys(form.formState.errors).length > 0) {
+      console.log("Form validation errors:", form.formState.errors)
+    }
+  }, [form.formState.errors])
 
   return (
     <div className="flex flex-col gap-6">
@@ -79,7 +97,13 @@ export function LoginForm() {
               <FormItem>
                 <Label>Email</Label>
                 <FormControl>
-                  <Input type="email" placeholder="m@example.com" {...field} disabled={isLoading} />
+                  <Input
+                    type="email"
+                    placeholder="m@example.com"
+                    {...field}
+                    disabled={isLoading}
+                    autoComplete="email"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -97,7 +121,13 @@ export function LoginForm() {
                   </Link>
                 </div>
                 <FormControl>
-                  <Input type="password" placeholder="Enter your password" {...field} disabled={isLoading} />
+                  <Input
+                    type="password"
+                    placeholder="Enter your password"
+                    {...field}
+                    disabled={isLoading}
+                    autoComplete="current-password"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -109,22 +139,6 @@ export function LoginForm() {
           </Button>
         </form>
       </Form>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or</span>
-        </div>
-      </div>
-
-      <Button variant="outline" disabled={isLoading} onClick={() => signIn("apple")} className="w-full">
-        <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09z" />
-        </svg>
-        Continue with Apple
-      </Button>
 
       <p className="text-center text-xs text-muted-foreground">
         By clicking continue, you agree to our{" "}

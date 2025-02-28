@@ -1,9 +1,10 @@
 import Link from "next/link"
-import { auth } from "@/lib/auth-utils"
+import { getServerSession } from "next-auth"
+import { authConfig } from "@/lib/auth.config"
 import { Button } from "@/components/ui/button"
 
 export async function Header() {
-  const session = await auth()
+  const session = await getServerSession(authConfig)
 
   return (
     <header className="fixed w-full z-50 bg-background/80 backdrop-blur-md border-b">

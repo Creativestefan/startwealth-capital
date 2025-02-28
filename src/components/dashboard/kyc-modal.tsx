@@ -72,7 +72,7 @@ export function KycModal({ open, onOpenChange }: KycModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Complete KYC Verification</DialogTitle>
           <DialogDescription>

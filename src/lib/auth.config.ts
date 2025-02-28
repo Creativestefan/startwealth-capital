@@ -1,124 +1,91 @@
 import type { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { prisma } from "./prisma"
-import { z } from "zod"
-import bcrypt from "bcryptjs"
-import { getUserByEmail } from "./data/user"
-import type { Role, KycStatus } from "@prisma/client"
-
-export type UserRole = Role
-
-export const LoginSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address",
-  }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters long",
-  }),
-})
-
-export const RegisterSchema = z
-  .object({
-    email: z.string().email({
-      message: "Please enter a valid email address",
-    }),
-    password: z.string().min(6, {
-      message: "Password must be at least 6 characters long",
-    }),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  })
-
-export const ResetPasswordSchema = z
-  .object({
-    password: z.string().min(6, {
-      message: "Password must be at least 6 characters long",
-    }),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  })
+import Credentials from "next-auth/providers/credentials"
+import { prisma } from "@/lib/prisma"
+import { compare } from "bcryptjs"
 
 export const authConfig: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
   providers: [
-    CredentialsProvider({
-      name: "credentials",
+    Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        email: {
+          label: "Email",
+          type: "email",
+        },
+        password: {
+          label: "Password",
+          type: "password",
+        },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials")
+          return null
         }
 
-        const parsedCredentials = LoginSchema.safeParse(credentials)
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email,
+            },
+            include: {
+              kyc: true,
+            },
+          })
 
-        if (!parsedCredentials.success) {
-          throw new Error("Invalid credentials")
-        }
+          if (!user) {
+            return null
+          }
 
-        const { email, password } = parsedCredentials.data
-        const user = await getUserByEmail(email)
+          const isPasswordValid = await compare(credentials.password, user.password)
 
-        if (!user || !user.password) {
-          throw new Error("Invalid credentials")
-        }
+          if (!isPasswordValid) {
+            return null
+          }
 
-        const passwordsMatch = await bcrypt.compare(password, user.password)
-
-        if (!passwordsMatch) {
-          throw new Error("Invalid credentials")
-        }
-
-        // Return user data with KYC status
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          image: user.image,
-          emailVerified: user.emailVerified,
-          kycStatus: user.kyc?.status || "PENDING",
+          return {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            dateOfBirth: user.dateOfBirth,
+            role: user.role,
+            image: user.image,
+            emailVerified: user.emailVerified,
+            kycStatus: user.kyc?.status ?? null,
+          }
+        } catch (error) {
+          console.error("Error in authorize:", error)
+          return null
         }
       },
     }),
   ],
+  pages: {
+    signIn: "/auth/login",
+    error: "/auth/error",
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
+        token.firstName = user.firstName
+        token.lastName = user.lastName
+        token.dateOfBirth = user.dateOfBirth
         token.role = user.role
-        token.emailVerified = user.emailVerified
-        token.kycStatus = user.kycStatus as KycStatus
+        token.kycStatus = user.kycStatus
       }
       return token
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id
-        session.user.role = token.role
-        session.user.emailVerified = token.emailVerified
-        session.user.kycStatus = token.kycStatus
+      if (token) {
+        session.user.id = token.id as string
+        session.user.firstName = token.firstName as string
+        session.user.lastName = token.lastName as string
+        session.user.dateOfBirth = token.dateOfBirth as Date
+        session.user.role = token.role as any
+        session.user.kycStatus = token.kycStatus as any
       }
       return session
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
 }
 

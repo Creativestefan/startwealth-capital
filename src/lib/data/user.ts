@@ -8,6 +8,18 @@ export async function getUserByEmail(email: string) {
       where: { email },
       include: {
         kyc: true,
+        wallet: {
+          include: {
+            transactions: true,
+          },
+        },
+        marketInvestments: true,
+        referralsGiven: true,
+        notifications: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
     })
 
@@ -23,6 +35,18 @@ export async function getUserById(id: string) {
       where: { id },
       include: {
         kyc: true,
+        wallet: {
+          include: {
+            transactions: true,
+          },
+        },
+        marketInvestments: true,
+        referralsGiven: true,
+        notifications: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
     })
 
@@ -34,15 +58,11 @@ export async function getUserById(id: string) {
 
 export async function updateUser(id: string, data: Partial<AuthUser>) {
   try {
-    // Convert AuthUser partial to Prisma UpdateInput
     const updateData: Prisma.UserUpdateInput = {
       email: data.email,
-      name: data.name,
       image: data.image,
       emailVerified: data.emailVerified,
-      password: data.password,
       role: data.role,
-      // Handle KYC update properly using Prisma's nested update syntax
       kyc: data.kyc
         ? {
             upsert: {
@@ -70,6 +90,18 @@ export async function updateUser(id: string, data: Partial<AuthUser>) {
       data: updateData,
       include: {
         kyc: true,
+        wallet: {
+          include: {
+            transactions: true,
+          },
+        },
+        marketInvestments: true,
+        referralsGiven: true,
+        notifications: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
     })
 

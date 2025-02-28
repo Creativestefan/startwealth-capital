@@ -1,29 +1,30 @@
-export interface Transaction {
-    id: string
-    walletId: string
-    type: "DEPOSIT" | "WITHDRAWAL"
-    amount: number
-    status: "PENDING" | "COMPLETED" | "FAILED"
-    cryptoType: "BTC" | "USDT"
-    txHash?: string
-    createdAt: Date
-    updatedAt: Date
-  }
-  
-  export interface Wallet {
-    id: string
-    userId: string
-    balance: number
-    transactions: Transaction[]
-    createdAt: Date
-    updatedAt: Date
-  }
-  
-  export interface CreateTransactionData {
-    type: Transaction["type"]
-    amount: number
-    cryptoType: Transaction["cryptoType"]
-    txHash?: string
-  }
-  
-  
+import type { WalletTransactionType, WalletTransactionStatus } from "@prisma/client"
+
+export interface WalletTransaction {
+  id: string
+  walletId: string
+  type: WalletTransactionType
+  amount: number
+  status: WalletTransactionStatus
+  cryptoType: string
+  txHash?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Wallet {
+  id: string
+  userId: string
+  balance: number
+  transactions: WalletTransaction[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface CreateTransactionData {
+  type: WalletTransactionType
+  amount: number
+  cryptoType: string
+  txHash?: string
+}
+

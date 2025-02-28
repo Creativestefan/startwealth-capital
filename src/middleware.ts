@@ -10,18 +10,25 @@ export default withAuth(
     if (request.nextUrl.pathname.startsWith("/dashboard")) {
       // Check if user exists and is authenticated
       if (!token) {
-        return NextResponse.redirect(new URL("/login", request.url))
+        return NextResponse.redirect(new URL("/auth/login", request.url))
       }
 
       // Check if email is verified
       if (!token.emailVerified) {
         // Store the intended URL to redirect back after verification
         const callbackUrl = encodeURIComponent(request.url)
-        return NextResponse.redirect(new URL(`/verify-email?callbackUrl=${callbackUrl}`, request.url))
+        return NextResponse.redirect(new URL(`/auth/verify-email?callbackUrl=${callbackUrl}`, request.url))
       }
 
       // Allow access to dashboard but KYC status will be checked in the UI
       return NextResponse.next()
+    }
+
+    // Protect settings routes
+    if (request.nextUrl.pathname.startsWith("/settings")) {
+      if (!token) {
+        return NextResponse.redirect(new URL("/auth/login", request.url))
+      }
     }
 
     // Allow other requests to pass through
@@ -32,7 +39,7 @@ export default withAuth(
       authorized: ({ token }) => !!token,
     },
     pages: {
-      signIn: "/login",
+      signIn: "/auth/login",
     },
   },
 )

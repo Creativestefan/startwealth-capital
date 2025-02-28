@@ -17,28 +17,44 @@ export async function POST(request: Request) {
       )
     }
 
-    const { email, password } = validatedFields.data
+    const { email, password, firstName, lastName, dateOfBirth } = validatedFields.data
 
-    // Check if user already exists
+    // Check if user already exists with detailed logging
     const existingUser = await prisma.user.findUnique({
       where: { email },
+      select: { id: true, email: true, createdAt: true },
     })
 
     if (existingUser) {
-      console.log("User already exists:", email) // Debug log
-      return Response.json({ error: "Email already exists" }, { status: 400 })
+      console.log("Existing user found:", {
+        id: existingUser.id,
+        email: existingUser.email,
+        createdAt: existingUser.createdAt,
+      })
+      return Response.json(
+        {
+          error: "Email already exists",
+          details: {
+            message: "An account with this email already exists",
+            createdAt: existingUser.createdAt,
+          },
+        },
+        { status: 400 },
+      )
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create user
-    console.log("Creating new user:", email) // Debug log
+    // Create user with detailed logging
+    console.log("Creating new user:", email)
     const user = await prisma.user.create({
       data: {
         email,
+        firstName,
+        lastName,
+        dateOfBirth: new Date(dateOfBirth),
         password: hashedPassword,
-        // Initialize wallet for the user
         wallet: {
           create: {
             balance: 0,
@@ -50,7 +66,11 @@ export async function POST(request: Request) {
       },
     })
 
-    console.log("User created successfully:", user.id) // Debug log
+    console.log("User created successfully:", {
+      id: user.id,
+      email: user.email,
+      hasWallet: !!user.wallet,
+    })
 
     return Response.json({
       user: {
@@ -61,7 +81,11 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Registration error:", error) // Detailed error log
     return Response.json(
-      { error: "Something went wrong", details: error instanceof Error ? error.message : "Unknown error" },
+      {
+        error: "Something went wrong",
+        details: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString(),
+      },
       { status: 500 },
     )
   }

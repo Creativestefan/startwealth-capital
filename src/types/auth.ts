@@ -1,8 +1,14 @@
-import type { User, Role, KycStatus } from "@prisma/client"
+import type { Role, KycStatus } from "@prisma/client"
 
-export interface AuthUser extends User {
+export interface AuthUser {
+  id: string
+  firstName: string
+  lastName: string
+  dateOfBirth: Date
+  email: string
   emailVerified: Date | null
   role: Role
+  image?: string | null
   kyc?: {
     status: KycStatus
     country: string

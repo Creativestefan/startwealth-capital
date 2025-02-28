@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form"
 import type * as z from "zod"
 import { Loader2, Wallet } from "lucide-react"
 import Link from "next/link"
-import { signIn } from "next-auth/react"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -24,6 +23,9 @@ export function RegisterForm() {
   const form = useForm<FormData>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
+      dateOfBirth: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -31,9 +33,12 @@ export function RegisterForm() {
   })
 
   async function onSubmit(values: FormData) {
+    console.log("Form submitted with values:", values) // Debug log
     setIsLoading(true)
+
     try {
       // First register the user
+      console.log("Attempting to register user...") // Debug log
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -41,12 +46,14 @@ export function RegisterForm() {
       })
 
       const data = await response.json()
+      console.log("Registration response:", data) // Debug log
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to register")
       }
 
       // Then send verification email
+      console.log("Sending verification email...") // Debug log
       const otpResponse = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -54,6 +61,7 @@ export function RegisterForm() {
       })
 
       const otpData = await otpResponse.json()
+      console.log("OTP response:", otpData) // Debug log
 
       if (!otpResponse.ok) {
         throw new Error(otpData.error || "Failed to send verification code")
@@ -62,12 +70,24 @@ export function RegisterForm() {
       toast.success("Registration successful! Please verify your email.")
       router.push(`/verify-email?email=${encodeURIComponent(values.email)}`)
     } catch (error) {
-      console.error("Registration error:", error)
+      console.error("Registration error:", error) // Debug log
       toast.error(error instanceof Error ? error.message : "Something went wrong. Please try again.")
+      // Log form state in case of error
+      console.log("Form state at error:", {
+        values: form.getValues(),
+        errors: form.formState.errors,
+      })
     } finally {
       setIsLoading(false)
     }
   }
+
+  // Log form errors when they occur
+  React.useEffect(() => {
+    if (Object.keys(form.formState.errors).length > 0) {
+      console.log("Form validation errors:", form.formState.errors)
+    }
+  }, [form.formState.errors])
 
   return (
     <div className="flex flex-col gap-6">
@@ -86,6 +106,47 @@ export function RegisterForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John" {...field} disabled={isLoading} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Doe" {...field} disabled={isLoading} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormField
+            control={form.control}
+            name="dateOfBirth"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Date of Birth</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} disabled={isLoading} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="email"
@@ -131,22 +192,6 @@ export function RegisterForm() {
           </Button>
         </form>
       </Form>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or</span>
-        </div>
-      </div>
-
-      <Button variant="outline" disabled={isLoading} onClick={() => signIn("apple")}>
-        <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09z" />
-        </svg>
-        Continue with Apple
-      </Button>
 
       <p className="text-center text-xs text-muted-foreground">
         By clicking continue, you agree to our{" "}

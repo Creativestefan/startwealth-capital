@@ -1,38 +1,39 @@
-import type { Role, KycStatus } from "@prisma/client"
-import type { DefaultSession } from "next-auth"
-import { getServerSession } from "next-auth/next"
+import type { Session } from "next-auth"
+import { getServerSession } from "next-auth"
+import { redirect } from "next/navigation"
 import { authConfig } from "./auth.config"
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string
-      role: Role
-      emailVerified: Date | null
-      kycStatus: KycStatus
-    } & DefaultSession["user"]
+export async function requireAuth() {
+  const session = (await getServerSession(authConfig)) as Session | null
+
+  if (!session) {
+    redirect("/auth/login")
   }
 
-  interface User {
-    role: Role
-    emailVerified: Date | null
-    kycStatus: KycStatus
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string
-    role: Role
-    emailVerified: Date | null
-    kycStatus: KycStatus
-  }
-}
-
-export async function auth() {
-  const session = await getServerSession(authConfig)
   return session
 }
 
-export { LoginSchema, RegisterSchema, ResetPasswordSchema } from "./auth.config"
+export async function requireAdmin() {
+  const session = (await getServerSession(authConfig)) as Session | null
+
+  if (!session || session.user.role !== "ADMIN") {
+    redirect("/auth/login")
+  }
+
+  return session
+}
+
+export async function requireKyc() {
+  const session = (await getServerSession(authConfig)) as Session | null
+
+  if (!session) {
+    redirect("/auth/login")
+  }
+
+  if (session.user.kycStatus !== "APPROVED") {
+    redirect("/dashboard/kyc")
+  }
+
+  return session
+}
 

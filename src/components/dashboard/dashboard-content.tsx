@@ -13,7 +13,6 @@ export function DashboardContent({ kycStatus }: DashboardContentProps) {
 
   return (
     <div>
-      {/* Your dashboard content */}
       <KycModal open={showKycModal} onOpenChange={setShowKycModal} />
     </div>
   )
