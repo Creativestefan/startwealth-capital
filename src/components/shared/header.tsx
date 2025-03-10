@@ -1,11 +1,16 @@
 import Link from "next/link"
-import { getServerSession } from "next-auth"
+import { getServerSession } from "next-auth/next"
 import { authConfig } from "@/lib/auth.config"
 import { Button } from "@/components/ui/button"
 
 export async function Header() {
   const session = await getServerSession(authConfig)
-
+  
+  // Don't show the shared header on admin pages
+  if (session?.user?.role === "ADMIN") {
+    return null;
+  }
+  
   return (
     <header className="fixed w-full z-50 bg-background/80 backdrop-blur-md border-b">
       <div className="container mx-auto py-4 px-4">

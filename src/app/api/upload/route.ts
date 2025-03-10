@@ -1,54 +1,81 @@
-import { NextResponse } from "next/server"
-import { uploadToR2 } from "@/lib/utils/upload"
+import { NextRequest, NextResponse } from 'next/server';
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getServerSession } from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 
-// Remove authentication requirement for testing
-export async function POST(request: Request) {
+// Initialize S3 client for Cloudflare R2
+const s3Client = new S3Client({
+  region: "auto",
+  endpoint: `https://${process.env.CLOUDFLARE_R2_ENDPOINT}`,
+  credentials: {
+    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || "",
+  },
+});
+
+const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || "";
+
+/**
+ * Generates a unique filename for uploading to R2
+ */
+function generateUniqueFilename(originalFilename: string): string {
+  const extension = originalFilename.split('.').pop() || 'jpg';
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 15);
+  return `${timestamp}-${randomString}.${extension}`;
+}
+
+export async function POST(request: NextRequest) {
   try {
-    // Temporarily remove session check for testing
-    // const session = await getServerSession(authConfig)
-    // if (!session) {
-    //   return new NextResponse("Unauthorized", { status: 401 })
-    // }
+    // Check authentication
+    const session = await getServerSession(authConfig);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    const formData = await request.formData()
-    const file = formData.get("file") as File | null
-
+    // Get the form data
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+    
     if (!file) {
-      return new NextResponse("No file provided", { status: 400 })
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Log file details for debugging
-    console.log("File details:", {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-    })
+    // Generate a unique filename
+    const uniqueFilename = generateUniqueFilename(file.name);
+    const key = `uploads/${uniqueFilename}`;
+    
+    // Convert file to buffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      return new NextResponse("Invalid file type. Only images are allowed.", { status: 400 })
-    }
+    // Upload to R2
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      Body: buffer,
+      ContentType: file.type,
+    });
 
-    // Validate file size (5MB limit)
-    const maxSize = 5 * 1024 * 1024 // 5MB
-    if (file.size > maxSize) {
-      return new NextResponse("File too large. Maximum size is 5MB.", { status: 400 })
-    }
-
-    const folder = (formData.get("folder") as string) || "properties"
-
-    try {
-      const url = await uploadToR2(file, folder)
-      return NextResponse.json({ url })
-    } catch (uploadError) {
-      console.error("R2 Upload error:", uploadError)
-      return new NextResponse(uploadError instanceof Error ? uploadError.message : "Failed to upload to R2", {
-        status: 500,
-      })
-    }
+    await s3Client.send(command);
+    
+    // Generate the public URL
+    const publicUrl = `https://${bucketName}.${process.env.CLOUDFLARE_R2_ENDPOINT}/uploads/${uniqueFilename}`;
+    
+    // Generate a proxied URL that goes through our API
+    const proxiedUrl = `/api/image-proxy?url=${encodeURIComponent(publicUrl)}`;
+    
+    return NextResponse.json({ 
+      success: true, 
+      url: proxiedUrl,
+      originalUrl: publicUrl
+    });
   } catch (error) {
-    console.error("[UPLOAD_ERROR]", error)
-    return new NextResponse(error instanceof Error ? error.message : "Internal Server Error", { status: 500 })
+    console.error('Error uploading file:', error);
+    return NextResponse.json({ 
+      error: 'Failed to upload file',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
 

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { signIn } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import type * as z from "zod"
@@ -21,7 +21,9 @@ type FormData = z.infer<typeof LoginSchema>
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { update: updateSession } = useSession()
   const [isLoading, setIsLoading] = React.useState(false)
+  const [error, setError] = React.useState("")
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
 
   const form = useForm<FormData>({
@@ -33,34 +35,38 @@ export function LoginForm() {
   })
 
   async function onSubmit(values: FormData) {
-    console.log("Login attempt for:", values.email) // Debug log
     setIsLoading(true)
+    setError("")
 
     try {
+      console.log("Login attempt for:", values.email)
+      
       const result = await signIn("credentials", {
-        email: values.email,
+        email: values.email.trim(),
         password: values.password,
         redirect: false,
       })
 
-      console.log("Login result:", result) // Debug log
+      console.log("Login result:", result)
 
       if (result?.error) {
-        throw new Error(result.error)
+        if (result.error === "CredentialsSignin") {
+          setError("Invalid email or password")
+        } else {
+          setError(result.error)
+        }
+        return
       }
 
-      toast.success("Logged in successfully")
-      router.push(callbackUrl)
+      // Update the session to get the latest data
+      await updateSession()
+      
+      // Redirect based on role
+      router.push("/dashboard")
       router.refresh()
     } catch (error) {
-      console.error("Login error:", error) // Debug log
-      toast.error(error instanceof Error ? error.message : "Invalid email or password")
-
-      // Log form state in case of error
-      console.log("Form state at error:", {
-        values: form.getValues(),
-        errors: form.formState.errors,
-      })
+      console.log("Login error:", error)
+      setError("Something went wrong. Please try again.")
     } finally {
       setIsLoading(false)
     }

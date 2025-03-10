@@ -20,6 +20,7 @@ interface UserProps {
   lastName: string
   email: string
   image?: string | null
+  role?: string
 }
 
 export function NavUser({ user }: { user: UserProps }) {
@@ -30,6 +31,9 @@ export function NavUser({ user }: { user: UserProps }) {
 
   // Get initials - fallback to "U" if no name available
   const initials = firstName ? firstName.charAt(0).toUpperCase() : "U"
+  
+  // Check if user is admin
+  const isAdmin = user.role === "ADMIN"
 
   return (
     <DropdownMenu>
@@ -63,14 +67,19 @@ export function NavUser({ user }: { user: UserProps }) {
             <User className="mr-2 h-4 w-4" />
             Account
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Shield className="mr-2 h-4 w-4" />
-            Complete KYC
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Sparkles className="mr-2 h-4 w-4" />
-            Referral Program
-          </DropdownMenuItem>
+          {/* Only show KYC and Referral Program for non-admin users */}
+          {!isAdmin && (
+            <>
+              <DropdownMenuItem>
+                <Shield className="mr-2 h-4 w-4" />
+                Complete KYC
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Referral Program
+              </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuItem>
             <Bell className="mr-2 h-4 w-4" />
             Notifications

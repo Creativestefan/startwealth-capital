@@ -1,0 +1,81 @@
+This project is about building an investment website where users can invest and the admin can manage the users and their investments. Here are some features and functionalities of what the users or admin can do.
+
+
+User module
+I want to build an investment dashboard where users can have: 
+
+    Authentication:
+        Basic sign-up, login, reset the password, and verify email address.
+        Onboarding will be KYC, which is optional:
+        To complete KYC, the user will have to provide their country of residence and upload an image of a valid government-issued ID  
+        If the user skips this step, they can’t use their wallet or purchase or invest in properties. Each time they try to use this restricted access, a modal popup will show up to tell them to complete KYC and await approval from the admin. 
+
+    Wallet: 
+        Wallet balance with chart and transaction history of transactions. 
+        i. Deposit funds: Users will set an amount they want to deposit and copy either of the two types of wallet addresses provided by the admin (BTC, USDT - TRC 20), an input field to provide their transaction ID  after they have made a deposit, then click confirm deposit button. This will be sent to the admin for confirmation
+        ii. Withdraw funds: users will enter the amount, choose crypto, enter the wallet address they want to withdraw to and send a withdrawal request. 
+
+    Investments : 
+    Below are the sub-navigations and their functionalities:
+        Real estate:
+            i. Users can see and buy properties. Users can see each property's details. To purchase property, the user can either choose to pay instalments (2 or 3) or pay at once from their wallet balance
+            ii. Users can see a list of real estate plans which can be called “shares” When the user clicks to invest each of the shares, they will pick a plan (semi-annual contract ($300,000 - $700,000 USD), annual contract ($1.5M to $2M), then enter the amount they want to invest and click “ invest” from their wallet balance
+        My portfolio:
+            i. Shares history: User can see lists of investments and withdraw matured investments to wallets
+            ii. Properties: Users can see lists of the properties they have purchased, and instalments will be withdrawn from wallets automatically until it's paid. Users will always get reminders about their instalments
+        Green energy: 
+            i. Users can see and buy equipment. Users can see a detail page for each equipment. To purchase, user will enter their delivery address to pay using their wallet balance. 
+            ii. Users can see a list of real estate plans which can be called “shares” When the user clicks to invest each of the shares, they will pick a plan (semi-annual contract ($300,000 - $700,000 USD), annual contract ($1.5M to $2M), then enter the amount they want to invest and click “ invest” from their wallet balance
+        My portfolio:
+            i. Shares history: User can see lists of investments and withdraw matured investments to wallets
+            ii. Equipment: users can see lists of the Equipment they have purchased
+        Markets:
+            i. Users can see 3 market plans and choose which plan and amount they want to invest from their wallet balance. 
+            ii. My portfolio: User can see lists of investments and withdraw matured investments to wallets
+        
+        User Profile: 
+            User can make changes to their account details
+            Change password
+            Complete KYC : Complete simple KYC by submitting details to the admin so they can approve the profile. Without KYC, users can’t invest, use wallets or purchase any property or equipment. 
+            Referral Program:
+            Users can see the referral link and a table to see those they have referred and the amount of commission earned. 
+            Notification: 
+            Users can see the inbox of emails or alerts sent to them from the admin. 
+
+Admin module:
+the admin dashboard requirements:
+
+    ### 1. Properties Management
+        - View and manage listed properties
+        - Create/edit investment plans for real estate
+        - Track property transactions and investments
+        - Monitor property performance metrics
+
+    ### 2. Markets Management
+        - Create and manage market investment plans
+        - Track market investment transactions
+        - Monitor performance of market investments
+        - View analytics for market investments
+
+    ### 3. User Management
+        - View comprehensive user profiles
+        - See user investments across all categories
+        - Monitor KYC verification status
+        - Track user wallet balances and transactions
+        - View user referrals and commissions
+
+    ### 4. Green Energy Management
+        - Manage equipment listings
+        - Create/edit green energy investment plans
+        - Track equipment sales and investments
+        - Monitor performance metrics for green energy investments
+
+    ### 5. Admin Settings
+        - Update admin profile information
+        - Change password
+        - Configure notification preferences
+        - Manage system settings
+
+    This structure provides a comprehensive admin dashboard that allows you to manage all aspects of your investment platform. Each section would have its own set of pages and components to handle the specific functionality required.
+
+

@@ -141,6 +141,10 @@ model User {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
+  // Password reset fields
+  resetToken          String?
+  resetTokenExpires   DateTime?
+
   accounts              Account[]
   sessions             Session[]
   kyc                  KYC?
@@ -221,9 +225,6 @@ model Property {
   mainImage     String      // Main display image from R2
   images        String[]    // Additional images from R2
   status        PropertyStatus @default(AVAILABLE)
-  minInvestment Decimal?    @db.Decimal(10, 2)
-  maxInvestment Decimal?    @db.Decimal(10, 2)
-  expectedReturn Decimal?   @db.Decimal(5, 2)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   transactions  PropertyTransaction[]
@@ -361,7 +362,7 @@ model RealEstateInvestment {
   status          InvestmentStatus      @default(ACTIVE)
   startDate       DateTime
   endDate         DateTime
-  expectedReturn  Decimal               @db.Decimal(5, 2)
+  expectedReturn  Decimal               @db.Decimal(10, 2)
   actualReturn    Decimal?              @db.Decimal(10, 2)
   reinvest        Boolean               @default(false)
   createdAt       DateTime              @default(now())
@@ -392,6 +393,23 @@ model GreenEnergyInvestment {
 
   @@index([userId])
   @@index([status])
+  @@index([type])
+}
+
+// Investment Plan model for managing investment plans
+model InvestmentPlan {
+  id            String                  @id @default(cuid())
+  name          String
+  description   String                  @db.Text
+  type          RealEstateInvestmentType
+  minAmount     Decimal                 @db.Decimal(10, 2)
+  maxAmount     Decimal                 @db.Decimal(10, 2)
+  returnRate    Decimal                 @db.Decimal(5, 2)
+  durationMonths Int                    @default(1)
+  image         String?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
   @@index([type])
 }
 

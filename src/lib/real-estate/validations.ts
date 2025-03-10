@@ -11,9 +11,6 @@ export const propertyCreateSchema = z.object({
   mainImage: z.string().min(1, "Main image is required"),
   images: z.array(z.string()),
   status: z.enum(["AVAILABLE", "PENDING", "SOLD"]).default("AVAILABLE"),
-  minInvestment: z.number().positive("Minimum investment must be positive").optional().nullable(),
-  maxInvestment: z.number().positive("Maximum investment must be positive").optional().nullable(),
-  expectedReturn: z.number().positive("Expected return must be positive").optional().nullable(),
 })
 
 export const propertyUpdateSchema = z.object({
@@ -26,9 +23,6 @@ export const propertyUpdateSchema = z.object({
   mainImage: z.string().min(1, "Main image is required").optional(),
   images: z.array(z.string()).optional(),
   status: z.enum(["AVAILABLE", "PENDING", "SOLD"]).optional(),
-  minInvestment: z.number().positive("Minimum investment must be positive").optional().nullable(),
-  maxInvestment: z.number().positive("Maximum investment must be positive").optional().nullable(),
-  expectedReturn: z.number().positive("Expected return must be positive").optional().nullable(),
 })
 
 // Investment Validations

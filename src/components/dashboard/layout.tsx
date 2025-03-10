@@ -16,20 +16,20 @@ const navigationItems = [
   },
   {
     title: "Real Estate",
-    href: "/dashboard/real-estate",
+    href: "/real-estate",
     icon: Building2,
     items: [
       {
-        title: "Property",
-        href: "/dashboard/real-estate/property",
+        title: "Properties",
+        href: "/real-estate/properties",
       },
       {
         title: "Shares",
-        href: "/dashboard/real-estate/shares",
+        href: "/real-estate/shares",
       },
       {
         title: "My Portfolio",
-        href: "/dashboard/real-estate/portfolio",
+        href: "/real-estate/portfolio",
       },
     ],
   },

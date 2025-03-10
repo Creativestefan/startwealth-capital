@@ -52,16 +52,10 @@ export function formatReturnRate(type: keyof typeof INVESTMENT_PLANS): string {
 }
 
 /**
- * Formats property price range
+ * Formats property price
  */
 export function formatPriceRange(property: Property): string {
-  const { minInvestment, maxInvestment, price } = property
-
-  if (!minInvestment && !maxInvestment) return formatCurrency(price)
-  if (!maxInvestment) return `From ${formatCurrency(minInvestment)}`
-  if (!minInvestment) return `Up to ${formatCurrency(maxInvestment)}`
-
-  return `${formatCurrency(minInvestment)} - ${formatCurrency(maxInvestment)}`
+  return formatCurrency(property.price)
 }
 
 /**
@@ -108,5 +102,45 @@ export function formatInvestmentProgress(investment: RealEstateInvestment): { pr
   const daysLeft = Math.max(Math.ceil(totalDays - elapsedDays), 0)
 
   return { progress, daysLeft }
+}
+
+/**
+ * Recursively converts all Decimal objects to regular numbers in an object or array
+ * This is needed because Decimal objects from Prisma cannot be passed to Client Components
+ */
+export function serializeData(data: any): any {
+  // Handle null or undefined
+  if (data == null) {
+    return data;
+  }
+
+  // Handle Date objects
+  if (data instanceof Date) {
+    return data.toISOString();
+  }
+
+  // Handle Decimal objects (checking for toNumber method which is present on Decimal)
+  if (typeof data === 'object' && data !== null && typeof data.toNumber === 'function') {
+    return data.toNumber();
+  }
+
+  // Handle arrays
+  if (Array.isArray(data)) {
+    return data.map(item => serializeData(item));
+  }
+
+  // Handle objects
+  if (typeof data === 'object' && data !== null) {
+    const result: Record<string, any> = {};
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        result[key] = serializeData(data[key]);
+      }
+    }
+    return result;
+  }
+
+  // Return primitive values as is
+  return data;
 }
 

@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma"
+import { serializeData } from "@/lib/real-estate/utils/formatting"
 
 export async function getUserPropertyTransactions(userId: string) {
   try {
-    return await prisma.propertyTransaction.findMany({
+    const transactions = await prisma.propertyTransaction.findMany({
       where: { userId },
       include: {
         property: true,
@@ -11,6 +12,9 @@ export async function getUserPropertyTransactions(userId: string) {
         createdAt: "desc",
       },
     })
+    
+    // Serialize the data to convert Decimal objects to numbers
+    return serializeData(transactions)
   } catch {
     return null
   }
@@ -18,7 +22,7 @@ export async function getUserPropertyTransactions(userId: string) {
 
 export async function getUserEquipmentTransactions(userId: string) {
   try {
-    return await prisma.equipmentTransaction.findMany({
+    const transactions = await prisma.equipmentTransaction.findMany({
       where: { userId },
       include: {
         equipment: true,
@@ -27,6 +31,9 @@ export async function getUserEquipmentTransactions(userId: string) {
         createdAt: "desc",
       },
     })
+    
+    // Serialize the data to convert Decimal objects to numbers
+    return serializeData(transactions)
   } catch {
     return null
   }

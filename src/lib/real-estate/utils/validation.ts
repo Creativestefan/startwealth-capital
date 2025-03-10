@@ -1,34 +1,27 @@
-import * as z from "zod"
+import { z } from "zod"
 
-// Property Validations
+// Property creation schema
 export const propertyCreateSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
+  name: z.string().min(3, "Name must be at least 3 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
   price: z.number().positive("Price must be positive"),
-  location: z.string().min(1, "Location is required"),
-  mapUrl: z.string().url("Invalid map URL").optional().nullable(),
-  features: z.record(z.any()),
-  mainImage: z.string().min(1, "Main image is required"),
-  images: z.array(z.string()),
-  status: z.enum(["AVAILABLE", "PENDING", "SOLD"]).default("AVAILABLE"),
-  minInvestment: z.number().positive("Minimum investment must be positive").optional().nullable(),
-  maxInvestment: z.number().positive("Maximum investment must be positive").optional().nullable(),
-  expectedReturn: z.number().positive("Expected return must be positive").optional().nullable(),
-})
-
-export const propertyUpdateSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
-  description: z.string().min(1, "Description is required").optional(),
-  price: z.number().positive("Price must be positive").optional(),
-  location: z.string().min(1, "Location is required").optional(),
-  mapUrl: z.string().url("Invalid map URL").optional().nullable(),
+  location: z.string().min(3, "Location must be at least 3 characters"),
+  mapUrl: z.string().url().optional(),
   features: z.record(z.any()).optional(),
-  mainImage: z.string().min(1, "Main image is required").optional(),
+  mainImage: z.string().optional(),
   images: z.array(z.string()).optional(),
   status: z.enum(["AVAILABLE", "PENDING", "SOLD"]).optional(),
-  minInvestment: z.number().positive("Minimum investment must be positive").optional().nullable(),
-  maxInvestment: z.number().positive("Maximum investment must be positive").optional().nullable(),
-  expectedReturn: z.number().positive("Expected return must be positive").optional().nullable(),
+})
+
+// Property update schema (similar to create but all fields optional)
+export const propertyUpdateSchema = propertyCreateSchema.partial()
+
+// Property transaction schema
+export const propertyTransactionSchema = z.object({
+  propertyId: z.string(),
+  amount: z.number().positive("Amount must be positive"),
+  type: z.enum(["FULL", "INSTALLMENT"]),
+  installments: z.number().int().positive().optional(),
 })
 
 export const investmentCreateSchema = z.object({
