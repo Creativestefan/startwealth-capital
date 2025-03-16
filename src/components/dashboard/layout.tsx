@@ -35,46 +35,46 @@ const navigationItems = [
   },
   {
     title: "Green Energy",
-    href: "/dashboard/green-energy",
+    href: "/green-energy",
     icon: Leaf,
     items: [
       {
         title: "Equipment",
-        href: "/dashboard/green-energy/equipment",
+        href: "/green-energy/equipment",
       },
       {
         title: "Shares",
-        href: "/dashboard/green-energy/shares",
+        href: "/green-energy/shares",
       },
       {
         title: "My Portfolio",
-        href: "/dashboard/green-energy/portfolio",
+        href: "/green-energy/portfolio",
       },
     ],
   },
   {
     title: "Markets",
-    href: "/dashboard/markets",
+    href: "/markets",
     icon: LineChart,
     items: [
       {
-        title: "Investment Plans",
-        href: "/dashboard/markets/plans",
+        title: "Shares",
+        href: "/markets/shares",
       },
       {
         title: "My Portfolio",
-        href: "/dashboard/markets/portfolio",
+        href: "/markets/portfolio",
       },
     ],
   },
   {
     title: "Wallet",
-    href: "/dashboard/wallet",
+    href: "/wallet",
     icon: Wallet,
   },
   {
     title: "Get Help",
-    href: "/dashboard/help",
+    href: "/help",
     icon: HelpCircle,
   },
 ]
@@ -99,9 +99,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-background">
       <SidebarProvider>
-        <Sidebar>
+        <Sidebar className="border-r shadow-sm">
           <SidebarHeader>
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
@@ -120,7 +120,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <NavUser user={user} />
           </SidebarFooter>
         </Sidebar>
-        <main className="flex-1 overflow-auto bg-background">{children}</main>
+        <main className="flex-1 overflow-auto">{children}</main>
       </SidebarProvider>
     </div>
   )

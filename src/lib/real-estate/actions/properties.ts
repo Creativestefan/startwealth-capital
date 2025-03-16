@@ -267,7 +267,7 @@ export async function purchaseProperty(propertyId: string, amount: number): Prom
         const walletTransaction = await tx.walletTransaction.create({
           data: {
             walletId: wallet.id,
-            type: "INVESTMENT",
+            type: "PURCHASE",
             amount,
             status: TRANSACTION_STATUS.COMPLETED,
             cryptoType: "USDT", // Default to USDT
@@ -372,7 +372,7 @@ export async function purchasePropertyWithInstallments(
         const walletTransaction = await tx.walletTransaction.create({
           data: {
             walletId: wallet.id,
-            type: "INVESTMENT",
+            type: "PURCHASE",
             amount: installmentAmount,
             status: TRANSACTION_STATUS.COMPLETED,
             cryptoType: "USDT", // Default to USDT

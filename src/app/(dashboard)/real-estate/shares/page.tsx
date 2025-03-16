@@ -8,6 +8,7 @@ import { getInvestmentPlans } from "@/lib/real-estate/actions/investments"
 import { InvestmentPlanCard } from "@/components/real-estate/investments/investment-plan-card"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { RealEstateInvestmentType } from "@prisma/client"
 
 // Loading component for the Shares page
@@ -111,6 +112,38 @@ export default async function SharesPage() {
           </div>
         </Suspense>
       </div>
+      
+      {/* Information Section */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Why Invest in Real Estate?</CardTitle>
+          <CardDescription>
+            Secure investments for long-term wealth building
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="space-y-2">
+              <h3 className="font-semibold">Stable Returns</h3>
+              <p className="text-sm text-muted-foreground">
+                Real estate investments historically provide stable and predictable returns, offering a reliable income stream and protection against market volatility.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold">Appreciation Potential</h3>
+              <p className="text-sm text-muted-foreground">
+                Our carefully selected properties are located in high-growth areas, providing excellent potential for capital appreciation over time.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold">Portfolio Diversification</h3>
+              <p className="text-sm text-muted-foreground">
+                Adding real estate to your investment portfolio provides diversification benefits, reducing overall risk and enhancing long-term financial security.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

@@ -1,12 +1,346 @@
-// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model User {
+  id                     String                  @id @default(cuid())
+  firstName              String
+  lastName               String
+  dateOfBirth            DateTime
+  email                  String                  @unique
+  password               String
+  emailVerified          DateTime?
+  verificationToken      String?
+  verificationExpires    DateTime?
+  image                  String?
+  role                   Role                    @default(USER)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  resetToken             String?
+  resetTokenExpires      DateTime?
+  accounts               Account[]
+  equipmentTransactions  EquipmentTransaction[]
+  greenEnergyInvestments GreenEnergyInvestment[]
+  kyc                    KYC?
+  marketInvestments      MarketInvestment[]
+  notifications          Notification[]
+  propertyTransactions   PropertyTransaction[]
+  realEstateInvestments  RealEstateInvestment[]
+  referralsReceived      Referral[]              @relation("ReferralReceiver")
+  referralsGiven         Referral[]              @relation("ReferralGiver")
+  sessions               Session[]
+  wallet                 Wallet?
+
+  @@index([email])
+  @@index([role])
+}
+
+model KYC {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  status          KycStatus @default(PENDING)
+  country         String
+  documentType    String
+  documentNumber  String?
+  documentImage   String
+  submittedAt     DateTime  @default(now())
+  reviewedAt      DateTime?
+  rejectionReason String?
+  reviewedBy      String?
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+model Wallet {
+  id           String              @id @default(cuid())
+  userId       String              @unique
+  balance      Float               @default(0)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  btcAddress   String?
+  usdtAddress  String?
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions WalletTransaction[]
+
+  @@index([userId])
+}
+
+model WalletTransaction {
+  id          String            @id @default(cuid())
+  walletId    String
+  type        TransactionType
+  amount      Float
+  status      TransactionStatus
+  cryptoType  String
+  txHash      String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  description String?
+  wallet      Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId])
+  @@index([status])
+  @@index([type])
+}
+
+model Property {
+  id           String                @id @default(cuid())
+  name         String
+  description  String
+  price        Decimal               @db.Decimal(10, 2)
+  location     String
+  mapUrl       String?
+  features     Json
+  images       String[]
+  status       PropertyStatus        @default(AVAILABLE)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  mainImage    String
+  transactions PropertyTransaction[]
+
+  @@index([status])
+  @@index([price])
+}
+
+model PropertyTransaction {
+  id                String                  @id @default(cuid())
+  propertyId        String
+  userId            String
+  amount            Decimal                 @db.Decimal(10, 2)
+  type              PropertyTransactionType
+  status            TransactionStatus
+  installments      Int?
+  installmentAmount Decimal?                @db.Decimal(10, 2)
+  nextPaymentDue    DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  paidInstallments  Int                     @default(0)
+  property          Property                @relation(fields: [propertyId], references: [id])
+  user              User                    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([propertyId])
+  @@index([status])
+}
+
+model Equipment {
+  id            String                 @id @default(cuid())
+  name          String
+  description   String
+  type          EquipmentType
+  price         Decimal                @db.Decimal(10, 2)
+  status        EquipmentStatus        @default(AVAILABLE)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  features      Json
+  stockQuantity Int                    @default(0)
+  images        Json
+  transactions  EquipmentTransaction[]
+
+  @@index([status])
+  @@index([type])
+}
+
+model EquipmentTransaction {
+  id              String            @id @default(cuid())
+  equipmentId     String
+  userId          String
+  status          TransactionStatus @default(PENDING)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  quantity        Int               @default(1)
+  trackingNumber  String?
+  deliveryPin     String?
+  deliveryDate    DateTime?
+  totalAmount     Decimal           @db.Decimal(10, 2)
+  deliveryAddress Json?
+  equipment       Equipment         @relation(fields: [equipmentId], references: [id])
+  user            User              @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([equipmentId])
+  @@index([status])
+}
+
+model MarketInvestment {
+  id             String           @id @default(cuid())
+  userId         String
+  planId         String
+  amount         Decimal         @db.Decimal(10, 2)
+  startDate      DateTime
+  endDate        DateTime
+  expectedReturn Decimal         @db.Decimal(10, 2)
+  actualReturn   Decimal?        @db.Decimal(10, 2)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  reinvest       Boolean          @default(false)
+  status         InvestmentStatus @default(ACTIVE)
+  user           User             @relation(fields: [userId], references: [id])
+  plan           MarketInvestmentPlan @relation(fields: [planId], references: [id])
+
+  @@index([userId])
+  @@index([planId])
+}
+
+model Referral {
+  id             String         @id @default(cuid())
+  referrerId     String
+  referredId     String
+  commission     Float
+  status         ReferralStatus
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  commissionPaid Boolean        @default(false)
+  referred       User           @relation("ReferralReceiver", fields: [referredId], references: [id])
+  referrer       User           @relation("ReferralGiver", fields: [referrerId], references: [id])
+
+  @@index([referrerId])
+  @@index([referredId])
+  @@index([status])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  actionUrl String?
+  user      User             @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([read])
+  @@index([type])
+}
+
+model RealEstateInvestment {
+  id             String                   @id @default(cuid())
+  userId         String
+  type           RealEstateInvestmentType
+  amount         Decimal                  @db.Decimal(10, 2)
+  status         InvestmentStatus         @default(ACTIVE)
+  startDate      DateTime
+  endDate        DateTime
+  expectedReturn Decimal                  @db.Decimal(10, 2)
+  actualReturn   Decimal?                 @db.Decimal(10, 2)
+  reinvest       Boolean                  @default(false)
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  user           User                     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+}
+
+model GreenEnergyInvestment {
+  id             String                    @id @default(cuid())
+  userId         String
+  type           GreenEnergyInvestmentType
+  amount         Decimal                   @db.Decimal(10, 2)
+  status         InvestmentStatus          @default(ACTIVE)
+  startDate      DateTime                  @default(now())
+  endDate        DateTime?
+  expectedReturn Decimal                   @db.Decimal(10, 2)
+  actualReturn   Decimal?                  @db.Decimal(10, 2)
+  reinvest       Boolean                   @default(false)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  planId         String
+  plan           GreenEnergyPlan           @relation(fields: [planId], references: [id])
+  user           User                      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
+  @@index([type])
+}
+
+model InvestmentPlan {
+  id             String                   @id @default(cuid())
+  name           String
+  description    String
+  type           RealEstateInvestmentType
+  minAmount      Decimal                  @db.Decimal(10, 2)
+  maxAmount      Decimal                  @db.Decimal(10, 2)
+  returnRate     Decimal                  @db.Decimal(5, 2)
+  image          String?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  durationMonths Int                      @default(1)
+
+  @@index([type])
+}
+
+model GreenEnergyPlan {
+  id             String                    @id @default(cuid())
+  name           String
+  description    String
+  type           GreenEnergyInvestmentType
+  minAmount      Decimal                   @db.Decimal(10, 2)
+  maxAmount      Decimal                   @db.Decimal(10, 2)
+  returnRate     Decimal                   @db.Decimal(5, 2)
+  durationMonths Int                       @default(6)
+  image          String?
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  investments    GreenEnergyInvestment[]
+
+  @@index([type])
+}
+
+model MarketInvestmentPlan {
+  id             String           @id @default(cuid())
+  name           String
+  description    String
+  type           MarketPlanType
+  minAmount      Decimal         @db.Decimal(10, 2)
+  maxAmount      Decimal         @db.Decimal(10, 2)
+  returnRate     Decimal         @db.Decimal(5, 2)
+  durationMonths Int             @default(6)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  investments    MarketInvestment[]
+
+  @@index([type])
 }
 
 enum Role {
@@ -23,13 +357,18 @@ enum KycStatus {
 enum TransactionType {
   DEPOSIT
   WITHDRAWAL
+  PAYOUT
   INVESTMENT
   RETURN
   COMMISSION
+  PURCHASE
 }
 
 enum TransactionStatus {
   PENDING
+  ACCEPTED
+  PROCESSING
+  OUT_FOR_DELIVERY
   COMPLETED
   FAILED
   CANCELLED
@@ -59,15 +398,14 @@ enum EquipmentType {
   INVERTER
 }
 
-// New investment type enums
 enum RealEstateInvestmentType {
-  SEMI_ANNUAL  // $300,000 - $700,000
-  ANNUAL       // $1.5M - $2M
+  SEMI_ANNUAL
+  ANNUAL
 }
 
 enum GreenEnergyInvestmentType {
-  SEMI_ANNUAL  // $300,000 - $700,000
-  ANNUAL       // $1.5M - $2M
+  SEMI_ANNUAL
+  ANNUAL
 }
 
 enum InvestmentStatus {
@@ -77,8 +415,8 @@ enum InvestmentStatus {
 }
 
 enum MarketPlanType {
-  SEMI_ANNUAL    // $300,000 - $700,000
-  ANNUAL         // $1.5M - $2M
+  SEMI_ANNUAL
+  ANNUAL
 }
 
 enum ReferralStatus {
@@ -95,321 +433,3 @@ enum NotificationType {
   REFERRAL_COMPLETED
   WALLET_UPDATED
 }
-
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@index([userId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-model User {
-  id                    String    @id @default(cuid())
-  firstName             String
-  lastName              String
-  dateOfBirth          DateTime
-  email                 String    @unique
-  password              String
-  emailVerified         DateTime?
-  verificationToken     String?   
-  verificationExpires   DateTime? 
-  image                 String?
-  role                  Role      @default(USER)
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  // Password reset fields
-  resetToken          String?
-  resetTokenExpires   DateTime?
-
-  accounts              Account[]
-  sessions             Session[]
-  kyc                  KYC?
-  wallet               Wallet?
-  propertyTransactions PropertyTransaction[]
-  equipmentTransactions EquipmentTransaction[]
-  marketInvestments    MarketInvestment[]
-  realEstateInvestments RealEstateInvestment[]
-  greenEnergyInvestments GreenEnergyInvestment[]
-  referralsGiven       Referral[]    @relation("ReferralGiver")
-  referralsReceived    Referral[]    @relation("ReferralReceiver")
-  notifications        Notification[]
-
-  @@index([email])
-  @@index([role])
-}
-
-model KYC {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  status          KycStatus @default(PENDING)
-  country         String
-  documentType    String
-  documentNumber  String?
-  documentImage   String
-  submittedAt     DateTime  @default(now())
-  reviewedAt      DateTime?
-  rejectionReason String?
-  reviewedBy      String?   // Admin user ID who reviewed the KYC
-
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([status])
-}
-
-model Wallet {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  balance       Float     @default(0)
-  btcAddress    String?   // BTC wallet address
-  usdtAddress   String?   // USDT wallet address
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions  WalletTransaction[]
-
-  @@index([userId])
-}
-
-model WalletTransaction {
-  id            String            @id @default(cuid())
-  walletId      String
-  type          TransactionType
-  amount        Float
-  status        TransactionStatus
-  cryptoType    String            // "BTC" or "USDT"
-  txHash        String?
-  description   String?           // Additional transaction details
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-
-  wallet        Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
-
-  @@index([walletId])
-  @@index([status])
-  @@index([type])
-}
-
-model Property {
-  id            String      @id @default(cuid())
-  name          String
-  description   String      @db.Text
-  price         Decimal     @db.Decimal(10, 2)
-  location      String
-  mapUrl        String?
-  features      Json
-  mainImage     String      // Main display image from R2
-  images        String[]    // Additional images from R2
-  status        PropertyStatus @default(AVAILABLE)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  transactions  PropertyTransaction[]
-
-  @@index([status])
-  @@index([price])
-}
-
-model PropertyTransaction {
-  id              String      @id @default(cuid())
-  propertyId      String
-  userId          String
-  amount          Decimal     @db.Decimal(10, 2)
-  type            PropertyTransactionType
-  status          TransactionStatus
-  installments    Int?        // Number of installments if applicable
-  installmentAmount Decimal?  @db.Decimal(10, 2)
-  nextPaymentDue   DateTime?
-  paidInstallments Int       @default(0)  // Track paid installments
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  property        Property    @relation(fields: [propertyId], references: [id])
-  user            User        @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([propertyId])
-  @@index([status])
-}
-
-model Equipment {
-  id            String      @id @default(cuid())
-  name          String
-  description   String      @db.Text
-  type          EquipmentType
-  price         Float
-  specifications Json
-  images        String[]
-  status        EquipmentStatus @default(AVAILABLE)
-  stock         Int         @default(0)
-  minOrder      Int         @default(1)
-  maxOrder      Int?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  transactions  EquipmentTransaction[]
-
-  @@index([status])
-  @@index([type])
-  @@index([price])
-}
-
-model EquipmentTransaction {
-  id              String      @id @default(cuid())
-  equipmentId     String
-  userId          String
-  amount          Float
-  quantity        Int         @default(1)
-  deliveryAddress String      @db.Text
-  trackingNumber  String?
-  status          TransactionStatus
-  estimatedDelivery DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  equipment       Equipment   @relation(fields: [equipmentId], references: [id])
-  user            User        @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([equipmentId])
-  @@index([status])
-}
-
-model MarketInvestment {
-  id            String      @id @default(cuid())
-  userId        String
-  planType      MarketPlanType
-  amount        Float
-  status        InvestmentStatus @default(ACTIVE)
-  startDate     DateTime
-  endDate       DateTime
-  expectedReturn Float
-  actualReturn  Float?
-  reinvest      Boolean     @default(false)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  user          User        @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([planType])
-}
-
-model Referral {
-  id            String      @id @default(cuid())
-  referrerId    String      // User who referred
-  referredId    String      // User who was referred
-  commission    Float
-  status        ReferralStatus
-  commissionPaid Boolean    @default(false)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  referrer      User        @relation("ReferralGiver", fields: [referrerId], references: [id])
-  referred      User        @relation("ReferralReceiver", fields: [referredId], references: [id])
-
-  @@index([referrerId])
-  @@index([referredId])
-  @@index([status])
-}
-
-model Notification {
-  id            String      @id @default(cuid())
-  userId        String
-  type          NotificationType
-  title         String
-  message       String      @db.Text
-  read          Boolean     @default(false)
-  actionUrl     String?     // Optional URL for notification action
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  user          User        @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([read])
-  @@index([type])
-}
-
-// New Investment Models
-model RealEstateInvestment {
-  id              String                @id @default(cuid())
-  userId          String
-  type            RealEstateInvestmentType
-  amount          Decimal               @db.Decimal(10, 2)
-  status          InvestmentStatus      @default(ACTIVE)
-  startDate       DateTime
-  endDate         DateTime
-  expectedReturn  Decimal               @db.Decimal(10, 2)
-  actualReturn    Decimal?              @db.Decimal(10, 2)
-  reinvest        Boolean               @default(false)
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
-
-  user            User                  @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([status])
-  @@index([type])
-}
-
-model GreenEnergyInvestment {
-  id              String                @id @default(cuid())
-  userId          String
-  type            GreenEnergyInvestmentType
-  amount          Decimal               @db.Decimal(10, 2)
-  status          InvestmentStatus      @default(ACTIVE)
-  startDate       DateTime
-  endDate         DateTime
-  expectedReturn  Decimal               @db.Decimal(5, 2)
-  actualReturn    Decimal?              @db.Decimal(10, 2)
-  reinvest        Boolean               @default(false)
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
-
-  user            User                  @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([status])
-  @@index([type])
-}
-
-// Investment Plan model for managing investment plans
-model InvestmentPlan {
-  id            String                  @id @default(cuid())
-  name          String
-  description   String                  @db.Text
-  type          RealEstateInvestmentType
-  minAmount     Decimal                 @db.Decimal(10, 2)
-  maxAmount     Decimal                 @db.Decimal(10, 2)
-  returnRate    Decimal                 @db.Decimal(5, 2)
-  durationMonths Int                    @default(1)
-  image         String?
-  createdAt     DateTime                @default(now())
-  updatedAt     DateTime                @updatedAt
-
-  @@index([type])
-}
-

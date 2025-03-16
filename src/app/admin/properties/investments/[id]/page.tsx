@@ -215,6 +215,28 @@ export default async function InvestmentDetailPage({
                 <p className="mt-1">{investment.status === "ACTIVE" ? "Active" : endDate}</p>
               </div>
             </div>
+
+            {/* Action Buttons */}
+            {investment.status === "ACTIVE" && (
+              <div className="mt-6 space-y-2">
+                <Button 
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  asChild
+                >
+                  <Link href={`/admin/properties/investments/${investment.id}/mark-matured`}>
+                    Mark as Matured
+                  </Link>
+                </Button>
+                <Button 
+                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                  asChild
+                >
+                  <Link href={`/admin/properties/investments/${investment.id}/cancel-refund`}>
+                    Cancel & Refund
+                  </Link>
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
         

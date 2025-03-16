@@ -2,13 +2,11 @@ import { Suspense } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { PlusIcon, TrendingUpIcon, CalendarIcon, BarChart3Icon, SearchIcon } from "lucide-react"
+import { PlusIcon, TrendingUpIcon, CalendarIcon, BarChart3Icon } from "lucide-react"
 import { getInvestmentPlans } from "@/lib/real-estate/actions/investments"
-import { InvestmentPlanTable } from "@/components/admin/properties/investment-plan-table"
-import { Input } from "@/components/ui/input"
-import { formatCurrency } from "@/lib/utils"
+import { PlanCard } from "@/components/admin/properties/plan-card"
 
-function InvestmentPlansLoading() {
+function PlansLoading() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -115,21 +113,34 @@ export default async function AdminInvestmentPlansPage() {
         </Card>
       </div>
 
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">All Investment Plans</h2>
-        <div className="relative w-full max-w-sm">
-          <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search plans..." 
-            className="pl-9" 
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {plans.map((plan) => (
+          <PlanCard 
+            key={plan.id} 
+            plan={plan} 
+            onUpdate={async () => {
+              'use server'
+              // This will trigger a server-side revalidation
+              const result = await getInvestmentPlans()
+              return result.data || []
+            }} 
           />
-        </div>
-      </div>
+        ))}
 
-      <div className="bg-card rounded-lg border shadow-sm">
-        <Suspense fallback={<InvestmentPlansLoading />}>
-          <InvestmentPlanTable plans={plans} />
-        </Suspense>
+        {plans.length === 0 && (
+          <div className="col-span-full flex min-h-[400px] flex-col items-center justify-center rounded-md border border-dashed">
+            <h3 className="text-lg font-medium">No plans found</h3>
+            <p className="text-sm text-muted-foreground">
+              Create a new plan to get started.
+            </p>
+            <Button asChild className="mt-4">
+              <Link href="/admin/properties/plans/new">
+                <PlusIcon className="mr-2 h-4 w-4" />
+                Add Plan
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )

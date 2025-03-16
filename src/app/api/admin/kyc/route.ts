@@ -1,20 +1,23 @@
-import { getServerSession } from "next-auth"
 import { authConfig } from "@/lib/auth.config"
+import { getServerSession } from "next-auth"
+import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authConfig)
 
+    // Check if user is authenticated and is an admin
     if (!session?.user || session.user.role !== "ADMIN") {
-      return Response.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get all KYC submissions with user information
-    const submissions = await prisma.kYC.findMany({
+    // Get all KYC submissions
+    const kycSubmissions = await prisma.kYC.findMany({
       include: {
         user: {
           select: {
+            id: true,
             firstName: true,
             lastName: true,
             email: true,
@@ -26,9 +29,12 @@ export async function GET(request: Request) {
       },
     })
 
-    return Response.json({ submissions })
+    return NextResponse.json(kycSubmissions)
   } catch (error) {
-    console.error("Failed to fetch KYC submissions:", error)
-    return Response.json({ error: "Failed to fetch KYC submissions" }, { status: 500 })
+    console.error("[ADMIN_KYC_GET]", error)
+    return NextResponse.json(
+      { error: "Failed to fetch KYC submissions" },
+      { status: 500 }
+    )
   }
 }

@@ -28,9 +28,44 @@ const nextConfig = {
         },
       ],
     },
-    // Add CORS headers for R2 uploads
+    // Add CORS headers for all routes
     async headers() {
       return [
+        {
+          // Specifically target auth endpoints
+          source: '/api/auth/:path*',
+          headers: [
+            {
+              key: 'Access-Control-Allow-Origin',
+              value: '*',
+            },
+            {
+              key: 'Access-Control-Allow-Methods',
+              value: 'GET, POST, PUT, DELETE, OPTIONS',
+            },
+            {
+              key: 'Access-Control-Allow-Headers',
+              value: 'Content-Type, Authorization',
+            },
+          ],
+        },
+        {
+          source: '/api/:path*',
+          headers: [
+            {
+              key: 'Access-Control-Allow-Origin',
+              value: '*',
+            },
+            {
+              key: 'Access-Control-Allow-Methods',
+              value: 'GET, POST, PUT, DELETE, OPTIONS',
+            },
+            {
+              key: 'Access-Control-Allow-Headers',
+              value: 'Content-Type, Authorization',
+            },
+          ],
+        },
         {
           source: '/(.*)',
           headers: [
@@ -50,6 +85,14 @@ const nextConfig = {
         },
       ];
     },
+    // Fix module resolution issues and optimize build
+    experimental: {
+      largePageDataBytes: 256 * 1024, // 256KB
+    },
+    // External packages for server components
+    serverExternalPackages: ['@prisma/client'],
+    poweredByHeader: false,
+    reactStrictMode: true,
   }
   
   module.exports = nextConfig

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
-import { authConfig } from "@/lib/auth"
+import { authConfig } from "@/lib/auth.config"
 import { TRANSACTION_STATUS, INVESTMENT_STATUS } from "../constants"
 import { NotFoundError, UnauthorizedError, ForbiddenError } from "@/lib/errors"
 import type { ApiResponse } from "../types"

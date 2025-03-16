@@ -1,8 +1,9 @@
-import authHandler from "@/lib/auth"
+import NextAuth from "next-auth"
+import { authConfig } from "@/lib/auth.config"
 
 // Add CORS headers to prevent CORS issues
-export async function OPTIONS(request: Request) {
-  const response = new Response(null, {
+export async function OPTIONS() {
+  return new Response(null, {
     status: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
@@ -10,8 +11,11 @@ export async function OPTIONS(request: Request) {
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
   });
-  return response;
 }
 
-export { authHandler as GET, authHandler as POST }
+// Create the NextAuth handler
+const handler = NextAuth(authConfig)
+
+// Export the NextAuth handlers
+export { handler as GET, handler as POST }
 
