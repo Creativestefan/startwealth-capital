@@ -93,23 +93,32 @@ export function TransactionHistory({ wallet, propertyTransactions = [] }: Transa
   
   // Get user name from session storage or local storage if available
   const [userName, setUserName] = useState<string>("")
+  const [userFirstName, setUserFirstName] = useState<string>("")
+  const [userLastName, setUserLastName] = useState<string>("")
   
   React.useEffect(() => {
-    // Try to get user name from localStorage or sessionStorage
-    const storedFirstName = localStorage.getItem('userFirstName') || sessionStorage.getItem('userFirstName') || ""
-    const storedLastName = localStorage.getItem('userLastName') || sessionStorage.getItem('userLastName') || ""
+    // Fetch user data from the database using the wallet's userId
+    const fetchUserData = async () => {
+      if (wallet.userId) {
+        try {
+          const response = await fetch(`/api/users/${wallet.userId}`);
+          if (response.ok) {
+            const userData = await response.json();
+            if (userData.user) {
+              setUserFirstName(userData.user.firstName || "");
+              setUserLastName(userData.user.lastName || "");
+              setUserName(`${userData.user.firstName || ""} ${userData.user.lastName || ""}`.trim());
+            }
+          } else {
+            console.error("Failed to fetch user data");
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      }
+    };
     
-    if (storedFirstName || storedLastName) {
-      setUserName(`${storedFirstName} ${storedLastName}`.trim())
-    } else {
-      // Fallback to empty string instead of "User"
-      setUserName("")
-    }
-    
-    // Store user ID in localStorage for future use
-    if (wallet.userId) {
-      localStorage.setItem('userId', wallet.userId)
-    }
+    fetchUserData();
   }, [wallet.userId])
   
   // Use real transactions from the wallet
@@ -552,7 +561,9 @@ export function TransactionHistory({ wallet, propertyTransactions = [] }: Transa
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <p className="text-sm text-gray-600">User:</p>
-                    <p className="text-sm font-medium">{userName}</p>
+                    <p className="text-sm font-medium">
+                      {userFirstName || ""} {userLastName || ""}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Wallet ID:</p>
