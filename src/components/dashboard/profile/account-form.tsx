@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -16,9 +16,15 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, CheckCircle, Loader2 } from "lucide-react"
+import { AlertCircle, CheckCircle, Loader2, Upload, X } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { toast } from "sonner"
+import { useUser } from "@/providers/user-provider"
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
 
 const accountFormSchema = z.object({
   firstName: z.string().min(2, {
@@ -42,6 +48,10 @@ export function AccountForm({ user }: AccountFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [avatarSrc, setAvatarSrc] = useState<string>(user.image || "")
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { updateUserAvatar } = useUser()
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
@@ -51,6 +61,82 @@ export function AccountForm({ user }: AccountFormProps) {
       email: user.email || "",
     },
   })
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File is too large. Maximum size is 5MB.")
+      return
+    }
+
+    // Validate file type
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      toast.error("Invalid file type. Please upload JPEG, PNG, or WebP images.")
+      return
+    }
+
+    setIsUploading(true)
+    
+    try {
+      // Create FormData
+      const formData = new FormData()
+      formData.append("file", file)
+      
+      const response = await fetch("/api/users/upload-avatar", {
+        method: "POST",
+        body: formData,
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to upload profile picture")
+      }
+      
+      const data = await response.json()
+      setAvatarSrc(data.imageUrl)
+      // Update avatar in context so all components using it will update
+      updateUserAvatar(data.imageUrl)
+      toast.success("Profile picture updated successfully")
+    } catch (error) {
+      console.error("Profile picture upload error:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to upload profile picture")
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const removeProfilePicture = async () => {
+    if (!avatarSrc) return
+    
+    try {
+      setIsUploading(true)
+      const response = await fetch("/api/users/remove-avatar", {
+        method: "DELETE",
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to remove profile picture")
+      }
+      
+      setAvatarSrc("")
+      // Update avatar in context so all components using it will update
+      updateUserAvatar(null)
+      toast.success("Profile picture removed")
+    } catch (error) {
+      console.error("Profile picture removal error:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to remove profile picture")
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   async function onSubmit(values: AccountFormValues) {
     setIsSubmitting(true)
@@ -72,6 +158,7 @@ export function AccountForm({ user }: AccountFormProps) {
       }
 
       setSubmitSuccess(true)
+      toast.success("Account information updated successfully")
     } catch (error) {
       console.error("Profile update error:", error)
       setSubmitError(error instanceof Error ? error.message : "An unknown error occurred")
@@ -80,13 +167,72 @@ export function AccountForm({ user }: AccountFormProps) {
     }
   }
 
+  // Generate user initials for avatar fallback
+  const getUserInitials = () => {
+    const firstName = form.watch("firstName") || user.firstName || ""
+    const lastName = form.watch("lastName") || user.lastName || ""
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Account Information</CardTitle>
-        <CardDescription>Update your personal information</CardDescription>
+        <CardDescription>Update your personal information and profile picture</CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Profile Picture Section */}
+        <div className="mb-8">
+          <h3 className="text-lg font-medium mb-4">Profile Picture</h3>
+          <div className="flex items-center gap-6">
+            <Avatar className="h-24 w-24">
+              <AvatarImage src={avatarSrc} alt={getUserInitials()} />
+              <AvatarFallback className="text-xl">{getUserInitials()}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={triggerFileInput}
+                disabled={isUploading}
+                className="flex items-center gap-2"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4" /> Upload New Picture
+                  </>
+                )}
+              </Button>
+              {avatarSrc && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={removeProfilePicture}
+                  disabled={isUploading}
+                  className="flex items-center gap-2 text-destructive hover:text-destructive"
+                >
+                  <X className="h-4 w-4" /> Remove Picture
+                </Button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleFileChange}
+                disabled={isUploading}
+              />
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            Upload a profile picture in JPEG, PNG, or WebP format. Maximum file size is 5MB.
+          </p>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -127,7 +273,7 @@ export function AccountForm({ user }: AccountFormProps) {
                     <Input placeholder="Enter your email" {...field} disabled />
                   </FormControl>
                   <FormDescription>
-                    Your email address cannot be changed. Contact support if you need to update it.
+                    Your email address cannot be changed directly. Contact support if you need to update it.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

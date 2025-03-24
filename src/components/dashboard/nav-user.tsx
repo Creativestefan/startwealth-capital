@@ -3,6 +3,7 @@
 import { Bell, ChevronsUpDown, LogOut, Shield, Sparkles, User } from "lucide-react"
 import { signOut } from "next-auth/react"
 import Link from "next/link"
+import { useUser } from "@/providers/user-provider"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -27,6 +28,13 @@ interface UserProps {
 
 export function NavUser({ user }: { user: UserProps }) {
   const { collapsed } = useSidebar()
+  const { userAvatar, avatarTimestamp } = useUser()
+  
+  // Use context avatar if available, otherwise fall back to user.image
+  const avatarSrc = userAvatar !== null ? userAvatar : user.image
+  
+  // Add a cache-busting timestamp query parameter
+  const avatarWithTimestamp = avatarSrc ? `${avatarSrc}?t=${avatarTimestamp}` : ""
   
   // Add fallbacks for empty names
   const firstName = user.firstName || "U"
@@ -49,7 +57,7 @@ export function NavUser({ user }: { user: UserProps }) {
                 <TooltipTrigger asChild>
                   <button className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-white">
                     <Avatar className="h-7 w-7">
-                      <AvatarImage src={user.image || ""} alt={displayName} />
+                      <AvatarImage src={avatarWithTimestamp} alt={displayName} />
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                   </button>
@@ -63,7 +71,7 @@ export function NavUser({ user }: { user: UserProps }) {
             <button className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-white hover:text-gray-900">
               <div className="flex items-center gap-3">
                 <Avatar className="h-7 w-7">
-                  <AvatarImage src={user.image || ""} alt={displayName} />
+                  <AvatarImage src={avatarWithTimestamp} alt={displayName} />
                   <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start">
@@ -83,7 +91,7 @@ export function NavUser({ user }: { user: UserProps }) {
         >
           <DropdownMenuLabel className="flex items-center gap-3 p-2">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user.image || ""} alt={displayName} />
+              <AvatarImage src={avatarWithTimestamp} alt={displayName} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">

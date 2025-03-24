@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth"
 import { authConfig } from "@/lib/auth.config"
 import type { MarketInvestmentWithRelations, SerializedMarketInvestment, SerializedMarketPlan } from "../types"
 import { redirect } from "next/navigation"
+import { serializeMarketInvestment } from "../helpers/serialization"
 
 // Wallet actions
 async function getUserWallet(userId: string): Promise<{ success: boolean; data?: Wallet; error?: string }> {
@@ -116,26 +117,29 @@ export async function investInMarket(
       // Create investment
       const investment = await tx.marketInvestment.create({
         data: {
-          userId: userId,
-          planId: plan.id,
-          amount: new Prisma.Decimal(amount),
-          expectedReturn: new Prisma.Decimal(expectedReturn),
-          actualReturn: null,
-          status: InvestmentStatus.ACTIVE,
+          userId: session.user.id,
+          planId,
+          amount,
+          expectedReturn,
           startDate: new Date(),
           endDate: new Date(Date.now() + plan.durationMonths * 30 * 24 * 60 * 60 * 1000), // More accurate month calculation
+          status: InvestmentStatus.ACTIVE,
           reinvest: false,
+          // Include referral fields with default values
+          referralId: null,
+          commissionAmount: null,
+          commissionPaid: false,
         },
         include: {
+          plan: true,
           user: {
             select: {
               id: true,
-              email: true,
               firstName: true,
               lastName: true,
+              email: true,
             }
-          },
-          plan: true,
+          }
         }
       })
 
@@ -172,22 +176,7 @@ export async function investInMarket(
       returnRate: Number(investment.plan.returnRate),
     }
 
-    const serializedInvestment: SerializedMarketInvestment = {
-      id: investment.id,
-      userId: investment.userId,
-      planId: investment.planId,
-      amount: Number(investment.amount),
-      expectedReturn: Number(investment.expectedReturn),
-      actualReturn: investment.actualReturn ? Number(investment.actualReturn) : null,
-      startDate: investment.startDate,
-      endDate: investment.endDate,
-      status: investment.status,
-      reinvest: investment.reinvest,
-      createdAt: investment.createdAt,
-      updatedAt: investment.updatedAt,
-      plan: serializedPlan,
-      user: investment.user,
-    }
+    const serializedInvestment = serializeMarketInvestment(investment)
 
     // Revalidate relevant paths
     revalidatePath("/markets/portfolio")
@@ -232,31 +221,9 @@ export async function getUserMarketInvestments(): Promise<{ success: boolean; da
     })
 
     // Serialize the investments data
-    const serializedInvestments: SerializedMarketInvestment[] = investments.map(investment => {
-      const serializedPlan: SerializedMarketPlan = {
-        ...investment.plan,
-        minAmount: Number(investment.plan.minAmount),
-        maxAmount: Number(investment.plan.maxAmount),
-        returnRate: Number(investment.plan.returnRate),
-      }
-
-      return {
-        id: investment.id,
-        userId: investment.userId,
-        planId: investment.planId,
-        amount: Number(investment.amount),
-        expectedReturn: Number(investment.expectedReturn),
-        actualReturn: investment.actualReturn ? Number(investment.actualReturn) : null,
-        startDate: investment.startDate,
-        endDate: investment.endDate,
-        status: investment.status,
-        reinvest: investment.reinvest,
-        createdAt: investment.createdAt,
-        updatedAt: investment.updatedAt,
-        plan: serializedPlan,
-        user: investment.user,
-      }
-    })
+    const serializedInvestments: SerializedMarketInvestment[] = investments.map(investment => 
+      serializeMarketInvestment(investment)
+    )
 
     return { success: true, data: serializedInvestments }
   } catch (error) {
@@ -296,22 +263,7 @@ export async function getMarketInvestmentById(
       returnRate: Number(investment.plan.returnRate),
     }
 
-    const serializedInvestment: SerializedMarketInvestment = {
-      id: investment.id,
-      userId: investment.userId,
-      planId: investment.planId,
-      amount: Number(investment.amount),
-      expectedReturn: Number(investment.expectedReturn),
-      actualReturn: investment.actualReturn ? Number(investment.actualReturn) : null,
-      startDate: investment.startDate,
-      endDate: investment.endDate,
-      status: investment.status,
-      reinvest: investment.reinvest,
-      createdAt: investment.createdAt,
-      updatedAt: investment.updatedAt,
-      plan: serializedPlan,
-      user: investment.user,
-    }
+    const serializedInvestment = serializeMarketInvestment(investment)
 
     return { success: true, data: serializedInvestment }
   } catch (error) {
@@ -337,33 +289,9 @@ export async function getAllMarketInvestments(): Promise<{ success: boolean; dat
     })
 
     // Serialize the investments data
-    const serializedInvestments: SerializedMarketInvestment[] = investments.map(investment => {
-      const serializedPlan: SerializedMarketPlan = {
-        ...investment.plan,
-        minAmount: Number(investment.plan.minAmount),
-        maxAmount: Number(investment.plan.maxAmount),
-        returnRate: Number(investment.plan.returnRate),
-      }
-
-      const serializedInvestment: SerializedMarketInvestment = {
-        id: investment.id,
-        userId: investment.userId,
-        planId: investment.planId,
-        amount: Number(investment.amount),
-        expectedReturn: Number(investment.expectedReturn),
-        actualReturn: investment.actualReturn ? Number(investment.actualReturn) : null,
-        startDate: investment.startDate,
-        endDate: investment.endDate,
-        status: investment.status,
-        reinvest: investment.reinvest,
-        createdAt: investment.createdAt,
-        updatedAt: investment.updatedAt,
-        plan: serializedPlan,
-        user: investment.user,
-      }
-
-      return serializedInvestment
-    })
+    const serializedInvestments: SerializedMarketInvestment[] = investments.map(investment => 
+      serializeMarketInvestment(investment)
+    )
 
     return { success: true, data: serializedInvestments }
   } catch (error) {

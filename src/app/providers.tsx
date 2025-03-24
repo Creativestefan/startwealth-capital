@@ -3,6 +3,8 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { SessionProvider } from "@/providers/session-provider"
+import { ReceiptProvider } from "@/providers/receipt-provider"
+import { UserProvider } from "@/providers/user-provider"
 
 export function Providers({
   children,
@@ -20,6 +22,14 @@ export function Providers({
     return null
   }
 
-  return <SessionProvider>{children}</SessionProvider>
+  return (
+    <SessionProvider>
+      <UserProvider>
+        <ReceiptProvider>
+          {children}
+        </ReceiptProvider>
+      </UserProvider>
+    </SessionProvider>
+  )
 }
 

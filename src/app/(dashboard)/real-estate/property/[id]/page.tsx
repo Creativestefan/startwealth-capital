@@ -31,7 +31,7 @@ function PropertyDetailsLoading() {
  * Property Details page
  * Displays detailed information about a specific property
  */
-export default async function PropertyDetailPage({ params }: { params: { id: string } }) {
+export default async function PropertyDetailPage(props: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authConfig)
 
   if (!session || !session.user) {
@@ -48,22 +48,31 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
     redirect("/dashboard?kyc=required")
   }
 
-  // Get the property ID directly - properly await params in Next.js 15
-  const { id } = await params
-  const propertyResponse = await getPropertyById(id)
+  // Get the property ID from params
+  const params = await props.params
+  const { id } = params
+  
+  try {
+    const propertyResponse = await getPropertyById(id)
 
-  if (!propertyResponse.success || !propertyResponse.data) {
-    throw new Error(propertyResponse.error || "Failed to fetch property details")
+    if (!propertyResponse.success || !propertyResponse.data) {
+      // Redirect to properties list with error message
+      redirect("/real-estate/properties?error=property-not-found")
+    }
+
+    const property = propertyResponse.data
+
+    return (
+      <div className="flex flex-col gap-6 p-6">
+        <Suspense fallback={<PropertyDetailsLoading />}>
+          <PropertyDetails property={property} />
+        </Suspense>
+      </div>
+    )
+  } catch (error) {
+    // Handle any errors
+    console.error("Error fetching property:", error)
+    redirect("/real-estate/properties?error=property-not-found")
   }
-
-  const property = propertyResponse.data
-
-  return (
-    <div className="flex flex-col gap-6 p-6">
-      <Suspense fallback={<PropertyDetailsLoading />}>
-        <PropertyDetails property={property} />
-      </Suspense>
-    </div>
-  )
 }
 

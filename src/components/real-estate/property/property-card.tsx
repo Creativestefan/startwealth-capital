@@ -22,39 +22,46 @@ export function PropertyCard({ property, variant = "default" }: PropertyCardProp
   const isCompact = variant === "compact"
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-md">
+    <Card className="overflow-hidden h-full flex flex-col border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
       <div className="relative">
-        <div className="aspect-video w-full overflow-hidden">
+        <div className="aspect-[3/2] w-full overflow-hidden">
           <Image
             src={property.mainImage || "/placeholder.svg"}
             alt={property.name}
             fill
-            className="object-cover transition-transform hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         </div>
-        <InvestmentStatusBadge status={property.status} className="absolute right-2 top-2" />
+        <InvestmentStatusBadge status={property.status} className="absolute right-2 top-2 z-10" />
       </div>
 
-      <CardHeader className={isCompact ? "p-3" : "p-4"}>
+      <CardHeader className="p-3 pb-1">
         <div className="space-y-1">
-          <h3 className="line-clamp-1 font-semibold">{property.name}</h3>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <MapPin className="mr-1 h-3.5 w-3.5" />
+          <h3 className="text-base font-semibold line-clamp-1">{property.name}</h3>
+          <div className="flex items-center text-xs text-muted-foreground">
+            <MapPin className="mr-1 h-3 w-3 text-primary/70" />
             <span className="line-clamp-1">{property.location}</span>
           </div>
         </div>
       </CardHeader>
 
       {!isCompact && (
-        <CardContent className="p-4 pt-0">
-          <p className="line-clamp-2 text-sm text-muted-foreground">{property.description}</p>
+        <CardContent className="px-3 py-1 flex-grow">
+          <p className="line-clamp-2 text-xs text-muted-foreground">{property.description}</p>
         </CardContent>
       )}
 
-      <CardFooter className={`flex items-center justify-between ${isCompact ? "p-3 pt-0" : "p-4 pt-0"}`}>
-        <PriceTag amount={property.price} />
-        <Button asChild size={isCompact ? "sm" : "default"} variant="outline">
+      <CardFooter className="p-3 mt-auto border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
+        <div className="font-semibold text-sm">
+          <PriceTag amount={property.price} fontWeight={600} />
+        </div>
+        <Button 
+          asChild 
+          size="sm"
+          variant="default" 
+          className="h-8 px-3 rounded-md transition-all duration-200 hover:shadow-md text-xs"
+        >
           <Link href={`/real-estate/property/${property.id}`}>View Details</Link>
         </Button>
       </CardFooter>

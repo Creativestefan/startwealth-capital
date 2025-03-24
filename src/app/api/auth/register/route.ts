@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { RegisterSchema } from "@/lib/auth.config"
 import bcrypt from "bcryptjs"
+import { ReferralStatus } from "@prisma/client"
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { email, password, firstName, lastName, dateOfBirth } = validatedFields.data
+    const { email, password, firstName, lastName, dateOfBirth, referralCode } = validatedFields.data
 
     // Check if user already exists with detailed logging
     const existingUser = await prisma.user.findUnique({
@@ -43,6 +44,24 @@ export async function POST(request: Request) {
       )
     }
 
+    // Look up referrer if referral code was provided
+    let referrerId: string | null = null
+    
+    if (referralCode) {
+      console.log("Looking up referrer for code:", referralCode)
+      const referrer = await prisma.user.findFirst({
+        where: { referralCode },
+        select: { id: true }
+      })
+      
+      if (referrer) {
+        referrerId = referrer.id
+        console.log("Found referrer with ID:", referrerId)
+      } else {
+        console.log("No referrer found for code:", referralCode)
+      }
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
@@ -66,25 +85,41 @@ export async function POST(request: Request) {
       },
     })
 
-    console.log("User created successfully:", {
-      id: user.id,
-      email: user.email,
-      hasWallet: !!user.wallet,
-    })
+    // Create referral record if referrer was found
+    if (referrerId) {
+      console.log("Creating referral record for new user")
+      await prisma.referral.create({
+        data: {
+          referrerId,
+          referredId: user.id,
+          commission: 0, // Will be calculated when user makes investments
+          status: ReferralStatus.PENDING,
+        }
+      })
+    }
 
-    return Response.json({
-      user: {
-        id: user.id,
-        email: user.email,
-      },
-    })
-  } catch (error) {
-    console.error("Registration error:", error) // Detailed error log
+    console.log("User created successfully:", user.id)
+
+    // Don't include sensitive fields in the response
     return Response.json(
       {
-        error: "Something went wrong",
+        success: true,
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          dateOfBirth: user.dateOfBirth,
+        },
+      },
+      { status: 201 },
+    )
+  } catch (error) {
+    console.error("Registration error:", error)
+    return Response.json(
+      {
+        error: "Error creating user",
         details: error instanceof Error ? error.message : "Unknown error",
-        timestamp: new Date().toISOString(),
       },
       { status: 500 },
     )

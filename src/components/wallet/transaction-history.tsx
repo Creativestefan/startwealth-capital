@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { format } from "date-fns"
 import { 
   ArrowDownLeft, 
@@ -13,10 +13,7 @@ import {
   Search,
   ChevronDown,
   ShoppingCart,
-  FileText,
-  Download,
-  Eye,
-  Printer
+  FileText
 } from "lucide-react"
 import { Wallet, WalletTransaction } from "@/types/wallet"
 import { formatCurrency } from "@/lib/utils"
@@ -45,18 +42,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { TransactionStatus } from "@prisma/client"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { toast } from "sonner"
-import jsPDF from "jspdf"
-import html2canvas from "html2canvas"
+import { useReceipt } from "@/providers/receipt-provider"
 
 interface PropertyTransaction {
   id: string
@@ -87,9 +74,7 @@ export function TransactionHistory({ wallet, propertyTransactions = [] }: Transa
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string[]>([])
   const [typeFilter, setTypeFilter] = useState("ALL")
-  const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
-  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false)
-  const receiptRef = useRef<HTMLDivElement>(null)
+  const { viewReceipt } = useReceipt()
   
   // Get user name from session storage or local storage if available
   const [userName, setUserName] = useState<string>("")
@@ -223,81 +208,9 @@ export function TransactionHistory({ wallet, propertyTransactions = [] }: Transa
     }
   }
 
-  const generatePDF = async () => {
-    if (!receiptRef.current) return;
-    
-    try {
-      const canvas = await html2canvas(receiptRef.current, {
-        scale: 2,
-        logging: false,
-        useCORS: true
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      const imgWidth = 210;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      pdf.save(`transaction-receipt-${selectedTransaction.id}.pdf`);
-      
-      toast.success("Receipt downloaded successfully");
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error("Failed to generate PDF receipt");
-    }
-  };
-
-  const printReceipt = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      toast.error("Unable to open print window. Please check your popup settings.");
-      return;
-    }
-    
-    const receiptContent = receiptRef.current?.innerHTML || '';
-    
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Transaction Receipt</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .receipt-container { max-width: 800px; margin: 0 auto; }
-            table { width: 100%; border-collapse: collapse; }
-            td { padding: 8px; border-bottom: 1px solid #eee; }
-            h1, h2, h3 { color: #1e3a8a; }
-            .text-center { text-align: center; }
-            .mt-8 { margin-top: 32px; }
-            .pt-4 { padding-top: 16px; }
-            .border-t { border-top: 1px solid #eee; }
-            @media print {
-              body { -webkit-print-color-adjust: exact; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="receipt-container">
-            ${receiptContent}
-          </div>
-          <script>
-            window.onload = function() { window.print(); window.close(); }
-          </script>
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
-  };
-
-  const viewReceipt = (transaction: any) => {
-    setSelectedTransaction(transaction);
-    setIsReceiptModalOpen(true);
+  // Update viewReceipt to use the context
+  const handleViewReceipt = (transaction: any) => {
+    viewReceipt(transaction, `${userFirstName} ${userLastName}`.trim());
   };
   
   return (
@@ -507,7 +420,7 @@ export function TransactionHistory({ wallet, propertyTransactions = [] }: Transa
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => viewReceipt(transaction)}
+                              onClick={() => handleViewReceipt(transaction)}
                               className="h-8 w-8 p-0"
                             >
                               <span className="sr-only">View receipt</span>
@@ -524,136 +437,6 @@ export function TransactionHistory({ wallet, propertyTransactions = [] }: Transa
           </div>
         </CardContent>
       </Card>
-
-      {/* Transaction Receipt Modal */}
-      <Dialog open={isReceiptModalOpen} onOpenChange={setIsReceiptModalOpen}>
-        <DialogContent className="max-w-md sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Transaction Receipt</DialogTitle>
-            <DialogDescription>
-              View and download your transaction receipt
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4">
-            <div 
-              ref={receiptRef} 
-              className="bg-white p-6 border rounded-lg shadow-sm max-h-[500px] overflow-y-auto"
-            >
-              {/* Company Header */}
-              <div className="flex items-center justify-between mb-6 border-b pb-4">
-                <div>
-                  <h1 className="text-xl font-bold text-blue-900">StartWealth Capital</h1>
-                  <p className="text-sm text-gray-600">123 Finance Street, New York, NY 10001</p>
-                  <p className="text-sm text-gray-600">support@startwealthcapital.com</p>
-                  <p className="text-sm text-gray-600">+1 (555) 123-4567</p>
-                </div>
-                <div className="text-right">
-                  <h2 className="text-lg font-semibold text-blue-900">Transaction Receipt</h2>
-                  <p className="text-sm text-gray-600">Receipt #: {selectedTransaction?.id.substring(0, 8)}</p>
-                  <p className="text-sm text-gray-600">Date: {selectedTransaction ? format(new Date(selectedTransaction.createdAt), "MMM d, yyyy") : ''}</p>
-                </div>
-              </div>
-              
-              {/* User Information */}
-              <div className="mb-6">
-                <h3 className="text-md font-semibold mb-2 text-blue-900">User Information</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <p className="text-sm text-gray-600">User:</p>
-                    <p className="text-sm font-medium">
-                      {userFirstName || ""} {userLastName || ""}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Wallet ID:</p>
-                    <p className="text-sm font-medium">{wallet.id}</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Transaction Details */}
-              <div className="mb-6">
-                <h3 className="text-md font-semibold mb-2 text-blue-900">Transaction Details</h3>
-                <table className="w-full text-sm">
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="py-2 text-gray-600">Transaction ID:</td>
-                      <td className="py-2 font-medium">{selectedTransaction?.id}</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-2 text-gray-600">Type:</td>
-                      <td className="py-2 font-medium">
-                        {selectedTransaction?.type === "DEPOSIT" ? "Deposit" : 
-                         selectedTransaction?.type === "WITHDRAWAL" ? "Withdrawal" : 
-                         selectedTransaction?.type === "INVESTMENT" ? "Investment" : 
-                         selectedTransaction?.type === "RETURN" ? "Return" : 
-                         selectedTransaction?.type === "COMMISSION" ? "Commission" :
-                         selectedTransaction?.type === "PURCHASE" ? "Purchase" : 
-                         selectedTransaction?.type}
-                      </td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-2 text-gray-600">Amount:</td>
-                      <td className="py-2 font-medium">{selectedTransaction ? formatCurrency(selectedTransaction.amount) : ''}</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-2 text-gray-600">Status:</td>
-                      <td className="py-2 font-medium">{selectedTransaction?.status}</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-2 text-gray-600">Date & Time:</td>
-                      <td className="py-2 font-medium">{selectedTransaction ? format(new Date(selectedTransaction.createdAt), "MMM d, yyyy h:mm a") : ''}</td>
-                    </tr>
-                    {selectedTransaction?.cryptoType && (
-                      <tr className="border-b">
-                        <td className="py-2 text-gray-600">Cryptocurrency:</td>
-                        <td className="py-2 font-medium">{selectedTransaction.cryptoType}</td>
-                      </tr>
-                    )}
-                    {selectedTransaction?.description && (
-                      <tr className="border-b">
-                        <td className="py-2 text-gray-600">Description:</td>
-                        <td className="py-2 font-medium">{selectedTransaction.description}</td>
-                      </tr>
-                    )}
-                    {selectedTransaction?.txHash && (
-                      <tr className="border-b">
-                        <td className="py-2 text-gray-600">Transaction Hash:</td>
-                        <td className="py-2 font-medium break-all">{selectedTransaction.txHash}</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              
-              {/* Footer */}
-              <div className="mt-8 pt-4 border-t text-center">
-                <p className="text-sm text-gray-600">Thank you for choosing StartWealth Capital</p>
-                <p className="text-xs text-gray-500 mt-1">This is an electronically generated receipt and does not require a signature.</p>
-              </div>
-            </div>
-            
-            <div className="flex justify-end space-x-2 mt-4">
-              <Button
-                variant="outline"
-                onClick={printReceipt}
-                className="flex items-center gap-2"
-              >
-                <Printer className="h-4 w-4" />
-                Print
-              </Button>
-              <Button
-                onClick={generatePDF}
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Download PDF
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 } 

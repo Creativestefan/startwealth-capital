@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { authConfig } from "@/lib/auth.config"
 import { getUserPortfolio } from "@/lib/real-estate/actions/portfolio"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, Building, TrendingUp, Clock, Calendar, Eye, PlusCircle } from "lucide-react"
+import { AlertCircle, Building, TrendingUp, Clock, Calendar, Eye, PlusCircle, Plus, BarChart3, Users, Wallet } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -16,6 +16,7 @@ import { InvestmentStatus } from "@prisma/client"
 import Link from "next/link"
 import { Suspense } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Loader2 } from "lucide-react"
 
 /**
  * Loading component for the portfolio page
@@ -108,64 +109,73 @@ export default async function PortfolioPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Real Estate Portfolio</h1>
-        <p className="text-muted-foreground">Track your real estate investments and properties</p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-xl font-semibold">Real Estate Portfolio</h1>
+          <p className="text-xs text-muted-foreground">Track your real estate investments and properties</p>
+        </div>
       </div>
 
-      {/* Portfolio Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-2">
-        <Card>
-          <CardHeader className="py-3 px-4">
-            <CardTitle className="text-sm font-medium">Total Investments</CardTitle>
-          </CardHeader>
-          <CardContent className="py-2 px-4">
-            <p className="text-2xl font-bold">{investments.length}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card className="border border-gray-200 rounded-xl">
+          <CardContent className="p-6">
+            <div className="flex flex-col space-y-2">
+              <span className="text-sm font-medium text-muted-foreground">Total Investments</span>
+              <span className="text-3xl font-bold">{investments.length}</span>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="py-3 px-4">
-            <CardTitle className="text-sm font-medium">Expected Returns</CardTitle>
-          </CardHeader>
-          <CardContent className="py-2 px-4">
-            <p className="text-2xl font-bold text-emerald-600">{formatCurrency(totalExpectedReturn)}</p>
+        <Card className="border border-gray-200 rounded-xl">
+          <CardContent className="p-6">
+            <div className="flex flex-col space-y-2">
+              <span className="text-sm font-medium text-muted-foreground">Expected Returns</span>
+              <span className="text-3xl font-bold text-green-600">{formatCurrency(totalExpectedReturn)}</span>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="py-3 px-4">
-            <CardTitle className="text-sm font-medium">Active / Matured</CardTitle>
-          </CardHeader>
-          <CardContent className="py-2 px-4">
-            <p className="text-2xl font-bold">{activeInvestments} / {maturedInvestments}</p>
+        <Card className="border border-gray-200 rounded-xl">
+          <CardContent className="p-6">
+            <div className="flex flex-col space-y-2">
+              <span className="text-sm font-medium text-muted-foreground">Active / Matured</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-3xl font-bold">{activeInvestments}</span>
+                <span className="text-lg font-medium text-muted-foreground">/</span>
+                <span className="text-3xl font-bold">{maturedInvestments}</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
       
       <Tabs defaultValue="investments" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="investments">Investments</TabsTrigger>
-          <TabsTrigger value="properties">Properties</TabsTrigger>
-        </TabsList>
+        <div className="flex justify-start mb-4">
+          <TabsList className="grid w-64 grid-cols-2">
+            <TabsTrigger value="investments" className="text-xs">Investments</TabsTrigger>
+            <TabsTrigger value="properties" className="text-xs">Properties</TabsTrigger>
+          </TabsList>
+        </div>
         
         <TabsContent value="investments">
-          <Suspense fallback={<PortfolioLoading />}>
+          <Suspense fallback={<div className="flex items-center justify-center h-40"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>My Real Estate Investments</CardTitle>
-                  <CardDescription>Track your investments in real estate projects</CardDescription>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-base">My Real Estate Investments</CardTitle>
+                    <CardDescription className="text-xs">Track your investments in real estate projects</CardDescription>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                    asChild
+                  >
+                    <Link href="/real-estate/shares">
+                      <Plus className="h-3 w-3 mr-1" />
+                      Invest More
+                    </Link>
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="ml-auto"
-                  asChild
-                >
-                  <Link href="/real-estate/shares">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Invest More
-                  </Link>
-                </Button>
               </CardHeader>
               <CardContent>
                 {investments.length === 0 ? (
@@ -178,18 +188,18 @@ export default async function PortfolioPage() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="rounded-md border">
+                  <div className="rounded-md border overflow-x-auto">
                     <table className="w-full">
                       <thead>
                         <tr className="border-b bg-muted/50">
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Plan</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Type</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Amount</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Expected Return</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Start Date</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Progress</th>
-                          <th className="h-10 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Plan</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Type</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Amount</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Expected Return</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Start Date</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Status</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Progress</th>
+                          <th className="h-8 px-3 text-right align-middle font-medium text-xs text-muted-foreground">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -199,40 +209,49 @@ export default async function PortfolioPage() {
                           
                           return (
                             <tr key={investment.id} className="border-b">
-                              <td className="p-4 align-middle font-medium">{investment.property?.name || "Investment Plan"}</td>
-                              <td className="p-4 align-middle">
+                              <td className="p-3 align-middle font-medium text-xs">{investment.property?.name || "Investment Plan"}</td>
+                              <td className="p-3 align-middle text-xs">
                                 {investment.type === "SEMI_ANNUAL" ? "6 months" : "12 months"}
                               </td>
-                              <td className="p-4 align-middle">{summary.amount}</td>
-                              <td className="p-4 align-middle text-emerald-600 font-medium">
+                              <td className="p-3 align-middle text-xs">{summary.amount}</td>
+                              <td className="p-3 align-middle text-xs text-emerald-600 font-medium">
                                 <div className="flex items-center">
-                                  <TrendingUp className="h-4 w-4 mr-1" />
+                                  <TrendingUp className="h-3 w-3 mr-1" />
                                   {summary.expectedReturn}
                                 </div>
                               </td>
-                              <td className="p-4 align-middle">{summary.investedOn}</td>
-                              <td className="p-4 align-middle">
-                                <InvestmentStatusBadge status={investment.status} />
+                              <td className="p-3 align-middle text-xs">{summary.investedOn}</td>
+                              <td className="p-3 align-middle">
+                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                                  investment.status === "ACTIVE" 
+                                    ? "bg-green-100 text-green-800" 
+                                    : investment.status === "MATURED"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}>
+                                  {investment.status}
+                                </span>
                               </td>
-                              <td className="p-4 align-middle">
+                              <td className="p-3 align-middle">
                                 <div className="w-full space-y-1">
-                                  <Progress value={progress} className="h-2" />
+                                  <Progress value={progress} className="h-1.5" />
                                   <div className="flex justify-between text-xs text-muted-foreground">
-                                    <span>{progress}%</span>
-                                    <span>
+                                    <span className="text-[10px]">{progress}%</span>
+                                    <span className="text-[10px]">
                                       {investment.endDate ? formatDate(investment.endDate) : "In progress"}
                                     </span>
                                   </div>
                                 </div>
                               </td>
-                              <td className="p-4 align-middle text-right">
+                              <td className="p-3 align-middle text-right">
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  className="h-7 text-xs"
                                   asChild
                                 >
                                   <Link href={`/real-estate/shares/${investment.id}`}>
-                                    <Eye className="h-4 w-4 mr-2" />
+                                    <Eye className="h-3 w-3 mr-1" />
                                     View Details
                                   </Link>
                                 </Button>
@@ -250,24 +269,21 @@ export default async function PortfolioPage() {
         </TabsContent>
         
         <TabsContent value="properties">
-          <Suspense fallback={<PortfolioLoading />}>
+          <Suspense fallback={<div className="flex items-center justify-center h-40"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>My Properties</CardTitle>
-                  <CardDescription>Properties you've purchased or invested in</CardDescription>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-base">My Properties</CardTitle>
+                    <CardDescription className="text-xs">Properties you've purchased or invested in</CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" className="text-xs h-7" asChild>
+                    <Link href="/real-estate/properties">
+                      <Plus className="h-3 w-3 mr-1" />
+                      Browse Properties
+                    </Link>
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="ml-auto"
-                  asChild
-                >
-                  <Link href="/real-estate/properties">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Browse Properties
-                  </Link>
-                </Button>
               </CardHeader>
               <CardContent>
                 {properties.length === 0 ? (
@@ -284,23 +300,23 @@ export default async function PortfolioPage() {
                     <table className="w-full">
                       <thead>
                         <tr className="border-b bg-muted/50">
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Property</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Location</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Purchase Date</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Price</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                          <th className="h-10 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Property</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Location</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Purchase Date</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Price</th>
+                          <th className="h-8 px-3 text-left align-middle font-medium text-xs text-muted-foreground">Status</th>
+                          <th className="h-8 px-3 text-right align-middle font-medium text-xs text-muted-foreground">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {properties.map((property) => (
                           <tr key={property.id} className="border-b">
-                            <td className="p-4 align-middle font-medium">{property.property?.name || "Property"}</td>
-                            <td className="p-4 align-middle">{property.property?.location || "N/A"}</td>
-                            <td className="p-4 align-middle">{formatDate(property.createdAt)}</td>
-                            <td className="p-4 align-middle">{formatCurrency(property.totalAmount)}</td>
-                            <td className="p-4 align-middle">
-                              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            <td className="p-3 align-middle font-medium text-xs">{property.property?.name || "Property"}</td>
+                            <td className="p-3 align-middle text-xs">{property.property?.location || "N/A"}</td>
+                            <td className="p-3 align-middle text-xs">{formatDate(property.createdAt)}</td>
+                            <td className="p-3 align-middle text-xs">{formatCurrency(property.amount || property.totalAmount || property.property?.price || 0)}</td>
+                            <td className="p-3 align-middle">
+                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                                 property.status === "COMPLETED" 
                                   ? "bg-green-100 text-green-800" 
                                   : property.status === "PENDING"
@@ -310,14 +326,15 @@ export default async function PortfolioPage() {
                                 {property.status}
                               </span>
                             </td>
-                            <td className="p-4 align-middle text-right">
+                            <td className="p-3 align-middle text-right">
                               <Button
                                 variant="ghost"
                                 size="sm"
+                                className="h-7 text-xs"
                                 asChild
                               >
-                                <Link href={`/real-estate/property/${property.id}`}>
-                                  <Eye className="h-4 w-4 mr-2" />
+                                <Link href={`/real-estate/portfolio/transaction/${property.id}`}>
+                                  <Eye className="h-3 w-3 mr-1" />
                                   View Details
                                 </Link>
                               </Button>

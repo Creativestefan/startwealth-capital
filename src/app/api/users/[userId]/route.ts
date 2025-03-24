@@ -2,10 +2,12 @@ import { getUserById } from "@/lib/data/user"
 
 export async function GET(
   request: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> | { userId: string } }
 ) {
   try {
-    const userId = params.userId
+    // Await the params object if it's a promise
+    const paramsData = await params
+    const userId = paramsData.userId
     
     if (!userId) {
       return Response.json({ error: "User ID is required" }, { status: 400 })

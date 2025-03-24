@@ -53,6 +53,9 @@ export interface RealEstateInvestment {
   reinvest: boolean
   createdAt: Date
   updatedAt: Date
+  referralId?: string | null
+  commissionAmount?: number | null
+  commissionPaid: boolean
   user?: {
     id: string
     firstName?: string
@@ -75,6 +78,31 @@ export interface PropertyResponse extends Property {
 }
 
 export interface InvestmentResponse extends RealEstateInvestment {}
+
+// Serialized investment type for client-side use
+export interface SerializedRealEstateInvestment {
+  id: string
+  userId: string
+  type: RealEstateInvestmentType
+  amount: number
+  status: InvestmentStatus
+  startDate: string
+  endDate: string
+  expectedReturn: number
+  actualReturn: number | null
+  reinvest: boolean
+  createdAt: string
+  updatedAt: string
+  referralId: string | null
+  commissionAmount: number | null
+  commissionPaid: boolean
+  user?: {
+    id: string
+    firstName?: string
+    lastName?: string
+    email?: string
+  }
+}
 
 // Investment plan constants
 export interface InvestmentPlan {

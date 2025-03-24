@@ -57,15 +57,18 @@ export default async function SharesPage({
     redirect("/dashboard?kyc=required")
   }
 
+  // Await searchParams before accessing its properties
+  const searchParamsData = await searchParams
+
   // Parse pagination params
-  const page = searchParams.page ? parseInt(searchParams.page) : 1
+  const page = searchParamsData.page ? parseInt(searchParamsData.page) : 1
   const pageSize = 6
   const skip = (page - 1) * pageSize
 
   const plansResponse = await getAllGreenEnergyPlans({
     take: pageSize,
     skip,
-    filter: searchParams.type ? { type: searchParams.type as any } : undefined
+    filter: searchParamsData.type ? { type: searchParamsData.type as any } : undefined
   })
 
   if (!plansResponse.success || !plansResponse.data) {

@@ -133,14 +133,9 @@ const adminRoutes = [
         icon: Wallet,
       },
       {
-        label: "Investments",
-        href: "/admin/users/investments",
+        label: "Commissions",
+        href: "/admin/users/comissions",
         icon: DollarSign,
-      },
-      {
-        label: "Referrals",
-        href: "/admin/users/referrals",
-        icon: Users,
       },
     ],
   },
@@ -150,6 +145,11 @@ const adminRoutes = [
     href: "/admin/settings",
     color: "text-blue-500",
     subItems: [
+      {
+        label: "Referral Settings",
+        href: "/admin/settings/referrals",
+        icon: Users,
+      },
       {
         label: "Profile",
         href: "/admin/settings/profile",

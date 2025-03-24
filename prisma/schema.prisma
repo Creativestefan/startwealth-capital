@@ -52,6 +52,7 @@ model User {
   updatedAt              DateTime                @updatedAt
   resetToken             String?
   resetTokenExpires      DateTime?
+  referralCode           String?                 @unique
   accounts               Account[]
   equipmentTransactions  EquipmentTransaction[]
   greenEnergyInvestments GreenEnergyInvestment[]
@@ -62,11 +63,13 @@ model User {
   realEstateInvestments  RealEstateInvestment[]
   referralsReceived      Referral[]              @relation("ReferralReceiver")
   referralsGiven         Referral[]              @relation("ReferralGiver")
+  commissions            ReferralCommission[]
   sessions               Session[]
   wallet                 Wallet?
 
   @@index([email])
   @@index([role])
+  @@index([referralCode])
 }
 
 model KYC {
@@ -150,12 +153,17 @@ model PropertyTransaction {
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
   paidInstallments  Int                     @default(0)
+  referralId        String?
+  commissionAmount  Decimal?                @db.Decimal(10, 2)
+  commissionPaid    Boolean                 @default(false)
   property          Property                @relation(fields: [propertyId], references: [id])
   user              User                    @relation(fields: [userId], references: [id])
+  commissions       ReferralCommission[]
 
   @@index([userId])
   @@index([propertyId])
   @@index([status])
+  @@index([referralId])
 }
 
 model Equipment {
@@ -177,61 +185,118 @@ model Equipment {
 }
 
 model EquipmentTransaction {
-  id              String            @id @default(cuid())
-  equipmentId     String
-  userId          String
-  status          TransactionStatus @default(PENDING)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  quantity        Int               @default(1)
-  trackingNumber  String?
-  deliveryPin     String?
-  deliveryDate    DateTime?
-  totalAmount     Decimal           @db.Decimal(10, 2)
-  deliveryAddress Json?
-  equipment       Equipment         @relation(fields: [equipmentId], references: [id])
-  user            User              @relation(fields: [userId], references: [id])
+  id               String              @id @default(cuid())
+  equipmentId      String
+  userId           String
+  status           TransactionStatus   @default(PENDING)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  quantity         Int                 @default(1)
+  trackingNumber   String?
+  deliveryPin      String?
+  deliveryDate     DateTime?
+  totalAmount      Decimal             @db.Decimal(10, 2)
+  deliveryAddress  Json?
+  referralId       String?
+  commissionAmount Decimal?            @db.Decimal(10, 2)
+  commissionPaid   Boolean             @default(false)
+  equipment        Equipment           @relation(fields: [equipmentId], references: [id])
+  user             User                @relation(fields: [userId], references: [id])
+  commissions      ReferralCommission[]
 
   @@index([userId])
   @@index([equipmentId])
   @@index([status])
+  @@index([referralId])
 }
 
 model MarketInvestment {
-  id             String           @id @default(cuid())
-  userId         String
-  planId         String
-  amount         Decimal         @db.Decimal(10, 2)
-  startDate      DateTime
-  endDate        DateTime
-  expectedReturn Decimal         @db.Decimal(10, 2)
-  actualReturn   Decimal?        @db.Decimal(10, 2)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  reinvest       Boolean          @default(false)
-  status         InvestmentStatus @default(ACTIVE)
-  user           User             @relation(fields: [userId], references: [id])
-  plan           MarketInvestmentPlan @relation(fields: [planId], references: [id])
+  id               String              @id @default(cuid())
+  userId           String
+  planId           String
+  amount           Decimal             @db.Decimal(10, 2)
+  startDate        DateTime
+  endDate          DateTime
+  expectedReturn   Decimal             @db.Decimal(10, 2)
+  actualReturn     Decimal?            @db.Decimal(10, 2)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  reinvest         Boolean             @default(false)
+  status           InvestmentStatus    @default(ACTIVE)
+  referralId       String?
+  commissionAmount Decimal?            @db.Decimal(10, 2)
+  commissionPaid   Boolean             @default(false)
+  user             User                @relation(fields: [userId], references: [id])
+  plan             MarketInvestmentPlan @relation(fields: [planId], references: [id])
+  commissions      ReferralCommission[]
 
   @@index([userId])
   @@index([planId])
+  @@index([referralId])
 }
 
 model Referral {
-  id             String         @id @default(cuid())
+  id             String              @id @default(cuid())
   referrerId     String
   referredId     String
   commission     Float
   status         ReferralStatus
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  commissionPaid Boolean        @default(false)
-  referred       User           @relation("ReferralReceiver", fields: [referredId], references: [id])
-  referrer       User           @relation("ReferralGiver", fields: [referrerId], references: [id])
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  commissionPaid Boolean             @default(false)
+  referred       User                @relation("ReferralReceiver", fields: [referredId], references: [id])
+  referrer       User                @relation("ReferralGiver", fields: [referrerId], references: [id])
+  commissions    ReferralCommission[]
 
   @@index([referrerId])
   @@index([referredId])
   @@index([status])
+}
+
+model ReferralCommission {
+  id                     String                  @id @default(cuid())
+  referralId             String
+  userId                 String
+  amount                 Decimal                 @db.Decimal(10, 2)
+  status                 CommissionStatus        @default(PENDING)
+  transactionType        ReferralTransactionType
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  paidAt                 DateTime?
+  propertyTransactionId  String?
+  equipmentTransactionId String?
+  marketInvestmentId     String?
+  realEstateInvestmentId String?
+  greenEnergyInvestmentId String?
+  referral               Referral                @relation(fields: [referralId], references: [id])
+  user                   User                    @relation(fields: [userId], references: [id])
+  propertyTransaction    PropertyTransaction?    @relation(fields: [propertyTransactionId], references: [id])
+  equipmentTransaction   EquipmentTransaction?   @relation(fields: [equipmentTransactionId], references: [id])
+  marketInvestment       MarketInvestment?       @relation(fields: [marketInvestmentId], references: [id])
+  realEstateInvestment   RealEstateInvestment?   @relation(fields: [realEstateInvestmentId], references: [id])
+  greenEnergyInvestment  GreenEnergyInvestment?  @relation(fields: [greenEnergyInvestmentId], references: [id])
+
+  @@index([referralId])
+  @@index([userId])
+  @@index([status])
+  @@index([transactionType])
+  @@index([propertyTransactionId])
+  @@index([equipmentTransactionId])
+  @@index([marketInvestmentId])
+  @@index([realEstateInvestmentId])
+  @@index([greenEnergyInvestmentId])
+}
+
+model ReferralSettings {
+  id                      String    @id @default(cuid())
+  propertyCommissionRate  Decimal   @db.Decimal(5, 2) @default(0)
+  equipmentCommissionRate Decimal   @db.Decimal(5, 2) @default(0)
+  marketCommissionRate    Decimal   @db.Decimal(5, 2) @default(0)
+  greenEnergyCommissionRate Decimal @db.Decimal(5, 2) @default(0)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  createdBy               String?
+  updatedBy               String?
 }
 
 model Notification {
@@ -252,46 +317,56 @@ model Notification {
 }
 
 model RealEstateInvestment {
-  id             String                   @id @default(cuid())
-  userId         String
-  type           RealEstateInvestmentType
-  amount         Decimal                  @db.Decimal(10, 2)
-  status         InvestmentStatus         @default(ACTIVE)
-  startDate      DateTime
-  endDate        DateTime
-  expectedReturn Decimal                  @db.Decimal(10, 2)
-  actualReturn   Decimal?                 @db.Decimal(10, 2)
-  reinvest       Boolean                  @default(false)
-  createdAt      DateTime                 @default(now())
-  updatedAt      DateTime                 @updatedAt
-  user           User                     @relation(fields: [userId], references: [id])
+  id                String                   @id @default(cuid())
+  userId            String
+  type              RealEstateInvestmentType
+  amount            Decimal                  @db.Decimal(10, 2)
+  status            InvestmentStatus         @default(ACTIVE)
+  startDate         DateTime
+  endDate           DateTime
+  expectedReturn    Decimal                  @db.Decimal(10, 2)
+  actualReturn      Decimal?                 @db.Decimal(10, 2)
+  reinvest          Boolean                  @default(false)
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  referralId        String?
+  commissionAmount  Decimal?                 @db.Decimal(10, 2)
+  commissionPaid    Boolean                  @default(false)
+  user              User                     @relation(fields: [userId], references: [id])
+  commissions       ReferralCommission[]
 
   @@index([userId])
   @@index([status])
   @@index([type])
+  @@index([referralId])
 }
 
 model GreenEnergyInvestment {
-  id             String                    @id @default(cuid())
-  userId         String
-  type           GreenEnergyInvestmentType
-  amount         Decimal                   @db.Decimal(10, 2)
-  status         InvestmentStatus          @default(ACTIVE)
-  startDate      DateTime                  @default(now())
-  endDate        DateTime?
-  expectedReturn Decimal                   @db.Decimal(10, 2)
-  actualReturn   Decimal?                  @db.Decimal(10, 2)
-  reinvest       Boolean                   @default(false)
-  createdAt      DateTime                  @default(now())
-  updatedAt      DateTime                  @updatedAt
-  planId         String
-  plan           GreenEnergyPlan           @relation(fields: [planId], references: [id])
-  user           User                      @relation(fields: [userId], references: [id])
+  id                String                    @id @default(cuid())
+  userId            String
+  type              GreenEnergyInvestmentType
+  amount            Decimal                   @db.Decimal(10, 2)
+  status            InvestmentStatus          @default(ACTIVE)
+  startDate         DateTime                  @default(now())
+  endDate           DateTime?
+  expectedReturn    Decimal                   @db.Decimal(10, 2)
+  actualReturn      Decimal?                  @db.Decimal(10, 2)
+  reinvest          Boolean                   @default(false)
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  planId            String
+  referralId        String?
+  commissionAmount  Decimal?                  @db.Decimal(10, 2)
+  commissionPaid    Boolean                   @default(false)
+  plan              GreenEnergyPlan           @relation(fields: [planId], references: [id])
+  user              User                      @relation(fields: [userId], references: [id])
+  commissions       ReferralCommission[]
 
   @@index([userId])
   @@index([planId])
   @@index([status])
   @@index([type])
+  @@index([referralId])
 }
 
 model InvestmentPlan {
@@ -425,6 +500,21 @@ enum ReferralStatus {
   EXPIRED
 }
 
+enum CommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+}
+
+enum ReferralTransactionType {
+  PROPERTY_PURCHASE
+  EQUIPMENT_PURCHASE
+  REAL_ESTATE_INVESTMENT
+  GREEN_ENERGY_INVESTMENT
+  MARKET_INVESTMENT
+}
+
 enum NotificationType {
   INVESTMENT_MATURED
   PAYMENT_DUE
@@ -432,4 +522,6 @@ enum NotificationType {
   SYSTEM_UPDATE
   REFERRAL_COMPLETED
   WALLET_UPDATED
+  COMMISSION_EARNED
+  COMMISSION_PAID
 }

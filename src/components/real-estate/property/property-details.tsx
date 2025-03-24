@@ -18,13 +18,15 @@ import {
   Car, 
   Landmark,
   Share2,
-  Share
+  Share,
+  ArrowLeft
 } from "lucide-react"
 import { PriceTag } from "../shared/price-tag"
 import { LocationMap } from "../shared/location-map"
 import { PropertyGallery } from "./property-gallery"
 import { PurchaseForm } from "../purchase/purchase-form"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 interface PropertyDetailsProps {
   property: Property
@@ -36,6 +38,7 @@ interface PropertyDetailsProps {
  */
 export function PropertyDetails({ property }: PropertyDetailsProps) {
   const [showPurchaseForm, setShowPurchaseForm] = useState(false)
+  const router = useRouter()
 
   // Format date
   const formattedDate = property.createdAt 
@@ -88,19 +91,31 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Hero Section with Gallery */}
-      <div className="rounded-xl overflow-hidden bg-card shadow-sm border">
-        <div className="p-4 md:p-6">
-          <PropertyGallery images={property.images} alt={property.name} />
-        </div>
-      </div>
+    <div className="space-y-6">
+      {/* Back button */}
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className="mb-4 flex items-center gap-1 text-muted-foreground hover:text-foreground"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to properties
+      </Button>
 
-      {/* Property Header */}
+      {/* Main content grid with fixed right sidebar */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
+        {/* Left column - Gallery and Property Details */}
+        <div className="md:col-span-2 space-y-5">
+          {/* Hero Section with Gallery */}
+          <PropertyGallery images={property.images} alt={property.name} />
+          
+          {/* Divider between gallery and property details */}
+          <div className="border-t border-gray-200 my-4"></div>
+
+          {/* Property Header */}
           <div>
-            <div className="flex flex-wrap items-center gap-2 mb-2">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
               <Badge variant={property.status === "AVAILABLE" ? "default" : "secondary"}>
                 {property.status === "AVAILABLE" ? "Available" : property.status}
               </Badge>
@@ -115,8 +130,8 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
                 Listed on {formattedDate}
               </Badge>
             </div>
-            <h1 className="text-3xl font-bold md:text-4xl">{property.name}</h1>
-            <div className="mt-2 flex items-center text-muted-foreground">
+            <h1 className="text-2xl font-bold md:text-3xl">{property.name}</h1>
+            <div className="mt-2 flex items-center text-muted-foreground text-sm">
               <MapPin className="mr-1 h-4 w-4" />
               <span>{property.location}</span>
             </div>
@@ -128,8 +143,8 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
               <div className="flex items-center gap-2">
                 <Bed className="h-5 w-5 text-primary" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Bedrooms</div>
-                  <div className="font-medium">{features.bedrooms}</div>
+                  <div className="text-xs text-muted-foreground">Bedrooms</div>
+                  <div className="font-medium text-sm">{features.bedrooms}</div>
                 </div>
               </div>
             )}
@@ -137,8 +152,8 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
               <div className="flex items-center gap-2">
                 <Bath className="h-5 w-5 text-primary" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Bathrooms</div>
-                  <div className="font-medium">{features.bathrooms}</div>
+                  <div className="text-xs text-muted-foreground">Bathrooms</div>
+                  <div className="font-medium text-sm">{features.bathrooms}</div>
                 </div>
               </div>
             )}
@@ -146,8 +161,8 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
               <div className="flex items-center gap-2">
                 <Maximize className="h-5 w-5 text-primary" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Area</div>
-                  <div className="font-medium">{features.area} sq ft</div>
+                  <div className="text-xs text-muted-foreground">Area</div>
+                  <div className="font-medium text-sm">{features.area} sq ft</div>
                 </div>
               </div>
             )}
@@ -155,8 +170,8 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
               <div className="flex items-center gap-2">
                 <Home className="h-5 w-5 text-primary" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Year Built</div>
-                  <div className="font-medium">{features.yearBuilt}</div>
+                  <div className="text-xs text-muted-foreground">Year Built</div>
+                  <div className="font-medium text-sm">{features.yearBuilt}</div>
                 </div>
               </div>
             )}
@@ -164,26 +179,26 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
               <div className="flex items-center gap-2">
                 <Car className="h-5 w-5 text-primary" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Parking</div>
-                  <div className="font-medium">{features.parking}</div>
+                  <div className="text-xs text-muted-foreground">Parking</div>
+                  <div className="font-medium text-sm">{features.parking}</div>
                 </div>
               </div>
             )}
           </div>
 
           {/* Content Sections */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Description Section */}
             <section>
-              <h2 className="text-2xl font-semibold mb-4">Description</h2>
-              <div className="prose max-w-none dark:prose-invert">
+              <h2 className="text-lg font-semibold mb-3">Description</h2>
+              <div className="prose max-w-none dark:prose-invert text-sm">
                 <p>{property.description}</p>
               </div>
             </section>
             
             {/* Features Section */}
             <section>
-              <h2 className="text-2xl font-semibold mb-4">Features</h2>
+              <h2 className="text-lg font-semibold mb-3">Features</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {property.features && 
                  typeof property.features === 'object' && 
@@ -191,10 +206,10 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
                  Object.entries(property.features as Record<string, any>).map(([key, value]) => (
                   value && (
                     <div key={key} className="flex items-center gap-2">
-                      <Check className="h-5 w-5 text-primary" />
+                      <Check className="h-4 w-4 text-primary" />
                       <div>
-                        <div className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="font-medium text-sm capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</div>
+                        <div className="text-xs text-muted-foreground">
                           {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                         </div>
                       </div>
@@ -206,58 +221,61 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
             
             {/* Location Section */}
             <section>
-              <h2 className="text-2xl font-semibold mb-4">Location</h2>
-              <p className="mb-4">{property.location}</p>
+              <h2 className="text-lg font-semibold mb-3">Location</h2>
+              <p className="mb-3 text-sm">{property.location}</p>
               
               <Button 
                 variant="outline" 
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs"
+                size="sm"
                 onClick={() => window.open(`https://maps.google.com/?q=${encodeURIComponent(property.location)}`, '_blank')}
               >
-                <MapPin className="h-4 w-4" />
+                <MapPin className="h-3 w-3" />
                 View on Google Maps
               </Button>
             </section>
           </div>
         </div>
 
-        {/* Price and CTA Card */}
+        {/* Right column - Price and CTA Card (Fixed while scrolling) */}
         <div className="md:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Property Price</span>
-                <Badge variant={property.status === "AVAILABLE" ? "default" : "secondary"}>
-                  {property.status === "AVAILABLE" ? "Available" : property.status}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="text-3xl font-bold">
-                  <PriceTag amount={property.price} />
+          <div className="md:sticky md:top-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center justify-between text-base font-medium text-[16px]">
+                  <span>Property Price</span>
+                  <Badge variant={property.status === "AVAILABLE" ? "default" : "secondary"}>
+                    {property.status === "AVAILABLE" ? "Available" : property.status}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 pb-3">
+                <div>
+                  <div className="text-3xl">
+                    <PriceTag amount={property.price} fontWeight={700} />
+                  </div>
                 </div>
-              </div>
-              
-              {property.status === "AVAILABLE" && (
-                <Button 
-                  className="w-full" 
-                  size="lg" 
-                  onClick={() => setShowPurchaseForm(true)}
-                >
-                  Purchase Property
+                
+                {property.status === "AVAILABLE" && (
+                  <Button 
+                    className="w-full" 
+                    size="default" 
+                    onClick={() => setShowPurchaseForm(true)}
+                  >
+                    Purchase Property
+                  </Button>
+                )}
+                
+                <Button variant="outline" className="w-full text-sm" size="sm" onClick={handleShare}>
+                  <Share className="mr-2 h-3 w-3" />
+                  Share Property
                 </Button>
-              )}
-              
-              <Button variant="outline" className="w-full" onClick={handleShare}>
-                <Share className="mr-2 h-4 w-4" />
-                Share Property
-              </Button>
-            </CardContent>
-            <CardFooter className="text-xs text-muted-foreground border-t pt-4">
-              <p>Purchase directly charges your wallet balance</p>
-            </CardFooter>
-          </Card>
+              </CardContent>
+              <CardFooter className="text-xs text-muted-foreground border-t pt-3">
+                <p>Purchase directly charges your wallet balance</p>
+              </CardFooter>
+            </Card>
+          </div>
         </div>
       </div>
 

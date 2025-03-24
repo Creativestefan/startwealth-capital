@@ -6,10 +6,13 @@ export interface SerializedMarketPlan extends Omit<MarketPlan, "minAmount" | "ma
   returnRate: number
 }
 
-export interface SerializedMarketInvestment extends Omit<MarketInvestment, "amount" | "expectedReturn" | "actualReturn"> {
+export interface SerializedMarketInvestment extends Omit<MarketInvestment, "amount" | "expectedReturn" | "actualReturn" | "commissionAmount"> {
   amount: number
   expectedReturn: number
   actualReturn: number | null
+  referralId: string | null
+  commissionAmount: number | null
+  commissionPaid: boolean
   plan?: SerializedMarketPlan
   user?: {
     id: string

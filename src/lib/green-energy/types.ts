@@ -72,6 +72,9 @@ export interface GreenEnergyInvestment {
   expectedReturn: number;
   actualReturn?: number;
   reinvest: boolean;
+  referralId?: string | null;
+  commissionAmount?: number | null;
+  commissionPaid?: boolean;
   createdAt: Date;
   updatedAt: Date;
   user?: User;
@@ -109,6 +112,9 @@ export type SerializedGreenEnergyInvestment = Omit<GreenEnergyInvestment, 'creat
   updatedAt: string;
   startDate: string;
   endDate?: string;
+  referralId: string | null;
+  commissionAmount: number | null;
+  commissionPaid: boolean;
   user?: {
     id: string;
     firstName: string;
@@ -218,6 +224,13 @@ export function serializeGreenEnergyInvestment(investment: any): SerializedGreen
         : Number(investment.actualReturn))
       : undefined,
     reinvest: investment.reinvest,
+    referralId: investment.referralId || null,
+    commissionAmount: investment.commissionAmount !== null && investment.commissionAmount !== undefined
+      ? (typeof investment.commissionAmount === 'object' && 'toNumber' in investment.commissionAmount
+        ? investment.commissionAmount.toNumber()
+        : Number(investment.commissionAmount))
+      : null,
+    commissionPaid: investment.commissionPaid ?? false,
     createdAt: investment.createdAt.toISOString(),
     updatedAt: investment.updatedAt.toISOString(),
     startDate: investment.startDate.toISOString(),

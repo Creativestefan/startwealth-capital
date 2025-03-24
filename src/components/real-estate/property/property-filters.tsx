@@ -1,14 +1,22 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useRouter, usePathname } from "next/navigation"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useState } from "react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { PropertyStatus } from "@prisma/client"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Filter } from "lucide-react"
 
 interface PropertyFiltersProps {
-  filters?: {
+  filters: {
     minPrice?: number
     maxPrice?: number
     location?: string
@@ -16,102 +24,136 @@ interface PropertyFiltersProps {
   }
 }
 
-export function PropertyFilters({ filters = {} }: PropertyFiltersProps) {
+export function PropertyFilters({ filters }: PropertyFiltersProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
-
-  const [minPrice, setMinPrice] = useState<string>(filters.minPrice?.toString() || "")
-  const [maxPrice, setMaxPrice] = useState<string>(filters.maxPrice?.toString() || "")
-  const [location, setLocation] = useState<string>(filters.location || "")
-  const [status, setStatus] = useState<PropertyStatus>(filters.status || "AVAILABLE")
-
-  const applyFilters = () => {
-    const params = new URLSearchParams(searchParams.toString())
-
-    // Update or remove minPrice parameter
-    if (minPrice) {
-      params.set("minPrice", minPrice)
-    } else {
-      params.delete("minPrice")
-    }
-
-    // Update or remove maxPrice parameter
-    if (maxPrice) {
-      params.set("maxPrice", maxPrice)
-    } else {
-      params.delete("maxPrice")
-    }
-
-    // Update or remove location parameter
-    if (location) {
-      params.set("location", location)
-    } else {
-      params.delete("location")
-    }
-
-    // Update or remove status parameter
-    if (status && status !== "AVAILABLE") {
-      params.set("status", status)
-    } else {
-      params.delete("status")
-    }
-
-    router.push(`?${params.toString()}`)
+  const pathname = usePathname()
+  
+  const [minPrice, setMinPrice] = useState(filters.minPrice?.toString() || "")
+  const [maxPrice, setMaxPrice] = useState(filters.maxPrice?.toString() || "")
+  const [location, setLocation] = useState(filters.location || "")
+  const [status, setStatus] = useState<PropertyStatus | undefined>(filters.status)
+  
+  function applyFilters() {
+    const params = new URLSearchParams()
+    
+    if (minPrice) params.append("minPrice", minPrice)
+    if (maxPrice) params.append("maxPrice", maxPrice)
+    if (location) params.append("location", location)
+    if (status) params.append("status", status)
+    
+    router.push(`${pathname}?${params.toString()}`)
   }
-
-  const clearFilters = () => {
+  
+  function clearFilters() {
     setMinPrice("")
     setMaxPrice("")
     setLocation("")
-    setStatus("AVAILABLE")
-    router.push("")
+    setStatus(undefined)
+    router.push(pathname)
   }
-
-  return (
-    <div className="flex flex-wrap gap-2 items-center">
-      <Input
-        type="number"
-        placeholder="Min Price"
-        className="w-[120px]"
-        value={minPrice}
-        onChange={(e) => setMinPrice(e.target.value)}
-      />
-
-      <Input
-        type="number"
-        placeholder="Max Price"
-        className="w-[120px]"
-        value={maxPrice}
-        onChange={(e) => setMaxPrice(e.target.value)}
-      />
-
-      <Input
-        type="text"
-        placeholder="Location"
-        className="w-[180px]"
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-      />
-
-      <Select value={status} onValueChange={(value) => setStatus(value as PropertyStatus)}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="AVAILABLE">Available</SelectItem>
-          <SelectItem value="PENDING">Pending</SelectItem>
-          <SelectItem value="SOLD">Sold</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Button variant="outline" size="sm" onClick={applyFilters}>
-        Apply
-      </Button>
-
-      <Button variant="ghost" size="sm" onClick={clearFilters}>
-        Clear
-      </Button>
+  
+  const FilterForm = () => (
+    <>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+        <div className="space-y-2">
+          <Input
+            placeholder="Min Price"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            type="number"
+            className="h-9"
+          />
+        </div>
+        <div className="space-y-2">
+          <Input
+            placeholder="Max Price"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            type="number"
+            className="h-9"
+          />
+        </div>
+        <div className="space-y-2">
+          <Input
+            placeholder="Location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="h-9"
+          />
+        </div>
+        <div className="space-y-2">
+          <Select
+            value={status}
+            onValueChange={(value) => setStatus(value as PropertyStatus)}
+          >
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder="Sold" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="AVAILABLE">Available</SelectItem>
+              <SelectItem value="SOLD">Sold</SelectItem>
+              <SelectItem value="PENDING">Pending</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2 justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={clearFilters}
+          className="h-9"
+        >
+          Clear
+        </Button>
+        <Button
+          onClick={applyFilters}
+          size="sm"
+          className="h-9"
+        >
+          Apply
+        </Button>
+      </div>
+    </>
+  )
+  
+  // Mobile view with bottom sheet
+  const MobileFilters = () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="sm" className="flex items-center gap-2">
+          <Filter className="h-4 w-4" />
+          Filters
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="bottom" className="h-[80vh] rounded-t-xl">
+        <SheetHeader className="mb-4">
+          <SheetTitle>Filter Properties</SheetTitle>
+        </SheetHeader>
+        <FilterForm />
+      </SheetContent>
+    </Sheet>
+  )
+  
+  // Desktop view
+  const DesktopFilters = () => (
+    <div className="rounded-lg border bg-card p-4 shadow-sm">
+      <FilterForm />
     </div>
+  )
+  
+  return (
+    <>
+      {/* Mobile view */}
+      <div className="md:hidden">
+        <MobileFilters />
+      </div>
+      
+      {/* Desktop view */}
+      <div className="hidden md:block">
+        <DesktopFilters />
+      </div>
+    </>
   )
 }
 

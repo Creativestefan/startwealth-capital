@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import type * as z from "zod"
@@ -18,7 +18,11 @@ type FormData = z.infer<typeof RegisterSchema>
 
 export function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = React.useState(false)
+  
+  // Get referral code from URL if available
+  const referralCode = searchParams.get("ref") || ""
 
   const form = useForm<FormData>({
     resolver: zodResolver(RegisterSchema),
@@ -29,8 +33,16 @@ export function RegisterForm() {
       email: "",
       password: "",
       confirmPassword: "",
+      referralCode: referralCode,
     },
   })
+
+  // Update referral code when URL parameter changes
+  React.useEffect(() => {
+    if (referralCode) {
+      form.setValue("referralCode", referralCode)
+    }
+  }, [referralCode, form])
 
   async function onSubmit(values: FormData) {
     console.log("Form submitted with values:", values) // Debug log

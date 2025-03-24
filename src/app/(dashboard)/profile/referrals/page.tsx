@@ -1,36 +1,35 @@
 import { Suspense } from "react"
-import { Metadata } from "next"
 import { requireAuth } from "@/lib/auth-utils"
 import { ProfileTabs } from "@/components/dashboard/profile/profile-tabs"
 import { Separator } from "@/components/ui/separator"
 import { ProfileSkeleton } from "@/components/dashboard/profile/profile-skeleton"
+import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Profile | StartWealth Capital",
-  description: "Manage your profile and account settings",
+  title: "Referral Program | StartWealth Capital",
+  description: "Manage your referrals and commissions",
 }
 
-export default async function ProfilePage({
+export default async function ReferralsPage({
   searchParams,
 }: {
-  searchParams: { tab?: string }
+  searchParams?: Promise<any>
 }) {
   // Require authentication for this page
   const session = await requireAuth()
-  const activeTab = searchParams.tab || "account"
-
+  
   return (
     <div className="container py-8 max-w-5xl">
       <div className="space-y-0.5">
         <h2 className="text-2xl font-bold tracking-tight">Profile</h2>
         <p className="text-muted-foreground">
-          Manage your account settings and KYC verification
+          Manage your referrals and commissions
         </p>
       </div>
       <Separator className="my-6" />
       <Suspense fallback={<ProfileSkeleton />}>
-        <ProfileTabs activeTab={activeTab} user={session.user} />
+        <ProfileTabs activeTab="referrals" user={session.user} />
       </Suspense>
     </div>
   )
-}
+} 

@@ -6,6 +6,7 @@ import { Providers } from "./providers"
 import "@/styles/globals.css"
 import { Metadata } from "next"
 import { Sonner } from "@/components/ui/sonner"
+import Script from "next/script"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,6 +25,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script 
+          src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body
         suppressHydrationWarning
         className={cn("min-h-screen bg-background font-sans antialiased", inter.className)}

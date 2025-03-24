@@ -233,6 +233,14 @@ export async function purchaseProperty(propertyId: string, amount: number): Prom
         throw new InsufficientFundsError()
       }
 
+      // Check for referral - Find active referral for this user
+      const referral = await prisma.referral.findFirst({
+        where: {
+          referredId: session.user.id,
+          status: "COMPLETED", // Use COMPLETED status for active referrals
+        },
+      });
+
       // Start a transaction to update property, create transaction, and update wallet
       const result = await prisma.$transaction(async (tx) => {
         // Update property status
@@ -241,7 +249,7 @@ export async function purchaseProperty(propertyId: string, amount: number): Prom
           data: { status: "SOLD" },
         })
 
-        // Create property transaction
+        // Create property transaction with referral info if available
         const propertyTransaction = await tx.propertyTransaction.create({
           data: {
             propertyId,
@@ -250,6 +258,7 @@ export async function purchaseProperty(propertyId: string, amount: number): Prom
             type: "FULL",
             status: TRANSACTION_STATUS.COMPLETED,
             paidInstallments: 0,
+            referralId: referral?.id || null, // Track the referral if present
           },
         })
 
@@ -274,6 +283,18 @@ export async function purchaseProperty(propertyId: string, amount: number): Prom
             description: `Purchase of property ${propertyId}`,
           },
         })
+
+        // Process referral commission if applicable
+        if (referral) {
+          await import("@/lib/referrals/processor").then(({ processReferralCommission }) => {
+            return processReferralCommission({
+              userId: session.user.id,
+              amount: amount,
+              investmentId: propertyTransaction.id,
+              investmentType: "PROPERTY_PURCHASE"
+            });
+          });
+        }
 
         return {
           property: updatedProperty,
@@ -335,6 +356,14 @@ export async function purchasePropertyWithInstallments(
         throw new InsufficientFundsError("Insufficient funds for first installment")
       }
 
+      // Check for referral - Find active referral for this user
+      const referral = await prisma.referral.findFirst({
+        where: {
+          referredId: session.user.id,
+          status: "COMPLETED",
+        },
+      });
+
       // Start a transaction to update property, create transaction, and update wallet
       const result = await prisma.$transaction(async (tx) => {
         // Update property status
@@ -343,7 +372,7 @@ export async function purchasePropertyWithInstallments(
           data: { status: "PENDING" },
         })
 
-        // Create property transaction
+        // Create property transaction with referral tracking
         const propertyTransaction = await tx.propertyTransaction.create({
           data: {
             propertyId,
@@ -355,6 +384,7 @@ export async function purchasePropertyWithInstallments(
             installmentAmount,
             paidInstallments: 1, // First installment paid now
             nextPaymentDue: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+            referralId: referral?.id || null, // Track the referral if present
           },
         })
 
@@ -379,6 +409,18 @@ export async function purchasePropertyWithInstallments(
             description: `First installment for property ${propertyId}`,
           },
         })
+
+        // Process referral commission if applicable - only on first installment
+        if (referral) {
+          await import("@/lib/referrals/processor").then(({ processReferralCommission }) => {
+            return processReferralCommission({
+              userId: session.user.id,
+              amount: installmentAmount, // Only process commission on first installment
+              investmentId: propertyTransaction.id,
+              investmentType: "PROPERTY_PURCHASE"
+            });
+          });
+        }
 
         return {
           property: updatedProperty,

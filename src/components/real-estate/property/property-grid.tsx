@@ -9,16 +9,21 @@ interface PropertyGridProps {
 export function PropertyGrid({ properties, variant = "default" }: PropertyGridProps) {
   if (properties.length === 0) {
     return (
-      <div className="flex h-40 items-center justify-center rounded-md border border-dashed">
-        <p className="text-center text-muted-foreground">No properties found</p>
+      <div className="flex h-60 items-center justify-center rounded-lg border border-dashed bg-muted/20">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-2">No properties found</p>
+          <p className="text-xs text-muted-foreground">Try adjusting your filters or check back later</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {properties.map((property) => (
-        <PropertyCard key={property.id} property={property} variant={variant} />
+        <div key={property.id} className="w-full">
+          <PropertyCard property={property} variant={variant} />
+        </div>
       ))}
     </div>
   )

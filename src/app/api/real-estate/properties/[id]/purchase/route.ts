@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authConfig } from "@/lib/auth.config"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
-import { PropertyTransactionType } from "@prisma/client"
+import { PropertyTransactionType, ReferralStatus } from "@prisma/client"
 
 // Define the schema for purchase validation
 const purchaseSchema = z.object({
@@ -100,6 +100,14 @@ export async function POST(
       )
     }
 
+    // Check for referral - Find active referral for this user
+    const referral = await prisma.referral.findFirst({
+      where: {
+        referredId: session.user.id,
+        status: ReferralStatus.COMPLETED,
+      },
+    });
+
     // Begin transaction
     const result = await prisma.$transaction(async (tx) => {
       // Update wallet balance
@@ -108,7 +116,7 @@ export async function POST(
         data: { balance: { decrement: initialPayment } },
       })
 
-      // Create property transaction
+      // Create property transaction with referral tracking
       const propertyTransaction = await tx.propertyTransaction.create({
         data: {
           propertyId: id,
@@ -119,6 +127,7 @@ export async function POST(
           installments: type === "INSTALLMENT" ? installments : null,
           installmentAmount: type === "INSTALLMENT" ? initialPayment : null,
           paidInstallments: type === "INSTALLMENT" ? 1 : 0, // First payment is made
+          referralId: referral?.id || null, // Track the referral if present
         },
       })
 
@@ -141,6 +150,18 @@ export async function POST(
           status: type === "FULL" ? "SOLD" : "PENDING",
         },
       })
+
+      // Process referral commission if applicable
+      if (referral) {
+        await import("@/lib/referrals/processor").then(({ processReferralCommission }) => {
+          return processReferralCommission({
+            userId: session.user.id,
+            amount: initialPayment, // Only process commission on the paid amount
+            investmentId: propertyTransaction.id,
+            investmentType: "PROPERTY_PURCHASE"
+          });
+        });
+      }
 
       return {
         propertyTransaction,

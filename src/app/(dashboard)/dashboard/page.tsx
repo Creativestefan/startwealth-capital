@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { EmptyState } from "@/components/dashboard/empty-state"
 import { InvestmentChart } from "@/components/dashboard/analytics/investment-chart"
 import { InvestmentSummary } from "@/components/dashboard/analytics/investment-summary"
+import { getUserDashboardStats } from "@/lib/data/dashboard"
 
 export default async function DashboardPage() {
   const session = await getServerSession(authConfig)
@@ -26,7 +27,7 @@ export default async function DashboardPage() {
   // Get investment data with error handling
   let data
   try {
-    data = await getInvestmentData()
+    data = await getUserDashboardStats(session.user.id)
   } catch (error) {
     console.error("Error fetching investment data:", error)
     data = null
@@ -38,9 +39,9 @@ export default async function DashboardPage() {
   if (!data) {
     return (
       <div className="container mx-auto px-4 py-6 space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Welcome back, {userName}!</h1>
-          <p className="text-muted-foreground">Start building your investment portfolio today</p>
+        <div className="mb-6">
+          <h1 className="text-xl font-medium tracking-tight">Welcome back, {userName}!</h1>
+          <p className="text-sm text-muted-foreground">Start building your investment portfolio today</p>
         </div>
         <EmptyState />
       </div>
@@ -48,14 +49,14 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Welcome back, {userName}!</h1>
-        <p className="text-muted-foreground">Here's an overview of your investment portfolio</p>
+    <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="mb-4">
+        <h1 className="text-xl font-medium tracking-tight">Welcome back, {userName}!</h1>
+        <p className="text-sm text-muted-foreground">Here's an overview of your investment portfolio</p>
       </div>
       
       {/* Investment Summary */}
-      <div className="w-full">
+      <div className="w-full mb-6">
         <InvestmentSummary 
           realEstate={data.investments.realEstate}
           greenEnergy={data.investments.greenEnergy}
@@ -64,7 +65,7 @@ export default async function DashboardPage() {
       </div>
       
       {/* Charts Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         <div className="md:col-span-1 xl:col-span-1">
           <InvestmentChart 
             title="Real Estate Performance"
@@ -85,6 +86,39 @@ export default async function DashboardPage() {
             description="Market investments value over time"
             data={data.chartData.markets}
           />
+        </div>
+      </div>
+      
+      {/* Recent Activity Section */}
+      <div className="mt-6">
+        <h2 className="text-base font-medium mb-4">Recent Activity</h2>
+        <div className="bg-card rounded-lg border shadow-sm p-4">
+          <div className="space-y-4">
+            {data.recentActivity?.length > 0 ? (
+              data.recentActivity.map((activity, index) => (
+                <div key={index} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
+                  <div className={`w-2 h-2 mt-2 rounded-full ${
+                    activity.type === 'deposit' ? 'bg-green-500' : 
+                    activity.type === 'withdrawal' ? 'bg-red-500' : 
+                    activity.type === 'investment' ? 'bg-blue-500' : 'bg-gray-500'
+                  }`} />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{activity.description}</p>
+                    <p className="text-xs text-muted-foreground">{activity.date}</p>
+                  </div>
+                  <div className={`text-sm font-medium ${
+                    activity.type === 'deposit' ? 'text-green-600' : 
+                    activity.type === 'withdrawal' ? 'text-red-600' : 
+                    'text-blue-600'
+                  }`}>
+                    {activity.amount}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -136,7 +170,27 @@ async function getInvestmentData() {
         { name: "Apr", value: 780000 },
         { name: "May", value: 800000 },
       ],
-    }
+    },
+    recentActivity: [
+      {
+        type: "deposit",
+        description: "Wallet Deposit",
+        date: "Today, 2:30 PM",
+        amount: "+$50,000"
+      },
+      {
+        type: "investment",
+        description: "Real Estate Investment - Skyline Towers",
+        date: "Yesterday, 11:15 AM",
+        amount: "$250,000"
+      },
+      {
+        type: "withdrawal",
+        description: "Wallet Withdrawal",
+        date: "May 15, 2024",
+        amount: "-$15,000"
+      }
+    ]
   }
 }
 

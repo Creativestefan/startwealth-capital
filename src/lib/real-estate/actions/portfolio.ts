@@ -349,6 +349,53 @@ export async function makeInstallmentPayment(transactionId: string): Promise<Api
   }
 }
 
+/**
+ * Gets detailed information about a property transaction
+ */
+export async function getPropertyTransactionById(transactionId: string): Promise<ApiResponse<any>> {
+  return withAuth(async (session) => {
+    // Find the transaction with related property data
+    const transaction = await prisma.propertyTransaction.findUnique({
+      where: {
+        id: transactionId,
+      },
+      include: {
+        property: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            location: true,
+            mainImage: true,
+            features: true,
+            status: true,
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          }
+        },
+      },
+    });
+
+    if (!transaction) {
+      throw new NotFoundError("Property transaction", transactionId);
+    }
+
+    // Verify the user owns this transaction or is an admin
+    if (transaction.userId !== session.user.id && session.user.role !== 'ADMIN') {
+      throw new ForbiddenError("You don't have permission to view this transaction");
+    }
+
+    return serializeData(transaction);
+  });
+}
+
 // ==========================================
 // Admin operations
 // ==========================================

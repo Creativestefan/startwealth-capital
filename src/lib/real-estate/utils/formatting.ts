@@ -1,5 +1,5 @@
 import { INVESTMENT_PLANS } from "../constants"
-import type { Property, RealEstateInvestment } from "../types"
+import type { Property, RealEstateInvestment, SerializedRealEstateInvestment } from "../types"
 import { Prisma } from "@prisma/client"
 
 /**
@@ -142,5 +142,40 @@ export function serializeData(data: any): any {
 
   // Return primitive values as is
   return data;
+}
+
+/**
+ * Serializes a RealEstateInvestment object for client-side use
+ * Converts Decimal and Date objects to regular JS types and handles referral fields
+ */
+export function serializeRealEstateInvestment(investment: any): SerializedRealEstateInvestment {
+  return {
+    id: investment.id,
+    userId: investment.userId,
+    type: investment.type,
+    amount: typeof investment.amount === 'object' && investment.amount !== null && typeof investment.amount.toNumber === 'function' 
+      ? investment.amount.toNumber() 
+      : Number(investment.amount),
+    status: investment.status,
+    startDate: investment.startDate instanceof Date ? investment.startDate.toISOString() : investment.startDate,
+    endDate: investment.endDate instanceof Date ? investment.endDate.toISOString() : investment.endDate,
+    expectedReturn: typeof investment.expectedReturn === 'object' && investment.expectedReturn !== null && typeof investment.expectedReturn.toNumber === 'function'
+      ? investment.expectedReturn.toNumber()
+      : Number(investment.expectedReturn),
+    actualReturn: investment.actualReturn === null ? null : 
+      (typeof investment.actualReturn === 'object' && investment.actualReturn !== null && typeof investment.actualReturn.toNumber === 'function'
+        ? investment.actualReturn.toNumber()
+        : Number(investment.actualReturn)),
+    reinvest: investment.reinvest,
+    createdAt: investment.createdAt instanceof Date ? investment.createdAt.toISOString() : investment.createdAt,
+    updatedAt: investment.updatedAt instanceof Date ? investment.updatedAt.toISOString() : investment.updatedAt,
+    referralId: investment.referralId || null,
+    commissionAmount: investment.commissionAmount === null || investment.commissionAmount === undefined ? null : 
+      (typeof investment.commissionAmount === 'object' && investment.commissionAmount !== null && typeof investment.commissionAmount.toNumber === 'function'
+        ? investment.commissionAmount.toNumber()
+        : Number(investment.commissionAmount)),
+    commissionPaid: investment.commissionPaid ?? false,
+    user: investment.user
+  };
 }
 

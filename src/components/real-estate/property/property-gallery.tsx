@@ -48,10 +48,10 @@ export function PropertyGallery({ images, alt }: PropertyGalleryProps) {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Main image */}
         <div 
-          className="relative mx-auto max-w-2xl aspect-[16/9] w-full cursor-pointer overflow-hidden rounded-lg shadow-md"
+          className="relative aspect-[16/9] w-full cursor-pointer overflow-hidden rounded-lg shadow-md"
           onClick={() => openLightbox(currentIndex)}
         >
           {imageErrors[currentIndex] ? (
@@ -70,7 +70,7 @@ export function PropertyGallery({ images, alt }: PropertyGalleryProps) {
                 unoptimized={images[currentIndex].startsWith('/api/image-proxy')}
                 onError={() => handleImageError(currentIndex)}
               />
-              <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-white text-sm">
+              <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-white text-xs">
                 {alt} - Image {currentIndex + 1} of {images.length}
               </div>
             </>
@@ -102,19 +102,19 @@ export function PropertyGallery({ images, alt }: PropertyGalleryProps) {
 
         {/* Thumbnails */}
         {images.length > 1 && (
-          <div className="mx-auto max-w-2xl grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
+          <div className="flex flex-wrap gap-3">
             {images.map((image, index) => (
               <div
                 key={index}
                 className={cn(
-                  "relative aspect-square cursor-pointer overflow-hidden rounded-md border-2 shadow-sm transition-all hover:opacity-90",
-                  index === currentIndex ? "border-primary ring-2 ring-primary/50" : "border-transparent"
+                  "relative aspect-square cursor-pointer overflow-hidden rounded-md border-2 shadow-sm transition-all hover:opacity-90 h-[50px] w-[50px]",
+                  index === currentIndex ? "border-primary ring-1 ring-primary/50" : "border-transparent"
                 )}
                 onClick={() => setCurrentIndex(index)}
               >
                 {imageErrors[index] ? (
                   <div className="flex h-full w-full items-center justify-center bg-muted">
-                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                    <ImageIcon className="h-4 w-4 text-muted-foreground" />
                   </div>
                 ) : (
                   <Image
