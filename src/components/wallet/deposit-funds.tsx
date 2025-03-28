@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { toast } from "sonner"
-import { Copy, Loader2 } from "lucide-react"
+import { Copy, Loader2, AlertCircle } from "lucide-react"
 import { Wallet } from "@/types/wallet"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { depositFunds } from "@/lib/wallet/actions"
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const depositFormSchema = z.object({
   amount: z.coerce.number().positive("Amount must be positive").min(100, "Minimum deposit is $100"),
@@ -29,9 +31,19 @@ interface DepositFundsProps {
   wallet: Wallet
 }
 
+interface WalletSettings {
+  id: string
+  btcWalletAddress: string | null
+  usdtWalletAddress: string | null
+  usdtWalletType: string
+}
+
 export function DepositFunds({ wallet }: DepositFundsProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("BTC")
+  const [walletSettings, setWalletSettings] = React.useState<WalletSettings | null>(null)
+  const [isLoadingSettings, setIsLoadingSettings] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
   
   const form = useForm<DepositFormValues>({
     resolver: zodResolver(depositFormSchema),
@@ -41,6 +53,32 @@ export function DepositFunds({ wallet }: DepositFundsProps) {
       txHash: "",
     },
   })
+
+  // Fetch wallet settings on mount
+  React.useEffect(() => {
+    const fetchWalletSettings = async () => {
+      try {
+        setIsLoadingSettings(true)
+        setError(null)
+        
+        const response = await fetch('/api/wallet-settings')
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch wallet addresses')
+        }
+        
+        const data = await response.json()
+        setWalletSettings(data)
+      } catch (error) {
+        console.error('Error fetching wallet settings:', error)
+        setError('Failed to load wallet addresses. Please try again later.')
+      } finally {
+        setIsLoadingSettings(false)
+      }
+    }
+    
+    fetchWalletSettings()
+  }, [])
   
   React.useEffect(() => {
     form.setValue("cryptoType", activeTab as "BTC" | "USDT")
@@ -91,6 +129,18 @@ export function DepositFunds({ wallet }: DepositFundsProps) {
       }
     )
   }
+
+  // Get the appropriate wallet address based on the active tab
+  const getActiveWalletAddress = () => {
+    if (!walletSettings) return null
+    
+    return activeTab === "BTC" 
+      ? walletSettings.btcWalletAddress
+      : walletSettings.usdtWalletAddress
+  }
+
+  const walletAddress = getActiveWalletAddress()
+  const hasAddress = !!walletAddress
   
   return (
     <div className="grid gap-6 md:grid-cols-2">
@@ -158,7 +208,7 @@ export function DepositFunds({ wallet }: DepositFundsProps) {
                             <RadioGroupItem value="USDT" />
                           </FormControl>
                           <FormLabel className="font-normal">
-                            Tether (USDT - TRC20)
+                            Tether (USDT - {walletSettings?.usdtWalletType || "BEP-20"})
                           </FormLabel>
                         </FormItem>
                       </RadioGroup>
@@ -188,7 +238,7 @@ export function DepositFunds({ wallet }: DepositFundsProps) {
                 )}
               />
               
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" disabled={isSubmitting || !hasAddress}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -214,29 +264,49 @@ export function DepositFunds({ wallet }: DepositFundsProps) {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="BTC">Bitcoin</TabsTrigger>
-              <TabsTrigger value="USDT">USDT (TRC20)</TabsTrigger>
+              <TabsTrigger value="USDT">USDT ({walletSettings?.usdtWalletType || "BEP-20"})</TabsTrigger>
             </TabsList>
             
             <TabsContent value="BTC" className="mt-6 space-y-4">
-              <div className="rounded-lg border p-4">
-                <div className="flex flex-col space-y-2">
-                  <div className="text-sm font-medium text-muted-foreground">
-                    Bitcoin Address
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
-                      {wallet.btcAddress || "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"}
-                    </code>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => copyToClipboard(wallet.btcAddress || "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh")}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
+              {isLoadingSettings ? (
+                <div className="space-y-2 py-4">
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ) : error ? (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              ) : !walletSettings?.btcWalletAddress ? (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>No BTC Address Available</AlertTitle>
+                  <AlertDescription>The admin has not set up a Bitcoin wallet address yet. Please try again later or contact support.</AlertDescription>
+                </Alert>
+              ) : (
+                <div className="rounded-lg border p-4">
+                  <div className="flex flex-col space-y-2">
+                    <div className="text-sm font-medium text-muted-foreground">
+                      Bitcoin Address
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm break-all">
+                        {walletSettings.btcWalletAddress}
+                      </code>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => copyToClipboard(walletSettings.btcWalletAddress)}
+                        className="ml-2 flex-shrink-0"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
               
               <div className="rounded-lg border p-4 space-y-2">
                 <h3 className="font-medium">Important Notes:</h3>
@@ -249,47 +319,57 @@ export function DepositFunds({ wallet }: DepositFundsProps) {
             </TabsContent>
             
             <TabsContent value="USDT" className="mt-6 space-y-4">
-              <div className="rounded-lg border p-4">
-                <div className="flex flex-col space-y-2">
-                  <div className="text-sm font-medium text-muted-foreground">
-                    USDT Address (TRC20)
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
-                      {wallet.usdtAddress || "TJYeasTPa6gpEEfYFfKpY1mDmfhyUwTYzm"}
-                    </code>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => copyToClipboard(wallet.usdtAddress || "TJYeasTPa6gpEEfYFfKpY1mDmfhyUwTYzm")}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
+              {isLoadingSettings ? (
+                <div className="space-y-2 py-4">
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ) : error ? (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              ) : !walletSettings?.usdtWalletAddress ? (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>No USDT Address Available</AlertTitle>
+                  <AlertDescription>The admin has not set up a USDT wallet address yet. Please try again later or contact support.</AlertDescription>
+                </Alert>
+              ) : (
+                <div className="rounded-lg border p-4">
+                  <div className="flex flex-col space-y-2">
+                    <div className="text-sm font-medium text-muted-foreground">
+                      USDT ({walletSettings.usdtWalletType}) Address
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm break-all">
+                        {walletSettings.usdtWalletAddress}
+                      </code>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => copyToClipboard(walletSettings.usdtWalletAddress)}
+                        className="ml-2 flex-shrink-0"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
               
               <div className="rounded-lg border p-4 space-y-2">
                 <h3 className="font-medium">Important Notes:</h3>
                 <ul className="list-disc pl-5 space-y-1 text-sm">
-                  <li>Only send USDT on TRC20 network to this address</li>
-                  <li>Do NOT send USDT on other networks (ERC20, etc.)</li>
+                  <li>Only send USDT ({walletSettings?.usdtWalletType || "BEP-20"}) to this address</li>
                   <li>Minimum confirmation required: 15</li>
-                  <li>Processing time: 30-60 minutes after confirmation</li>
+                  <li>Processing time: 1-3 hours after confirmation</li>
                 </ul>
               </div>
             </TabsContent>
           </Tabs>
         </CardContent>
-        <CardFooter className="flex flex-col items-start gap-2">
-          <div className="text-sm font-medium">After sending funds:</div>
-          <ol className="list-decimal pl-5 text-sm space-y-1">
-            <li>Wait for transaction confirmations</li>
-            <li>Copy the transaction hash/ID</li>
-            <li>Enter the details in the form and submit</li>
-            <li>Admin will verify and credit your account</li>
-          </ol>
-        </CardFooter>
       </Card>
     </div>
   )

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { NavUser } from "@/components/dashboard/nav-user"
 import { AdminNavUser } from "@/components/admin/admin-nav-user"
 import { Bell, Search, Menu } from "lucide-react"
@@ -7,12 +8,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
+import { NotificationSheet } from "@/components/dashboard/notification-sheet"
+import { AdminNotificationSheet } from "@/components/admin/admin-notification-sheet"
 import Link from "next/link"
 
 export function DashboardHeader({ user, isAdmin = false }: { 
   user: any; 
   isAdmin?: boolean 
 }) {
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
       <div className="flex items-center gap-4">
@@ -55,11 +60,30 @@ export function DashboardHeader({ user, isAdmin = false }: {
         )}
         
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative"
+          onClick={() => setNotificationsOpen(true)}
+          aria-label="Open notifications"
+        >
           <Bell className="h-5 w-5" />
           <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"></span>
           <span className="sr-only">Notifications</span>
         </Button>
+
+        {/* Use different notification sheets based on user role */}
+        {isAdmin ? (
+          <AdminNotificationSheet 
+            isOpen={notificationsOpen} 
+            onOpenChange={setNotificationsOpen} 
+          />
+        ) : (
+          <NotificationSheet 
+            isOpen={notificationsOpen} 
+            onOpenChange={setNotificationsOpen} 
+          />
+        )}
         
         {/* User menu - use AdminNavUser for admin users */}
         {isAdmin ? (

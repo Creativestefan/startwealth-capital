@@ -208,3 +208,86 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   }
 }
 
+export async function sendNotificationEmail(email: string, title: string, message: string, actionUrl?: string) {
+  const mailOptions: SendMailOptions = {
+    from: process.env.SMTP_FROM!,
+    to: email,
+    subject: title,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale: 1.0">
+          <title>${title}</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #1a1a1a; margin-bottom: 10px;">${title}</h1>
+              <p style="color: #4b5563; margin-bottom: 20px;">
+                ${message}
+              </p>
+            </div>
+            
+            ${actionUrl ? `
+            <div style="text-align: center; margin-bottom: 30px;">
+              <a href="${actionUrl}" style="display: inline-block; background-color: #1a1a1a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
+                View Details
+              </a>
+            </div>
+            ` : ''}
+            
+            <div style="color: #4b5563; font-size: 14px; text-align: center;">
+              <p style="margin-bottom: 20px;">
+                You can view all your notifications on your dashboard.
+              </p>
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+              <p style="color: #6b7280; font-size: 12px;">
+                This is an automated message. Please do not reply to this email.
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }
+
+  try {
+    // Verify SMTP connection before sending
+    try {
+      await transporter.verify()
+    } catch (verifyError) {
+      console.error("SMTP connection verification failed:", verifyError)
+      throw new Error(`SMTP connection failed: ${verifyError instanceof Error ? verifyError.message : "Unknown error"}`)
+    }
+
+    // Send email with retry logic
+    let retries = 3
+    let lastError = null
+
+    while (retries > 0) {
+      try {
+        const info = await transporter.sendMail(mailOptions)
+        console.log("Notification email sent:", info.messageId)
+        return info
+      } catch (sendError) {
+        lastError = sendError
+        console.error(`Failed to send notification email (retries left: ${retries - 1}):`, sendError)
+        retries--
+
+        if (retries > 0) {
+          // Wait before retrying
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+        }
+      }
+    }
+
+    // If we get here, all retries failed
+    throw lastError || new Error("Failed to send notification email after multiple attempts")
+  } catch (error) {
+    console.error("Failed to send notification email:", error)
+    throw new Error(`Failed to send notification email: ${error instanceof Error ? error.message : "Unknown error"}`)
+  }
+}
+

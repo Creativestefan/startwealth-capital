@@ -87,16 +87,15 @@ export function SingleImageUpload({
   return (
     <div className={cn("space-y-2", className)}>
       {value ? (
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-md border border-border">
+        <div className="relative h-[72px] w-[72px] overflow-hidden rounded-full border border-border mx-auto">
           {imageError ? (
             <div className="flex h-full w-full items-center justify-center bg-muted">
-              <Camera className="h-12 w-12 text-muted-foreground" />
-              <p className="ml-2 text-sm text-muted-foreground">Image failed to load</p>
+              <Camera className="h-8 w-8 text-muted-foreground" />
             </div>
           ) : (
             <Image
               src={value}
-              alt="Property image"
+              alt="Profile picture"
               fill
               className="object-cover"
               unoptimized={value.startsWith('/api/image-proxy')}
@@ -106,19 +105,19 @@ export function SingleImageUpload({
           <button
             type="button"
             onClick={handleRemove}
-            className="absolute right-2 top-2 rounded-full bg-foreground/10 p-1 text-white hover:bg-foreground/20"
+            className="absolute right-0 top-0 rounded-full bg-foreground/10 p-1 text-white hover:bg-foreground/20"
             disabled={disabled}
           >
-            <X className="h-4 w-4" />
+            <X className="h-3 w-3" />
           </button>
         </div>
       ) : (
         <div 
           onClick={handleButtonClick}
-          className="flex aspect-[16/9] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border bg-muted/50 p-4 transition-colors hover:bg-muted"
+          className="flex h-[72px] w-[72px] cursor-pointer flex-col items-center justify-center rounded-full border border-dashed border-border bg-muted/50 p-1 transition-colors hover:bg-muted mx-auto"
         >
-          <Camera className="h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Click to upload main image</p>
+          <Camera className="h-6 w-6 text-muted-foreground" />
+          <p className="text-xs text-muted-foreground mt-1">Upload</p>
         </div>
       )}
       
@@ -138,7 +137,7 @@ export function SingleImageUpload({
         className="hidden"
       />
 
-      <div className="flex justify-end">
+      <div className="flex justify-center">
         <Button
           type="button"
           variant="outline"

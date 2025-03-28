@@ -151,6 +151,11 @@ const adminRoutes = [
         icon: Users,
       },
       {
+        label: "Wallet Settings",
+        href: "/admin/settings/wallet",
+        icon: Wallet,
+      },
+      {
         label: "Profile",
         href: "/admin/settings/profile",
         icon: Users,
@@ -159,11 +164,6 @@ const adminRoutes = [
         label: "Security",
         href: "/admin/settings/security",
         icon: ShieldCheck,
-      },
-      {
-        label: "Notifications",
-        href: "/admin/settings/notifications",
-        icon: Bell,
       },
     ],
   },

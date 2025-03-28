@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authConfig } from "@/lib/auth.config"
+import { v4 as uuidv4 } from "uuid"
+import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { r2Client, R2_BUCKET_NAME } from "@/lib/cloudflare"
+
+// Maximum file size (5MB)
+const MAX_FILE_SIZE = 5 * 1024 * 1024
+
+// Allowed file types
+const ALLOWED_FILE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif"
+]
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,14 +23,14 @@ export async function POST(req: NextRequest) {
     
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
+        { error: "Unauthorized access" },
+        { status: 401 }
       )
     }
     
-    // Check if the request is multipart/form-data
+    // Get the form data
     const formData = await req.formData()
-    const file = formData.get("image") as File
+    const file = formData.get("file") as File
     
     if (!file) {
       return NextResponse.json(
@@ -25,48 +39,49 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    // Check file type
-    const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/gif"]
-    if (!validTypes.includes(file.type)) {
+    // Validate file type
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
       return NextResponse.json(
         { error: "Invalid file type. Only JPEG, PNG, WEBP, and GIF images are allowed." },
         { status: 400 }
       )
     }
     
-    // Check file size - limit to 5MB
-    const maxSize = 5 * 1024 * 1024 // 5MB
-    if (file.size > maxSize) {
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
         { error: "File too large. Maximum size is 5MB." },
         { status: 400 }
       )
     }
     
+    // Generate a unique filename with UUID
+    const fileExtension = file.name.split(".").pop() || "jpg"
+    const uniqueFilename = `admin/profile/${uuidv4()}.${fileExtension}`
+    
     try {
       // Convert file to buffer for upload
       const bytes = await file.arrayBuffer()
       const buffer = Buffer.from(bytes)
       
-      // Upload to Cloudflare using existing integration
-      const uploadResponse = await fetch(process.env.CLOUDFLARE_UPLOAD_URL!, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
-        },
-        body: formData // Use the original formData which contains the file
+      // Upload to Cloudflare R2
+      const command = new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: uniqueFilename,
+        Body: buffer,
+        ContentType: file.type,
       })
       
-      if (!uploadResponse.ok) {
-        throw new Error(`Cloudflare upload failed: ${uploadResponse.statusText}`)
-      }
+      await r2Client.send(command)
       
-      const uploadResult = await uploadResponse.json()
+      // Generate the public URL using Cloudflare domain
+      const publicUrl = `https://${process.env.CLOUDFLARE_PUBLIC_DOMAIN}/${uniqueFilename}`
       
-      // Return the Cloudflare URL to the file
-      return NextResponse.json({ 
-        imageUrl: uploadResult.result.variants[0], // Adjust based on your Cloudflare response structure
-        success: true
+      // Return success response
+      return NextResponse.json({
+        success: true,
+        url: publicUrl,
+        fileName: uniqueFilename
       })
     } catch (error) {
       console.error("[CLOUDFLARE_UPLOAD_ERROR]", error)
@@ -84,7 +99,29 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// Block other HTTP methods
 export async function GET() {
+  return NextResponse.json(
+    { error: "Method not allowed" },
+    { status: 405 }
+  )
+}
+
+export async function PUT() {
+  return NextResponse.json(
+    { error: "Method not allowed" },
+    { status: 405 }
+  )
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    { error: "Method not allowed" },
+    { status: 405 }
+  )
+}
+
+export async function PATCH() {
   return NextResponse.json(
     { error: "Method not allowed" },
     { status: 405 }

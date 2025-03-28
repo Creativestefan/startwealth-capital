@@ -68,6 +68,8 @@ model User {
   sessions               Session[]
   wallet                 Wallet?
   activities             UserActivity[]
+  pushSubscription       PushSubscription?
+  notificationPreferences NotificationPreference?
 
   @@index([email])
   @@index([role])
@@ -290,7 +292,7 @@ model ReferralCommission {
 }
 
 model ReferralSettings {
-  id                      String    @id @default(cuid())
+  id                      String   @id @default(cuid())
   propertyCommissionRate  Decimal   @db.Decimal(5, 2) @default(0)
   equipmentCommissionRate Decimal   @db.Decimal(5, 2) @default(0)
   marketCommissionRate    Decimal   @db.Decimal(5, 2) @default(0)
@@ -299,6 +301,16 @@ model ReferralSettings {
   updatedAt               DateTime  @updatedAt
   createdBy               String?
   updatedBy               String?
+}
+
+model WalletSettings {
+  id                 String   @id @default(cuid())
+  btcWalletAddress   String?
+  usdtWalletAddress  String?  // BEP-20 USDT address
+  usdtWalletType     String   @default("BEP-20")
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model Notification {
@@ -316,6 +328,39 @@ model Notification {
   @@index([userId])
   @@index([read])
   @@index([type])
+}
+
+// Push notification subscription model
+model PushSubscription {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  subscription String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// User notification preferences
+model NotificationPreference {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  emailEnabled           Boolean  @default(true)
+  pushEnabled            Boolean  @default(true)
+  investmentNotifications Boolean  @default(true)
+  paymentNotifications    Boolean  @default(true)
+  kycNotifications        Boolean  @default(true)
+  referralNotifications   Boolean  @default(true)
+  walletNotifications     Boolean  @default(true)
+  systemNotifications     Boolean  @default(true)
+  commissionNotifications Boolean  @default(true)
+  securityNotifications   Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model RealEstateInvestment {
@@ -526,6 +571,9 @@ enum NotificationType {
   WALLET_UPDATED
   COMMISSION_EARNED
   COMMISSION_PAID
+  ADMIN_ALERT
+  PASSWORD_CHANGED
+  PROFILE_UPDATED
 }
 
 model UserActivity {

@@ -4,10 +4,12 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  MoreHorizontal,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import Link from "next/link"
 
 interface PaginationProps {
   currentPage: number
@@ -18,120 +20,122 @@ interface PaginationProps {
   maxPageButtons?: number
 }
 
-export function Pagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-  showFirstLast = true,
-  showPageNumbers = true,
-  maxPageButtons = 5,
-}: PaginationProps) {
+const Pagination = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & {
+    currentPage: number
+    totalPages: number
+    onPageChange: (page: number) => void
+  }
+>(({ className, currentPage, totalPages, onPageChange, ...props }, ref) => {
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return
     onPageChange(page)
   }
 
-  // Generate page numbers to display
+  // Generate array of page numbers to display
   const getPageNumbers = () => {
-    const pageNumbers: number[] = []
+    const pageNumbers = []
     
-    // If totalPages is less than or equal to maxPageButtons, display all pages
-    if (totalPages <= maxPageButtons) {
+    if (totalPages <= 5) {
+      // If fewer than 5 pages, show all
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i)
       }
-      return pageNumbers
-    }
-    
-    // Calculate start and end of the page buttons range
-    const halfMaxButtons = Math.floor(maxPageButtons / 2)
-    let startPage = Math.max(1, currentPage - halfMaxButtons)
-    let endPage = Math.min(totalPages, startPage + maxPageButtons - 1)
-    
-    // Adjust if we're at the end of the range
-    if (endPage - startPage + 1 < maxPageButtons) {
-      startPage = Math.max(1, endPage - maxPageButtons + 1)
-    }
-    
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(i)
+    } else {
+      // Always add first page
+      pageNumbers.push(1)
+      
+      // Add pages around current page
+      const startPage = Math.max(2, currentPage - 1)
+      const endPage = Math.min(totalPages - 1, currentPage + 1)
+      
+      // Add ellipsis after first page if needed
+      if (startPage > 2) {
+        pageNumbers.push(-1) // -1 represents ellipsis
+      }
+      
+      // Add pages around current
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i)
+      }
+      
+      // Add ellipsis before last page if needed
+      if (endPage < totalPages - 1) {
+        pageNumbers.push(-2) // -2 represents ellipsis
+      }
+      
+      // Always add last page
+      pageNumbers.push(totalPages)
     }
     
     return pageNumbers
   }
-  
-  // Only render if there's more than one page
-  if (totalPages <= 1) return null
 
   return (
-    <div className="flex items-center justify-between space-x-2 py-4">
-      <div className="text-sm text-muted-foreground">
-        Page {currentPage} of {totalPages}
-      </div>
-      <div className="flex items-center space-x-2">
-        {showFirstLast && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handlePageChange(1)}
-            disabled={currentPage === 1}
-            className="h-8 w-8"
-          >
-            <span className="sr-only">Go to first page</span>
-            <ChevronsLeft className="h-4 w-4" />
-          </Button>
-        )}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="h-8 w-8"
-        >
-          <span className="sr-only">Go to previous page</span>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
+    <div
+      ref={ref}
+      className={cn("flex w-full items-center justify-center space-x-2", className)}
+      {...props}
+    >
+      <button
+        aria-label="Go to previous page"
+        className={buttonVariants({
+          variant: "outline",
+          size: "sm"
+        })}
+        disabled={currentPage <= 1}
+        onClick={() => handlePageChange(currentPage - 1)}
+      >
+        <ChevronLeft className="h-4 w-4" />
+        <span className="sr-only">Previous page</span>
+      </button>
+      
+      {getPageNumbers().map((page, i) => {
+        // Render ellipsis
+        if (page < 0) {
+          return (
+            <span
+              key={`ellipsis-${i}`}
+              className="flex h-8 w-8 items-center justify-center text-sm"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </span>
+          )
+        }
         
-        {showPageNumbers && (
-          <div className="hidden sm:flex items-center space-x-2">
-            {getPageNumbers().map((page) => (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="icon"
-                onClick={() => handlePageChange(page)}
-                className="h-8 w-8"
-              >
-                <span className="sr-only">Page {page}</span>
-                {page}
-              </Button>
-            ))}
-          </div>
-        )}
-        
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="h-8 w-8"
-        >
-          <span className="sr-only">Go to next page</span>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-        {showFirstLast && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handlePageChange(totalPages)}
-            disabled={currentPage === totalPages}
-            className="h-8 w-8"
+        // Render page number
+        return (
+          <button
+            key={page}
+            aria-label={`Go to page ${page}`}
+            aria-current={page === currentPage ? "page" : undefined}
+            className={buttonVariants({
+              variant: page === currentPage ? "default" : "outline",
+              size: "sm"
+            })}
+            onClick={() => handlePageChange(page)}
           >
-            <span className="sr-only">Go to last page</span>
-            <ChevronsRight className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+            {page}
+          </button>
+        )
+      })}
+      
+      <button
+        aria-label="Go to next page"
+        className={buttonVariants({
+          variant: "outline",
+          size: "sm"
+        })}
+        disabled={currentPage >= totalPages}
+        onClick={() => handlePageChange(currentPage + 1)}
+      >
+        <ChevronRight className="h-4 w-4" />
+        <span className="sr-only">Next page</span>
+      </button>
     </div>
   )
-} 
+})
+Pagination.displayName = "Pagination"
+
+export { Pagination } 
