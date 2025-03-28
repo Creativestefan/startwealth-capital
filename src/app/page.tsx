@@ -99,7 +99,7 @@ export default function HomePage() {
         {/* Features Section */}
         <section className="py-20 bg-muted/50">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Choose StartWealth Capital</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Choose StratWealth Capital</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="flex flex-col items-center text-center space-y-4">
                 <Shield className="w-12 h-12 text-primary" />
@@ -125,27 +125,25 @@ export default function HomePage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center space-y-8">
-              <h2 className="text-3xl md:text-4xl font-bold">Ready to Start Building Wealth?</h2>
-              <p className="text-xl text-muted-foreground">
-                Join StartWealth Capital today and access premium investment opportunities starting from $300,000.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Link
-                  href="/register"
-                  className="px-8 py-4 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors"
-                >
-                  Create Account
-                </Link>
-                <Link
-                  href="/contact"
-                  className="px-8 py-4 bg-secondary text-secondary-foreground font-medium rounded-md hover:bg-secondary/90 transition-colors"
-                >
-                  Talk to an Advisor
-                </Link>
-              </div>
+        <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Grow Your Wealth?</h2>
+            <p className="text-xl mb-8 max-w-3xl mx-auto">
+              Join StratWealth Capital today and access premium investment opportunities starting from $300,000.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link
+                href="/register"
+                className="px-8 py-4 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Create Account
+              </Link>
+              <Link
+                href="/contact"
+                className="px-8 py-4 bg-secondary text-secondary-foreground font-medium rounded-md hover:bg-secondary/90 transition-colors"
+              >
+                Talk to an Advisor
+              </Link>
             </div>
           </div>
         </section>

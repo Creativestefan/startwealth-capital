@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { SessionProvider } from "@/providers/session-provider"
 import { ReceiptProvider } from "@/providers/receipt-provider"
 import { UserProvider } from "@/providers/user-provider"
+import QueryProvider from "@/providers/query-provider"
 
 export function Providers({
   children,
@@ -24,11 +25,13 @@ export function Providers({
 
   return (
     <SessionProvider>
-      <UserProvider>
-        <ReceiptProvider>
-          {children}
-        </ReceiptProvider>
-      </UserProvider>
+      <QueryProvider>
+        <UserProvider>
+          <ReceiptProvider>
+            {children}
+          </ReceiptProvider>
+        </UserProvider>
+      </QueryProvider>
     </SessionProvider>
   )
 }

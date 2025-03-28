@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { User } from "next-auth"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -26,9 +27,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, CheckCircle, Upload, Loader2 } from "lucide-react"
+import { AlertCircle, CheckCircle, Upload, Loader2, RefreshCw } from "lucide-react"
 import { countries } from "@/lib/countries"
 import { KycStatus } from "@prisma/client"
+import { useSession } from "next-auth/react"
+import { useRefreshKyc } from "@/hooks/use-refresh-kyc"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "application/pdf"]
@@ -59,9 +62,11 @@ interface KycFormProps {
 export function KycForm({ user }: KycFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
-  const [submitSuccess, setSubmitSuccess] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [currentKycStatus, setCurrentKycStatus] = useState<KycStatus | undefined>(user.kycStatus)
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false)
+  const { refreshKycStatus, isRefreshing } = useRefreshKyc()
+  const { update } = useSession()
 
   const form = useForm<KycFormValues>({
     resolver: zodResolver(kycFormSchema),
@@ -71,6 +76,56 @@ export function KycForm({ user }: KycFormProps) {
       documentNumber: "",
     },
   })
+
+  // Check for the latest KYC status on component mount
+  useEffect(() => {
+    const fetchLatestKycStatus = async () => {
+      try {
+        setIsCheckingStatus(true)
+        // Call the session refresh endpoint
+        const response = await fetch("/api/auth/session-refresh")
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch latest KYC status")
+        }
+
+        const userData = await response.json()
+        
+        // Update the local state with the latest KYC status
+        if (userData.kycStatus !== currentKycStatus) {
+          setCurrentKycStatus(userData.kycStatus)
+          
+          // Update the session with the latest KYC status
+          await update({
+            ...userData,
+          })
+          
+          // Refresh the page to reflect the latest KYC status
+          router.refresh()
+        }
+      } catch (error) {
+        console.error("Error fetching latest KYC status:", error)
+      } finally {
+        setIsCheckingStatus(false)
+      }
+    }
+
+    fetchLatestKycStatus()
+  }, [currentKycStatus, router, update])
+
+  const handleRefreshStatus = async () => {
+    try {
+      setIsCheckingStatus(true)
+      const newStatus = await refreshKycStatus()
+      if (newStatus && newStatus !== currentKycStatus) {
+        setCurrentKycStatus(newStatus as KycStatus)
+      }
+    } catch (error) {
+      console.error("Error refreshing KYC status:", error)
+    } finally {
+      setIsCheckingStatus(false)
+    }
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null
@@ -82,8 +137,6 @@ export function KycForm({ user }: KycFormProps) {
 
   async function onSubmit(values: KycFormValues) {
     setIsSubmitting(true)
-    setSubmitError(null)
-    setSubmitSuccess(false)
 
     try {
       // Create form data for file upload
@@ -105,26 +158,45 @@ export function KycForm({ user }: KycFormProps) {
         throw new Error(errorData.error || "Failed to submit KYC")
       }
 
-      setSubmitSuccess(true)
+      // Update the local KYC status to PENDING
+      setCurrentKycStatus("PENDING")
+
+      toast.success("KYC verification submitted", {
+        description: "Your verification documents have been submitted for review."
+      })
+      
       // Refresh the page after a short delay to update the UI with the new KYC status
       setTimeout(() => {
         router.refresh()
       }, 2000)
     } catch (error) {
       console.error("KYC submission error:", error)
-      setSubmitError(error instanceof Error ? error.message : "An unknown error occurred")
+      toast.error("Failed to submit KYC verification", {
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   // Display different content based on KYC status
-  if (user.kycStatus === "APPROVED") {
+  if (currentKycStatus === "APPROVED") {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>KYC Verification</CardTitle>
-          <CardDescription>Your identity has been verified</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>KYC Verification</CardTitle>
+            <CardDescription>Your identity has been verified</CardDescription>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefreshStatus}
+            disabled={isCheckingStatus}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isCheckingStatus ? 'animate-spin' : ''}`} />
+            {isCheckingStatus ? 'Checking...' : 'Refresh Status'}
+          </Button>
         </CardHeader>
         <CardContent>
           <Alert className="bg-green-50">
@@ -139,14 +211,25 @@ export function KycForm({ user }: KycFormProps) {
     )
   }
 
-  if (user.kycStatus === "PENDING") {
+  if (currentKycStatus === "PENDING") {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>KYC Verification</CardTitle>
-          <CardDescription>Your verification is being processed</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>KYC Verification</CardTitle>
+            <CardDescription>Your verification is being processed</CardDescription>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefreshStatus}
+            disabled={isCheckingStatus}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isCheckingStatus ? 'animate-spin' : ''}`} />
+            {isCheckingStatus ? 'Checking...' : 'Refresh Status'}
+          </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
           <Alert className="bg-yellow-50">
             <Loader2 className="h-4 w-4 text-yellow-600 animate-spin" />
             <AlertTitle className="text-yellow-800">Verification Pending</AlertTitle>
@@ -155,29 +238,91 @@ export function KycForm({ user }: KycFormProps) {
               days. You'll be notified once the review is complete.
             </AlertDescription>
           </Alert>
+          
+          <div className="rounded-lg border p-4 bg-gray-50">
+            <h3 className="text-base font-medium mb-2">What happens next?</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start">
+                <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+                <span>Our team will review your submitted documents</span>
+              </li>
+              <li className="flex items-start">
+                <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+                <span>You'll receive an email notification when your verification is approved or rejected</span>
+              </li>
+              <li className="flex items-start">
+                <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+                <span>Once approved, you'll have full access to all investment features</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div className="rounded-lg border p-4 bg-blue-50">
+            <h3 className="text-base font-medium mb-2 flex items-center text-blue-800">
+              <AlertCircle className="h-4 w-4 mr-2" /> Need assistance?
+            </h3>
+            <p className="text-sm text-blue-700">
+              If you have any questions about your KYC verification process, please contact our 
+              support team at <a href="mailto:support@stratwealth.com" className="underline font-medium">
+              support@stratwealth.com</a>
+            </p>
+          </div>
         </CardContent>
       </Card>
     )
   }
 
-  if (user.kycStatus === "REJECTED") {
+  if (currentKycStatus === "REJECTED") {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>KYC Verification</CardTitle>
-          <CardDescription>Your verification needs attention</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>KYC Verification</CardTitle>
+            <CardDescription>Your verification needs attention</CardDescription>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefreshStatus}
+            disabled={isCheckingStatus}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isCheckingStatus ? 'animate-spin' : ''}`} />
+            {isCheckingStatus ? 'Checking...' : 'Refresh Status'}
+          </Button>
         </CardHeader>
         <CardContent>
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Verification Rejected</AlertTitle>
             <AlertDescription>
-              Your KYC verification was rejected. Please submit a new verification with clear, valid documents.
+              Your KYC verification was rejected. Please submit new verification documents following the guidelines below.
             </AlertDescription>
           </Alert>
+          
+          <div className="rounded-lg border p-4 bg-gray-50 mb-6">
+            <h3 className="text-base font-medium mb-2">Tips for successful verification:</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start">
+                <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+                <span>Ensure your document is clearly visible and not blurry</span>
+              </li>
+              <li className="flex items-start">
+                <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+                <span>Make sure all four corners of the document are visible</span>
+              </li>
+              <li className="flex items-start">
+                <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+                <span>Ensure the document is valid and not expired</span>
+              </li>
+              <li className="flex items-start">
+                <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+                <span>Submit a high-quality image (JPG, PNG) or PDF document</span>
+              </li>
+            </ul>
+          </div>
+          
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
-              {/* Form fields go here - same as below */}
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="country"
@@ -247,62 +392,38 @@ export function KycForm({ user }: KycFormProps) {
                   <FormItem>
                     <FormLabel>Upload Document Image</FormLabel>
                     <FormControl>
-                      <div className="grid w-full items-center gap-1.5">
+                      <div className="space-y-2">
                         <Input
                           id="documentImage"
                           type="file"
-                          accept="image/png,image/jpeg,image/jpg,application/pdf"
-                          className="hidden"
+                          accept="image/jpeg,image/jpg,image/png,application/pdf"
                           onChange={handleFileChange}
+                          className="hidden"
                           {...fieldProps}
                         />
-                        <div className="flex items-center justify-center w-full">
-                          <label
-                            htmlFor="documentImage"
-                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-                          >
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              <Upload className="w-8 h-8 mb-2 text-gray-500" />
-                              <p className="mb-2 text-sm text-gray-500">
-                                <span className="font-semibold">Click to upload</span> or drag and drop
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                PNG, JPG, JPEG or PDF (MAX. 5MB)
-                              </p>
-                            </div>
-                            {selectedFile && (
-                              <div className="text-sm text-green-600 mt-2">
-                                Selected: {selectedFile.name}
-                              </div>
-                            )}
-                          </label>
-                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full h-32 flex flex-col items-center justify-center gap-2"
+                          onClick={() => document.getElementById("documentImage")?.click()}
+                        >
+                          <Upload className="h-6 w-6" />
+                          <span>{selectedFile ? selectedFile.name : "Upload Document"}</span>
+                          <span className="text-xs text-muted-foreground">
+                            JPG, PNG or PDF (max 5MB)
+                          </span>
+                        </Button>
                       </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              {submitError && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{submitError}</AlertDescription>
-                </Alert>
-              )}
-              {submitSuccess && (
-                <Alert className="bg-green-50">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <AlertTitle className="text-green-800">Success</AlertTitle>
-                  <AlertDescription className="text-green-700">
-                    Your KYC verification has been submitted successfully and is pending review.
-                  </AlertDescription>
-                </Alert>
-              )}
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
                   </>
                 ) : (
                   "Submit Verification"
@@ -315,24 +436,52 @@ export function KycForm({ user }: KycFormProps) {
     )
   }
 
-  // Default state - KYC not submitted yet
+  // Default form for users without KYC status
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>KYC Verification</CardTitle>
-        <CardDescription>
-          Complete your KYC (Know Your Customer) verification to unlock full platform access
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>KYC Verification</CardTitle>
+          <CardDescription>Verify your identity to unlock all platform features</CardDescription>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRefreshStatus}
+          disabled={isCheckingStatus}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isCheckingStatus ? 'animate-spin' : ''}`} />
+          {isCheckingStatus ? 'Checking...' : 'Refresh Status'}
+        </Button>
       </CardHeader>
       <CardContent>
         <Alert className="mb-6">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Verification Required</AlertTitle>
           <AlertDescription>
-            You need to complete KYC verification before you can make investments, use your wallet, or purchase
-            properties.
+            Complete KYC verification to unlock investment opportunities, wallet features, and property purchases.
+            This is a regulatory requirement for all users.
           </AlertDescription>
         </Alert>
+        
+        <div className="rounded-lg border p-4 bg-gray-50 mb-6">
+          <h3 className="text-base font-medium mb-2">What you'll need:</h3>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li className="flex items-start">
+              <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+              <span>A valid government-issued ID (passport, driver's license, or national ID)</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+              <span>Clear images or scan of your document (front and back if applicable)</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+              <span>Your document must be valid and not expired</span>
+            </li>
+          </ul>
+        </div>
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -404,62 +553,38 @@ export function KycForm({ user }: KycFormProps) {
                 <FormItem>
                   <FormLabel>Upload Document Image</FormLabel>
                   <FormControl>
-                    <div className="grid w-full items-center gap-1.5">
+                    <div className="space-y-2">
                       <Input
                         id="documentImage"
                         type="file"
-                        accept="image/png,image/jpeg,image/jpg,application/pdf"
-                        className="hidden"
+                        accept="image/jpeg,image/jpg,image/png,application/pdf"
                         onChange={handleFileChange}
+                        className="hidden"
                         {...fieldProps}
                       />
-                      <div className="flex items-center justify-center w-full">
-                        <label
-                          htmlFor="documentImage"
-                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-                        >
-                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <Upload className="w-8 h-8 mb-2 text-gray-500" />
-                            <p className="mb-2 text-sm text-gray-500">
-                              <span className="font-semibold">Click to upload</span> or drag and drop
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              PNG, JPG, JPEG or PDF (MAX. 5MB)
-                            </p>
-                          </div>
-                          {selectedFile && (
-                            <div className="text-sm text-green-600 mt-2">
-                              Selected: {selectedFile.name}
-                            </div>
-                          )}
-                        </label>
-                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-32 flex flex-col items-center justify-center gap-2"
+                        onClick={() => document.getElementById("documentImage")?.click()}
+                      >
+                        <Upload className="h-6 w-6" />
+                        <span>{selectedFile ? selectedFile.name : "Upload Document"}</span>
+                        <span className="text-xs text-muted-foreground">
+                          JPG, PNG or PDF (max 5MB)
+                        </span>
+                      </Button>
                     </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {submitError && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{submitError}</AlertDescription>
-              </Alert>
-            )}
-            {submitSuccess && (
-              <Alert className="bg-green-50">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertTitle className="text-green-800">Success</AlertTitle>
-                <AlertDescription className="text-green-700">
-                  Your KYC verification has been submitted successfully and is pending review.
-                </AlertDescription>
-              </Alert>
-            )}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
                 </>
               ) : (
                 "Submit Verification"

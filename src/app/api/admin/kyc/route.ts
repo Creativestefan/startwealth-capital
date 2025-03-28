@@ -29,7 +29,7 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json(kycSubmissions)
+    return NextResponse.json({ submissions: kycSubmissions })
   } catch (error) {
     console.error("[ADMIN_KYC_GET]", error)
     return NextResponse.json(

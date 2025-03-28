@@ -21,5 +21,5 @@ export const r2Client = new S3Client({
   },
 })
 
-export const R2_BUCKET_NAME = process.env.CLOUDFLARE_R2_BUCKET_NAME || "startwealth"
+export const R2_BUCKET_NAME = process.env.CLOUDFLARE_R2_BUCKET_NAME || "stratwealth"
 

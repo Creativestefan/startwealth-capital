@@ -42,21 +42,21 @@ export async function sendVerificationEmail(email: string, otp: string) {
   const mailOptions: SendMailOptions = {
     from: process.env.SMTP_FROM!,
     to: email,
-    subject: "Verify your StartWealth Capital account",
+    subject: "Verify your StratWealth Capital account",
     html: `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale: 1.0">
-          <title>Verify your StartWealth Capital account</title>
+          <title>Verify your StratWealth Capital account</title>
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0;">
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
               <h1 style="color: #1a1a1a; margin-bottom: 10px;">Verify your email</h1>
               <p style="color: #4b5563; margin-bottom: 20px;">
-                Thank you for registering with StartWealth Capital. Use this verification code to complete your registration.
+                Thank you for registering with StratWealth Capital. Use this verification code to complete your registration.
               </p>
             </div>
             
@@ -156,14 +156,14 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   const mailOptions: SendMailOptions = {
     from: process.env.SMTP_FROM!,
     to: email,
-    subject: "Reset your StartWealth Capital password",
+    subject: "Reset your StratWealth Capital password",
     html: `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale: 1.0">
-          <title>Reset your StartWealth Capital password</title>
+          <title>Reset your StratWealth Capital password</title>
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0;">
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">

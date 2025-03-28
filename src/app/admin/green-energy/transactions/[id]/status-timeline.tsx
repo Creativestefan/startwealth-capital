@@ -50,7 +50,7 @@ export default function StatusTimeline({
             timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
             updatedBy: {
               name: "System",
-              email: "system@startwealth.com",
+              email: "system@stratwealth.com",
             },
             notes: "Transaction created",
           },
@@ -65,7 +65,7 @@ export default function StatusTimeline({
               timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days ago
               updatedBy: {
                 name: "Admin User",
-                email: "admin@startwealth.com",
+                email: "admin@stratwealth.com",
               },
               notes: "Order accepted and payment confirmed",
             },
@@ -75,7 +75,7 @@ export default function StatusTimeline({
               timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
               updatedBy: {
                 name: "Admin User",
-                email: "admin@startwealth.com",
+                email: "admin@stratwealth.com",
               },
               notes: "Order is being processed and prepared for shipping",
             },
@@ -85,7 +85,7 @@ export default function StatusTimeline({
               timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
               updatedBy: {
                 name: "Admin User",
-                email: "admin@startwealth.com",
+                email: "admin@stratwealth.com",
               },
               notes: "Order has been shipped and is out for delivery",
             }

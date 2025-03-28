@@ -186,10 +186,18 @@ export function ReceiptProvider({ children }: ReceiptProviderProps) {
               {/* Company Header */}
               <div className="flex items-center justify-between mb-6 border-b pb-4">
                 <div>
-                  <h1 className="text-xl font-bold text-blue-900">StartWealth Capital</h1>
+                  <h1 className="text-xl font-bold text-blue-900">StratWealth Capital</h1>
                   <p className="text-sm text-gray-600">123 Finance Street, New York, NY 10001</p>
-                  <p className="text-sm text-gray-600">support@startwealthcapital.com</p>
-                  <p className="text-sm text-gray-600">+1 (555) 123-4567</p>
+                  <div className="mt-4 text-sm text-gray-500">
+                    <p>If you have any questions, please contact our support team at{" "}
+                      <a
+                        href="mailto:support@stratwealthcapital.com"
+                        className="text-blue-500 hover:underline"
+                      >
+                        support@stratwealthcapital.com
+                      </a>
+                    </p>
+                  </div>
                 </div>
                 <div className="text-right">
                   <h2 className="text-lg font-semibold text-blue-900">Transaction Receipt</h2>
@@ -295,9 +303,9 @@ export function ReceiptProvider({ children }: ReceiptProviderProps) {
               
               {/* Footer */}
               <div className="mt-8 pt-4 border-t text-center">
-                <p className="text-sm text-gray-600">Thank you for choosing StartWealth Capital.</p>
+                <p className="text-sm text-gray-600">Thank you for choosing StratWealth Capital.</p>
                 <p className="text-xs text-gray-500 mt-1">This is an electronically generated receipt and does not require a signature.</p>
-                <p className="text-xs text-gray-500 mt-1">© {new Date().getFullYear()} StartWealth Capital. All rights reserved.</p>
+                <p className="text-xs text-gray-500 mt-1">© {new Date().getFullYear()} StratWealth Capital. All rights reserved.</p>
               </div>
             </div>
             

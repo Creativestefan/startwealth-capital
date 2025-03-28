@@ -12,7 +12,17 @@ export default withAuth(
       email: token?.email,
       role: token?.role,
       kycStatus: token?.kycStatus,
+      isBanned: token?.isBanned,
     })
+
+    // Check if user is banned
+    if (token?.isBanned) {
+      // Redirect to login with banned message
+      console.log("User is banned, redirecting to login")
+      return NextResponse.redirect(
+        new URL(`/login?error=banned&email=${token.email}`, request.url)
+      )
+    }
 
     // Protect dashboard routes
     if (request.nextUrl.pathname.startsWith("/dashboard") || 

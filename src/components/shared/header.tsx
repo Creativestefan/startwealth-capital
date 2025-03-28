@@ -2,6 +2,7 @@ import Link from "next/link"
 import { getServerSession } from "next-auth/next"
 import { authConfig } from "@/lib/auth.config"
 import { Button } from "@/components/ui/button"
+import { Building2 } from "lucide-react"
 
 export async function Header() {
   const session = await getServerSession(authConfig)
@@ -15,8 +16,12 @@ export async function Header() {
     <header className="fixed w-full z-50 bg-background/80 backdrop-blur-md border-b">
       <div className="container mx-auto py-4 px-4">
         <div className="flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold">
-            StartWealth Capital
+          <Link
+            href="/"
+            className="flex items-center space-x-2"
+          >
+            <Building2 className="h-6 w-6" />
+            <span className="font-semibold">StratWealth Capital</span>
           </Link>
           <div className="space-x-4">
             {session ? (

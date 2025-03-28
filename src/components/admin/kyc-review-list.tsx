@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { format } from 'date-fns';
 import { KycStatus } from "@prisma/client"
+import { toast } from "sonner"
 import {
   Card,
   CardContent,
@@ -33,8 +34,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, CheckCircle, Loader2, Eye } from "lucide-react"
+import { AlertCircle, CheckCircle, Loader2, Eye, Camera } from "lucide-react"
 
 type KycSubmission = {
   id: string
@@ -58,14 +58,11 @@ export function KycReviewList() {
   const router = useRouter()
   const [submissions, setSubmissions] = useState<KycSubmission[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedSubmission, setSelectedSubmission] = useState<KycSubmission | null>(null)
   const [viewImageOpen, setViewImageOpen] = useState(false)
   const [reviewOpen, setReviewOpen] = useState(false)
   const [rejectionReason, setRejectionReason] = useState("")
   const [reviewLoading, setReviewLoading] = useState(false)
-  const [reviewError, setReviewError] = useState<string | null>(null)
-  const [reviewSuccess, setReviewSuccess] = useState(false)
   const [activeTab, setActiveTab] = useState("pending")
 
   // Fetch KYC submissions
@@ -73,7 +70,6 @@ export function KycReviewList() {
     async function fetchSubmissions() {
       try {
         setLoading(true)
-        setError(null)
 
         const response = await fetch("/api/admin/kyc")
         if (!response.ok) {
@@ -84,7 +80,9 @@ export function KycReviewList() {
         setSubmissions(data.submissions)
       } catch (error) {
         console.error("Error fetching KYC submissions:", error)
-        setError(error instanceof Error ? error.message : "An unknown error occurred")
+        toast.error("Failed to load KYC submissions", {
+          description: error instanceof Error ? error.message : "An unknown error occurred"
+        })
       } finally {
         setLoading(false)
       }
@@ -111,8 +109,6 @@ export function KycReviewList() {
   const handleReview = (submission: KycSubmission) => {
     setSelectedSubmission(submission)
     setRejectionReason("")
-    setReviewError(null)
-    setReviewSuccess(false)
     setReviewOpen(true)
   }
 
@@ -122,8 +118,6 @@ export function KycReviewList() {
 
     try {
       setReviewLoading(true)
-      setReviewError(null)
-      setReviewSuccess(false)
 
       const response = await fetch(`/api/admin/kyc/${selectedSubmission.id}/approve`, {
         method: "POST",
@@ -143,14 +137,17 @@ export function KycReviewList() {
         )
       )
 
-      setReviewSuccess(true)
-      setTimeout(() => {
-        setReviewOpen(false)
-        router.refresh()
-      }, 2000)
+      toast.success("KYC verification approved", {
+        description: `${selectedSubmission.user.firstName} ${selectedSubmission.user.lastName}'s KYC has been approved.`
+      })
+      
+      setReviewOpen(false)
+      router.refresh()
     } catch (error) {
       console.error("Error approving KYC:", error)
-      setReviewError(error instanceof Error ? error.message : "An unknown error occurred")
+      toast.error("Failed to approve KYC", {
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      })
     } finally {
       setReviewLoading(false)
     }
@@ -162,8 +159,6 @@ export function KycReviewList() {
 
     try {
       setReviewLoading(true)
-      setReviewError(null)
-      setReviewSuccess(false)
 
       const response = await fetch(`/api/admin/kyc/${selectedSubmission.id}/reject`, {
         method: "POST",
@@ -187,14 +182,17 @@ export function KycReviewList() {
         )
       )
 
-      setReviewSuccess(true)
-      setTimeout(() => {
-        setReviewOpen(false)
-        router.refresh()
-      }, 2000)
+      toast.success("KYC verification rejected", {
+        description: `${selectedSubmission.user.firstName} ${selectedSubmission.user.lastName}'s KYC has been rejected.`
+      })
+      
+      setReviewOpen(false)
+      router.refresh()
     } catch (error) {
       console.error("Error rejecting KYC:", error)
-      setReviewError(error instanceof Error ? error.message : "An unknown error occurred")
+      toast.error("Failed to reject KYC", {
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      })
     } finally {
       setReviewLoading(false)
     }
@@ -207,17 +205,6 @@ export function KycReviewList() {
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <span className="ml-2">Loading KYC submissions...</span>
       </div>
-    )
-  }
-
-  // Render error state
-  if (error) {
-    return (
-      <Alert variant="destructive" className="mb-6">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
     )
   }
 
@@ -281,14 +268,25 @@ export function KycReviewList() {
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center py-4">
-            {selectedSubmission?.documentImage && (
+            {selectedSubmission?.documentImage && 
+             selectedSubmission.documentImage !== "placeholder-url" &&
+             selectedSubmission.documentImage.startsWith("/") ? (
               <div className="relative w-full h-[400px] border rounded-md overflow-hidden">
                 <Image
                   src={selectedSubmission.documentImage}
                   alt="Document"
                   fill
                   className="object-contain"
+                  unoptimized={selectedSubmission.documentImage.includes('image-proxy')}
+                  onError={() => toast.error("Failed to load document image")}
                 />
+              </div>
+            ) : (
+              <div className="w-full h-[400px] border rounded-md overflow-hidden flex items-center justify-center bg-muted">
+                <div className="text-center">
+                  <Camera className="h-16 w-16 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-muted-foreground">No valid document image available</p>
+                </div>
               </div>
             )}
           </div>
@@ -348,24 +346,6 @@ export function KycReviewList() {
                   onChange={(e) => setRejectionReason(e.target.value)}
                 />
               </div>
-            )}
-
-            {reviewError && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{reviewError}</AlertDescription>
-              </Alert>
-            )}
-
-            {reviewSuccess && (
-              <Alert className="bg-green-50">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertTitle className="text-green-800">Success</AlertTitle>
-                <AlertDescription className="text-green-700">
-                  KYC submission has been {selectedSubmission?.status.toLowerCase()} successfully.
-                </AlertDescription>
-              </Alert>
             )}
           </div>
 

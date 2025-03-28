@@ -26,6 +26,16 @@ export function LoginForm() {
   const [error, setError] = React.useState("")
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
 
+  // Check for banned user error from query params
+  React.useEffect(() => {
+    const errorType = searchParams.get("error")
+    const email = searchParams.get("email")
+    
+    if (errorType === "banned" && email) {
+      setError(`This account (${email}) has been banned. Please contact support for assistance.`)
+    }
+  }, [searchParams])
+
   const form = useForm<FormData>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -93,6 +103,12 @@ export function LoginForm() {
           </Link>
         </p>
       </div>
+
+      {error && (
+        <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm border border-red-200">
+          {error}
+        </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">

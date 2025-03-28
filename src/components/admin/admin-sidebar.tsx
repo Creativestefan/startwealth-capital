@@ -119,7 +119,7 @@ const adminRoutes = [
     subItems: [
       {
         label: "All Users",
-        href: "/admin/users",
+        href: "/admin/users/all",
         icon: Users,
       },
       {

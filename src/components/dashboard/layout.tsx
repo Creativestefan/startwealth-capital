@@ -122,7 +122,7 @@ function MobileSidebar({ user }: { user: any }) {
               </div>
               <div>
                 <SheetHeader className="text-left p-0 space-y-0">
-                  <SheetTitle className="text-sm font-semibold">StartWealth Capital</SheetTitle>
+                  <SheetTitle className="text-sm font-semibold">StratWealth Capital</SheetTitle>
                   <p className="text-xs text-gray-500">Investment Platform</p>
                 </SheetHeader>
               </div>
@@ -206,7 +206,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
               {!collapsed && (
                 <div>
-                  <div className="text-sm font-semibold">StartWealth Capital</div>
+                  <div className="text-sm font-semibold">StratWealth Capital</div>
                   <div className="text-xs text-gray-500">Investment Platform</div>
                 </div>
               )}
@@ -230,7 +230,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-600 text-white">
               <Command className="h-4 w-4" />
             </div>
-            <div className="text-sm font-semibold">StartWealth Capital</div>
+            <div className="text-sm font-semibold">StratWealth Capital</div>
           </div>
           <MobileSidebar user={user} />
         </div>

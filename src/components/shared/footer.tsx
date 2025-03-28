@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { Building2 } from "lucide-react"
 
 export function Footer() {
   return (
@@ -81,8 +82,16 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} StartWealth Capital. All rights reserved.</p>
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="mb-4 md:mb-0">
+            <div className="flex items-center space-x-3">
+              <Building2 className="h-6 w-6" />
+              <span className="text-xl font-bold">StratWealth Capital</span>
+            </div>
+          </div>
+          <div className="mt-8 md:mt-0 text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} StratWealth Capital. All rights reserved.
+          </div>
         </div>
       </div>
     </footer>

@@ -16,12 +16,15 @@ interface ProfileTabsProps {
 export function ProfileTabs({ activeTab, user }: ProfileTabsProps) {
   return (
     <Tabs defaultValue={activeTab} className="space-y-4">
-      <TabsList>
-        <TabsTrigger value="account">Account</TabsTrigger>
-        <TabsTrigger value="kyc">KYC Verification</TabsTrigger>
-        <TabsTrigger value="password">Password</TabsTrigger>
-        <TabsTrigger value="referrals">Referrals</TabsTrigger>
-      </TabsList>
+      <div className="flex justify-between items-center">
+        <TabsList>
+          <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="kyc">KYC Verification</TabsTrigger>
+          <TabsTrigger value="password">Password</TabsTrigger>
+          <TabsTrigger value="referrals">Referrals</TabsTrigger>
+        </TabsList>
+      </div>
+      
       <TabsContent value="account" className="space-y-4">
         <AccountForm user={user} />
       </TabsContent>

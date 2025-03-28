@@ -48,6 +48,7 @@ model User {
   verificationExpires    DateTime?
   image                  String?
   role                   Role                    @default(USER)
+  isBanned               Boolean                 @default(false)
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
   resetToken             String?
@@ -66,6 +67,7 @@ model User {
   commissions            ReferralCommission[]
   sessions               Session[]
   wallet                 Wallet?
+  activities             UserActivity[]
 
   @@index([email])
   @@index([role])
@@ -524,4 +526,20 @@ enum NotificationType {
   WALLET_UPDATED
   COMMISSION_EARNED
   COMMISSION_PAID
+}
+
+model UserActivity {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String
+  description String
+  status      String?
+  amount      Float?
+  timestamp   DateTime  @default(now())
+  metadata    Json?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([timestamp])
 }

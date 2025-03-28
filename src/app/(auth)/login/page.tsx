@@ -2,8 +2,8 @@ import { LoginForm } from "@/components/auth/login-form"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Login | StartWealth Capital",
-  description: "Login to your StartWealth Capital account",
+  title: "Login | StratWealth Capital",
+  description: "Login to your StratWealth Capital account",
 }
 
 export default function LoginPage() {

@@ -12,7 +12,7 @@ const nextConfig = {
         },
         {
           protocol: "https",
-          hostname: "startwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com",
+          hostname: "stratwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com",
         },
         {
           protocol: "https",
@@ -20,7 +20,7 @@ const nextConfig = {
         },
         {
           protocol: "https",
-          hostname: "startwealth.r2.cloudflarestorage.com",
+          hostname: "stratwealth.r2.cloudflarestorage.com",
         },
         {
           protocol: "http",

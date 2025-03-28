@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, ChevronsUpDown, LogOut, Shield, Sparkles, User } from "lucide-react"
+import { Bell, ChevronsUpDown, Lock, LogOut, Shield, Sparkles, User } from "lucide-react"
 import { signOut } from "next-auth/react"
 import Link from "next/link"
 import { useUser } from "@/providers/user-provider"
@@ -76,7 +76,7 @@ export function NavUser({ user }: { user: UserProps }) {
                 </Avatar>
                 <div className="flex flex-col items-start">
                   <span className="text-sm font-medium">{displayName}</span>
-                  <span className="text-xs text-gray-500">{user.email}</span>
+                  <span className="text-xs text-gray-500 truncate max-w-[150px]">{user.email}</span>
                 </div>
               </div>
               <ChevronsUpDown className="h-4 w-4" />
@@ -96,15 +96,15 @@ export function NavUser({ user }: { user: UserProps }) {
             </Avatar>
             <div className="flex flex-col">
               <span className="font-medium">{displayName}</span>
-              <span className="text-xs text-gray-500">{user.email}</span>
+              <span className="text-xs text-gray-500 truncate max-w-[180px]">{user.email}</span>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link href="/profile" className="flex cursor-pointer items-center">
+              <Link href="/profile/account" className="flex cursor-pointer items-center">
                 <User className="mr-2 h-4 w-4" />
-                Account
+                Account Settings
               </Link>
             </DropdownMenuItem>
             {/* Only show KYC and Referral Program for non-admin users */}
@@ -113,7 +113,13 @@ export function NavUser({ user }: { user: UserProps }) {
                 <DropdownMenuItem asChild>
                   <Link href="/profile/kyc" className="flex cursor-pointer items-center">
                     <Shield className="mr-2 h-4 w-4" />
-                    Complete KYC
+                    KYC Verification
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile/password" className="flex cursor-pointer items-center">
+                    <Lock className="mr-2 h-4 w-4" />
+                    Change Password
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

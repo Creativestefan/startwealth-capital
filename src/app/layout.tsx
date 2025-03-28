@@ -12,10 +12,13 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: {
-    default: "StartWealth Capital",
-    template: "%s | StartWealth Capital",
+    default: "StratWealth Capital",
+    template: "%s | StratWealth Capital",
   },
-  description: "Invest in real estate, green energy, and market opportunities.",
+  description: "Secure investment platform for real estate, market investments, green energy.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 }
 
 export default function RootLayout({
