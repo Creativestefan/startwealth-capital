@@ -1,4 +1,3 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -17,8 +16,7 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   // Fix module resolution issues
   experimental: { largePageDataBytes: 256 * 1024 },
-  // Disable static optimization completely
-  output: 'export',
+  // Config for server-side functionality
   distDir: '.next',
   // Other settings
   reactStrictMode: true,
@@ -26,4 +24,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-  
