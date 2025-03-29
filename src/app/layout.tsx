@@ -31,7 +31,7 @@ export default function RootLayout({
       <head>
         <Script 
           src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
         <Script
           id="service-worker-registration"
@@ -93,4 +93,3 @@ export default function RootLayout({
     </html>
   )
 }
-

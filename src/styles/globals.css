@@ -19,19 +19,19 @@
 
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 142 76% 36%;
 
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 220 60% 30%;
 
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary-foreground: 210 40% 98%;
 
     --muted: 210 40% 96.1%;
 
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    --accent: 45 94% 58%;
 
     --accent-foreground: 222.2 47.4% 11.2%;
 
@@ -43,7 +43,7 @@
 
     --input: 214.3 31.8% 91.4%;
 
-    --ring: 222.2 84% 4.9%;
+    --ring: 142 76% 36%;
 
     --chart-1: 12 76% 61%;
 
@@ -87,11 +87,11 @@
 
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 142 70% 36%;
 
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 220 60% 30%;
 
     --secondary-foreground: 210 40% 98%;
 
@@ -99,9 +99,9 @@
 
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 45 94% 58%;
 
-    --accent-foreground: 210 40% 98%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 62.8% 30.6%;
 
@@ -164,5 +164,31 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .hero-gradient {
+    @apply bg-gradient-to-r from-secondary/90 to-primary/90;
+  }
+  
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+  
+  .page-container {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+  }
+  
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-md font-medium transition-all;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-md font-medium transition-all;
+  }
+  
+  .btn-accent {
+    @apply bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-3 rounded-md font-medium transition-all;
   }
 }

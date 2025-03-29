@@ -291,3 +291,45 @@ export async function sendNotificationEmail(email: string, title: string, messag
   }
 }
 
+// Function to send contact form emails
+export async function sendContactFormEmail(
+  firstName: string,
+  lastName: string,
+  email: string,
+  phone: string | undefined,
+  subject: string,
+  message: string
+) {
+  const mailOptions = {
+    from: process.env.SMTP_FROM!,
+    to: 'support@stratwealth-capital.com',
+    replyTo: email,
+    subject: `Contact Form: ${subject}`,
+    html: `
+      <h2>New Contact Form Submission</h2>
+      <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+      <p><strong>Subject:</strong> ${subject}</p>
+      <h3>Message:</h3>
+      <p>${message.replace(/\n/g, '<br>')}</p>
+    `,
+  };
+
+  try {
+    // In development, just log the email content instead of sending
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Email would be sent with:', mailOptions);
+      return { success: true };
+    }
+
+    await transporter.sendMail(mailOptions);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send contact form email:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
+}
