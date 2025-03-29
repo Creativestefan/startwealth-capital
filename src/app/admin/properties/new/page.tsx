@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { PropertyForm } from "@/components/admin/properties/property-form"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"

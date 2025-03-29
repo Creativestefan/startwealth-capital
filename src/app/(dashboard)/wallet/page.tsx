@@ -1,6 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { redirect } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { getServerSession } from "next-auth"
 import { authConfig } from "@/lib/auth.config"
 import { prisma } from "@/lib/prisma"

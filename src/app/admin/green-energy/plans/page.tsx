@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Suspense } from "react"
 import { Metadata } from "next"
 import { getAllGreenEnergyPlans } from "@/lib/green-energy/actions/investments"

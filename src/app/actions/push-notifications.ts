@@ -187,11 +187,11 @@ export async function sendPushNotification(
   title: string,
   body: string,
   icon: string = '/logo.png',
-  data: any = {}
+  data: unknown = {}
 ) {
   try {
     // Get user subscription using raw SQL to avoid Prisma issues
-    let userSubscription: any = null;
+    let userSubscription: unknown = null;
     
     try {
       // Try using Prisma first
@@ -257,7 +257,7 @@ export async function sendPushNotificationToAll(
   data: Record<string, any> = {}
 ) {
   try {
-    let subscriptions: any[] = [];
+    let subscriptions: unknown[] = [];
     
     // Try to get subscriptions with Prisma first
     try {

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getServerSession } from "next-auth"
 import { notFound, redirect } from "next/navigation"
 import { authConfig } from "@/lib/auth.config"
@@ -48,7 +49,7 @@ function calculateProgress(startDate: string, endDate: string | null | undefined
 
 export default async function InvestmentDetailPage({ params }: InvestmentDetailPageProps) {
   // Await the params object before accessing its properties
-  const { id } = await params;
+  const { id  } = params;
   
   const session = await getServerSession(authConfig)
 

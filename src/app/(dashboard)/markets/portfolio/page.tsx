@@ -63,9 +63,9 @@ function calculateProgress(startDate: string, endDate: string | null | undefined
  * Format date for display
  */
 function formatDate(date: Date | string): string {
-  if (!date) return 'N/A'
+  if (!date) return 'N/A';
   
-  const dateObj = typeof date === 'string' ? new Date(date) : date
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
   
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -236,6 +236,7 @@ export default async function PortfolioPage() {
                                 <Progress value={progress} className="h-2" />
                                 <div className="flex justify-between text-xs text-muted-foreground">
                                   <span>{progress}%</span>
+// eslint-disable-next-line react/no-unescaped-entities
                                   <span>
                                     {investment.endDate ? formatDate(investment.endDate) : "In progress"}
                                   </span>

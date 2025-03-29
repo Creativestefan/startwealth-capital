@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "bash vercel-build.sh",
+  "buildCommand": "npm run build:vercel",
   "installCommand": "npm install",
   "framework": "nextjs",
   "outputDirectory": ".next",
@@ -11,6 +11,5 @@
     "DATABASE_URL": "${DATABASE_URL}",
     "NEXT_DISABLE_ESLINT": "true",
     "NEXT_DISABLE_TYPECHECK": "true"
-  },
-  "ignoreCommand": "echo 'Skipping linting checks'"
+  }
 }

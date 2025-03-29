@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Metadata } from "next"
 import { EquipmentForm } from "@/components/admin/green-energy/equipment-form"
 import { Button } from "@/components/ui/button"

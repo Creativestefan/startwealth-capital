@@ -339,7 +339,7 @@ export function AdminDashboardContent() {
                   content={
                     <ChartTooltipContent 
                       hideLabel 
-                      formatter={(value: any) => formatCurrency(Number(value))} 
+                      formatter={(value: unknown) => formatCurrency(Number(value))} 
                     />
                   }
                 />
@@ -519,7 +519,7 @@ export function AdminDashboardContent() {
                 <XAxis dataKey="count" type="number" hide />
                 <ChartTooltip
                   cursor={false}
-                  content={<ChartTooltipContent hideLabel formatter={(value: any) => formatNumber(Number(value))} />}
+                  content={<ChartTooltipContent hideLabel formatter={(value: unknown) => formatNumber(Number(value))} />}
                 />
                 <Bar 
                   dataKey="count" 

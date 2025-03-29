@@ -13,7 +13,7 @@ import { AdminNotificationSheet } from "@/components/admin/admin-notification-sh
 import Link from "next/link"
 
 export function DashboardHeader({ user, isAdmin = false }: { 
-  user: any; 
+  user: unknown; 
   isAdmin?: boolean 
 }) {
   const [notificationsOpen, setNotificationsOpen] = useState(false)

@@ -140,7 +140,8 @@ export function CommissionManagement() {
   }
 
   // Load commissions on initial render
-  useEffect(() => {
+   
+useEffect(() => {
     loadCommissions()
   }, [])
 

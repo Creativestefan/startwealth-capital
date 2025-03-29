@@ -1,12 +1,13 @@
+export const dynamic = 'force-dynamic';
 import { getServerSession } from "next-auth"
 import { notFound, redirect } from "next/navigation"
 import { authConfig } from "@/lib/auth.config"
-import { getEquipmentTransactionById, updateEquipmentTransactionStatus, updateEquipmentTransactionDeliveryPin } from "@/lib/green-energy/actions/equipment"
+import { getEquipmentTransactionById, updateEquipmentTransactionDeliveryPin } from "@/lib/green-energy/actions/equipment"
 import { formatCurrency, formatDate } from "@/lib/green-energy/utils/formatting"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { ChevronLeft, Package, MapPin, Calendar, Clock, KeyIcon, CheckCircle, AlertCircle, Clock3 } from "lucide-react"
+import { ChevronLeft, Package, MapPin, Calendar, KeyIcon, CheckCircle, Clock3 } from "lucide-react"
 import Link from "next/link"
 import { TransactionStatus } from "@prisma/client"
 import { ImageCarousel } from "@/components/ui/image-carousel"
@@ -21,7 +22,7 @@ interface EquipmentTransactionDetailPageProps {
 // Function to generate a random 6-character alphanumeric PIN in all capital letters
 function generateDeliveryPIN(): string {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
+  const result = '';
   for (let i = 0; i < 6; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
@@ -30,7 +31,7 @@ function generateDeliveryPIN(): string {
 
 export default async function EquipmentTransactionDetailPage({ params }: EquipmentTransactionDetailPageProps) {
   // Await the params object before accessing its properties
-  const { id } = await params;
+  const { id  } = params;
   
   const session = await getServerSession(authConfig)
 
@@ -54,8 +55,7 @@ export default async function EquipmentTransactionDetailPage({ params }: Equipme
   if (!result.success || !result.data) {
     notFound()
   }
-  
-  let transaction = result.data
+ const transaction =on = result.data
   
   // Ensure equipment data exists
   if (!transaction.equipment) {
@@ -288,7 +288,7 @@ function formatStatus(status: TransactionStatus): string {
 }
 
 // Helper function to generate status updates based on current transaction status
-function generateStatusUpdates(transaction: any) {
+function generateStatusUpdates(transaction: unknown) {
   const statuses = [
     {
       status: "Order Placed",

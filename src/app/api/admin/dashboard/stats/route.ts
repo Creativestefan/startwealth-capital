@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authConfig } from "@/lib/auth.config"
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
     
     // Calculate date range
     const now = new Date()
-    let startDate = new Date()
+    const startDate = new Date()
     
     switch (timeRange) {
       case "7days":

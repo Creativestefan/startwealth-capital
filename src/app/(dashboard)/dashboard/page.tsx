@@ -52,6 +52,7 @@ export default async function DashboardPage() {
     <div className="container mx-auto px-4 py-6 space-y-6">
       <div className="mb-4">
         <h1 className="text-xl font-medium tracking-tight">Welcome back, {userName}!</h1>
+// eslint-disable-next-line react/no-unescaped-entities
         <p className="text-sm text-muted-foreground">Here's an overview of your investment portfolio</p>
       </div>
       

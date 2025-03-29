@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Metadata } from "next"
 import { getMarketPlans } from "@/lib/market/actions/plans"
 import { PlansList } from "@/components/admin/markets/plans-list"

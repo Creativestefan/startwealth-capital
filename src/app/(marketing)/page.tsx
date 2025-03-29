@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import React from 'react'
 import { MarketingLayout } from '@/components/shared/marketing-layout'
 import { HeroSection } from '@/components/marketing/HeroSection'
@@ -34,7 +36,8 @@ export default function MarketingPage() {
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
             {[partnerLogo1, partnerLogo2, partnerLogo3, partnerLogo4, partnerLogo5].map((logo, index) => (
               <div key={index} className="w-32 h-16 relative grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
-                <img src={logo} alt={`Partner ${index + 1}`} className="object-contain w-full h-full" />
+                {/* eslint-disable @next/next/no-img-element */}
+<img src={logo} alt={`Partner ${index + 1}`} className="object-contain w-full h-full" />
               </div>
             ))}
           </div>

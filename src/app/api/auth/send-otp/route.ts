@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { generateOTP, storeOTP, getOTPStatus } from "@/lib/otp"
 import { sendVerificationEmail, testSMTPConnection } from "@/lib/mail"
 

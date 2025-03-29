@@ -174,6 +174,7 @@ export default function NotificationPreferencesForm({ user }: { user: UserProps 
                   <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
                     <h4 className="text-sm font-semibold mb-2">Current Browser Status</h4>
                     <PushNotificationManager />
+// eslint-disable-next-line react/no-unescaped-entities
                     <p className="text-xs text-muted-foreground mt-2">
                       When you click "Enable Notifications", your browser will ask for permission.
                       You must click "Allow" in that browser prompt to receive notifications.

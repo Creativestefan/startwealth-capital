@@ -24,7 +24,7 @@ import html2canvas from "html2canvas"
 interface TransactionDetailModalProps {
   isOpen: boolean
   onClose: () => void
-  transaction: any
+  transaction: unknown
   onTransactionUpdated: () => void
 }
 

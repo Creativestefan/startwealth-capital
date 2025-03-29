@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getGreenEnergyPlanById, getAllGreenEnergyInvestments } from "@/lib/green-energy/actions/investments"
@@ -75,7 +76,8 @@ export default async function PlanDetailsPage({ params }: PlanDetailsPageProps) 
           <CardContent>
             {plan.image ? (
               <div className="relative aspect-video overflow-hidden rounded-md">
-                <img
+                {/* eslint-disable @next/next/no-img-element */}
+<img
                   src={plan.image}
                   alt={plan.name}
                   className="object-cover"

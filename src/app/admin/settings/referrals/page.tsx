@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -134,7 +136,7 @@ export default function ReferralSettingsPage() {
   }
 
   // Format rate to display with percent sign
-  const formatRate = (rate: any) => {
+  const formatRate = (rate: unknown) => {
     if (rate === null || rate === undefined) return "0%"
     return `${rate}%`
   }

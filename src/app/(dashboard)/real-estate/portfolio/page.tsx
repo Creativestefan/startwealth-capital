@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { authConfig } from "@/lib/auth.config"
@@ -312,6 +313,7 @@ export default async function PortfolioPage() {
                         {properties.map((property) => (
                           <tr key={property.id} className="border-b">
                             <td className="p-3 align-middle font-medium text-xs">{property.property?.name || "Property"}</td>
+// eslint-disable-next-line react/no-unescaped-entities
                             <td className="p-3 align-middle text-xs">{property.property?.location || "N/A"}</td>
                             <td className="p-3 align-middle text-xs">{formatDate(property.createdAt)}</td>
                             <td className="p-3 align-middle text-xs">{formatCurrency(property.amount || property.totalAmount || property.property?.price || 0)}</td>

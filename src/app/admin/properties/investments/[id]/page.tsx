@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getInvestmentById } from "@/lib/real-estate/actions/investments"
@@ -56,7 +57,7 @@ export default async function InvestmentDetailPage({
   })
 
   // Format user name
-  const formatUserName = (user: any) => {
+  const formatUserName = (user: unknown) => {
     if (!user) return "Unknown User";
     
     const firstName = user.firstName || "";

@@ -6,8 +6,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 interface AnalyticsChartsProps {
-  monthlyData: any[]
-  roiTrends: any[]
+  monthlyData: unknown[]
+  roiTrends: unknown[]
 }
 
 const monthlyChartConfig = {

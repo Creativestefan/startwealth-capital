@@ -62,7 +62,7 @@ export function InvestmentTransactionTable({ investments }: InvestmentTransactio
   }
 
   // Function to format user name (First Name + Last Initial)
-  const formatUserName = (user: any) => {
+  const formatUserName = (user: unknown) => {
     if (!user) return "Unknown User";
     
     const firstName = user.firstName || "";

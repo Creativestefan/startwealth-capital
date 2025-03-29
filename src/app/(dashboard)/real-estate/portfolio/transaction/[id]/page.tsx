@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getPropertyTransactionById } from "@/lib/real-estate/actions/portfolio"
 import { PropertyTransactionDetail } from "@/components/real-estate/property/property-transaction-detail"
 import { getServerSession } from "next-auth"

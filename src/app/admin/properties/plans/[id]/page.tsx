@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getInvestmentPlanById } from "@/lib/real-estate/actions/investments"
@@ -105,7 +106,8 @@ export default async function InvestmentPlanDetailPage({
               <div>
                 <h3 className="text-lg font-medium">Plan Image</h3>
                 <div className="mt-2 relative aspect-video rounded-md overflow-hidden border">
-                  <img 
+                  {/* eslint-disable @next/next/no-img-element */}
+<img 
                     src={plan.image} 
                     alt={plan.name}
                     className="object-cover w-full h-full"

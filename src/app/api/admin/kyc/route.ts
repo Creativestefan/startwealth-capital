@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { authConfig } from "@/lib/auth.config"
 import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"

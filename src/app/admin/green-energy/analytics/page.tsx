@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Metadata } from "next"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getAllEquipmentTransactions } from "@/lib/green-energy/actions/equipment"
@@ -127,8 +128,8 @@ export default async function AnalyticsPage() {
 }
 
 // Helper function to calculate monthly data
-function calculateMonthlyData(investments: any[], equipmentTransactions: any[]) {
-  const monthlyData: any[] = []
+function calculateMonthlyData(investments: unknown[], equipmentTransactions: unknown[]) {
+  const monthlyData: unknown[] = []
   const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
   
   // Get current year
@@ -163,8 +164,8 @@ function calculateMonthlyData(investments: any[], equipmentTransactions: any[]) 
 }
 
 // Helper function to calculate ROI trends
-function calculateROITrends(investments: any[]) {
-  const monthlyROI: any[] = []
+function calculateROITrends(investments: unknown[]) {
+  const monthlyROI: unknown[] = []
   const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
   
   months.forEach((month, index) => {

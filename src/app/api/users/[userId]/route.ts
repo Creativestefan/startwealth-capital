@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getUserById } from "@/lib/data/user"
 
 export async function GET(

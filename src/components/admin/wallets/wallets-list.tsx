@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/card"
 
 interface WalletsListProps {
-  wallets: any[]
+  wallets: unknown[]
   error?: string
 }
 
@@ -70,7 +70,7 @@ export function WalletsList({ wallets, error }: WalletsListProps) {
 }
 
 interface WalletsListClientProps {
-  wallets: any[]
+  wallets: unknown[]
 }
 
 function WalletsListClient({ wallets }: WalletsListClientProps) {

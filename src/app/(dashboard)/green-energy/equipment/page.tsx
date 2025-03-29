@@ -1,18 +1,19 @@
+export const dynamic = 'force-dynamic';
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { authConfig } from "@/lib/auth.config"
 import { Suspense } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getAllEquipment } from "@/lib/green-energy/actions/equipment"
-import { EquipmentStatus, EquipmentType } from "@prisma/client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import { formatCurrency } from "@/lib/green-energy/utils/formatting"
+
+
+
+
+
+
 import { EquipmentFilters } from "@/components/green-energy/equipment/equipment-filters"
 
 /**
@@ -81,7 +82,7 @@ export default async function EquipmentPage({
   }
 
   // Get all equipment (including sold items)
-  let allEquipment = equipmentResponse.data
+  const allEquipment = equipmentResponse.data
   
   // Calculate min and max prices for the filter
   const prices = allEquipment.map(item => item.price)
@@ -89,7 +90,7 @@ export default async function EquipmentPage({
   const maxPrice = Math.max(...prices, 10000)
   
   // Filter equipment based on user selections
-  let equipment = [...allEquipment]
+const equipment = [...allEquipment]
   
   // Apply additional filters if provided
   if (filters.type && filters.type !== "all") {
@@ -138,7 +139,8 @@ export default async function EquipmentPage({
                 
                 {item.images && item.images.length > 0 && (
                   <div className="aspect-[4/3] relative">
-                    <img 
+                    {/* eslint-disable @next/next/no-img-element */}
+<img 
                       src={item.images[0]} 
                       alt={item.name} 
                       className={`object-cover w-full h-full transition-opacity ${item.stockQuantity <= 0 ? 'opacity-70' : ''}`}

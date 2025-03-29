@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/prisma"
 import { RegisterSchema } from "@/lib/auth.config"
 import bcrypt from "bcryptjs"

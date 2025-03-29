@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from "next/server"
 import { createMarketPlan, deleteMarketPlan, getMarketPlans, updateMarketPlan } from "@/lib/market/actions/plans"
 import { validateMarketPlan } from "@/lib/market/utils/validation"

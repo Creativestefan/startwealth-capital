@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { notFound, redirect } from "next/navigation"
 import { getInvestmentById, cancelInvestment } from "@/lib/real-estate/actions/investments"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

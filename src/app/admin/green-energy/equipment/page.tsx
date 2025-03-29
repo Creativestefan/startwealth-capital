@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Metadata } from "next"
 import { getAllEquipment } from "@/lib/green-energy/actions/equipment"
 import { EquipmentTable } from "@/components/admin/green-energy/equipment-table"

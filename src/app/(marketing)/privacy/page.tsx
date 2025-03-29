@@ -119,6 +119,7 @@ export default function PrivacyPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl md:text-3xl font-bold mb-6">Your Data Security is Our Priority</h2>
+// eslint-disable-next-line react/no-unescaped-entities
               <p className="text-xl mb-8">
                 We're committed to protecting your personal information while providing exceptional investment opportunities.
               </p>

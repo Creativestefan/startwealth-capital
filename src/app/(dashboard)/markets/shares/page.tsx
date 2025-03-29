@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Metadata } from "next"
 import { Suspense } from "react"
 import { getAllMarketPlans } from "@/lib/market/actions/plans"

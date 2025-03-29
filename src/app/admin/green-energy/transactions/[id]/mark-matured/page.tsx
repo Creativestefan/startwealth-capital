@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { notFound, redirect } from "next/navigation"
 import { getGreenEnergyInvestmentById, matureGreenEnergyInvestment } from "@/lib/green-energy/actions/investments"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

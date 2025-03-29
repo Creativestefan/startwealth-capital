@@ -172,7 +172,7 @@ export default function UserDetail({ user }: UserDetailProps) {
   }
 
   const confirmSave = () => {
-    const userData: any = {
+    const userData: unknown = {
       firstName,
       lastName,
       email,

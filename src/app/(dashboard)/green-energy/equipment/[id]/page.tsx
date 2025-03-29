@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getServerSession } from "next-auth"
 import { notFound, redirect } from "next/navigation"
 import { authConfig } from "@/lib/auth.config"
@@ -7,20 +8,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator"
 import { ChevronLeft } from "lucide-react"
 import Link from "next/link"
-import { formatCurrency, formatDate, formatEquipmentStatus, formatEquipmentType } from "@/lib/green-energy/utils/formatting"
-import { EquipmentStatus } from "@prisma/client"
+import { formatDate, formatEquipmentStatus, formatEquipmentType } from "@/lib/green-energy/utils/formatting"
+
 import { ImageCarousel } from "@/components/ui/image-carousel"
 import { PurchaseEquipmentButton } from "@/components/green-energy/equipment/purchase-button"
 
-interface EquipmentDetailPageProps {
-  params: {
-    id: string
-  }
-}
-
-export default async function EquipmentDetailPage({ params }: EquipmentDetailPageProps) {
-  // Await the params object before accessing its properties
-  const { id } = await params;
+export default async function EquipmentDetailPage({ 
+  params 
+}: { 
+  params: { id: string } 
+}) {
+  // Get the ID directly from params (no need to await)
+  const { id } = params;
   
   const session = await getServerSession(authConfig)
 
@@ -146,4 +145,4 @@ export default async function EquipmentDetailPage({ params }: EquipmentDetailPag
       </div>
     </div>
   )
-} 
+}

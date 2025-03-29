@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { InvestmentPlanForm } from "@/components/admin/properties/investment-plan-form"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"

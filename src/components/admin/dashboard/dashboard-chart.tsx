@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/chart"
 
 interface DashboardChartProps {
-  data: any[]
+  data: unknown[]
   type: "bar" | "line"
   xAxisKey: string
   yAxisKey: string

@@ -63,7 +63,7 @@ export function PropertyTransactionTable({ transactions }: PropertyTransactionTa
   }
 
   // Function to format user name (First Name + Last Initial)
-  const formatUserName = (user: any) => {
+  const formatUserName = (user: unknown) => {
     if (!user) return "Unknown User";
     
     const firstName = user.firstName || "";

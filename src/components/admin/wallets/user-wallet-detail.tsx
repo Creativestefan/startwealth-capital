@@ -70,9 +70,9 @@ interface UserWalletDetailProps {
         lastName: string;
         email: string;
       };
-      transactions: any[];
+      transactions: unknown[];
     };
-    propertyTransactions: any[];
+    propertyTransactions: unknown[];
   }
 }
 
@@ -90,7 +90,7 @@ export function UserWalletDetail({ wallet }: UserWalletDetailProps) {
   
   const transactions = wallet.wallet.transactions || []
   
-  const filteredTransactions = transactions.filter((transaction: any) => {
+  const filteredTransactions = transactions.filter((transaction: unknown) => {
     const matchesSearch = 
       searchQuery === "" || 
       transaction.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -314,7 +314,7 @@ export function UserWalletDetail({ wallet }: UserWalletDetailProps) {
     }
   }
   
-  function handleViewTransaction(transaction: any) {
+  function handleViewTransaction(transaction: unknown) {
     setSelectedTransaction(transaction)
     setIsTransactionModalOpen(true)
   }
@@ -450,7 +450,7 @@ export function UserWalletDetail({ wallet }: UserWalletDetailProps) {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredTransactions.map((transaction: any) => (
+                        filteredTransactions.map((transaction: unknown) => (
                           <TableRow key={transaction.id}>
                             <TableCell className="font-medium">
                               {format(new Date(transaction.createdAt), "MMM d, yyyy")}
