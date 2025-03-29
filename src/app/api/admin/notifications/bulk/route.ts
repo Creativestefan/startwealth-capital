@@ -7,6 +7,9 @@ import { prisma } from "@/lib/prisma";
 import { NotificationType } from "@prisma/client";
 import { createBulkNotifications } from "@/lib/notifications/index";
 
+// Check if VAPID keys are configured for web push notifications
+const isWebPushConfigured = !!(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
+
 // Bulk notification schema
 const bulkNotificationSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -14,7 +17,7 @@ const bulkNotificationSchema = z.object({
   type: z.nativeEnum(NotificationType),
   actionUrl: z.string().url().optional(),
   sendEmail: z.boolean().optional().default(true),
-  sendPush: z.boolean().optional().default(true),
+  sendPush: z.boolean().optional().default(isWebPushConfigured), // Default to false if VAPID keys not configured
   
   // User selection options (must provide one)
   userIds: z.array(z.string()).optional(),
@@ -59,6 +62,12 @@ export async function POST(req: NextRequest) {
       allUsers
     } = validationResult.data;
     
+    // Check if web push is requested but not configured
+    if (sendPush && !isWebPushConfigured) {
+      console.warn("Web Push notifications requested but VAPID keys are not configured");
+      // Continue with the request but log a warning
+    }
+    
     // Determine target users
     let targetUserIds: string[] = [];
     
@@ -102,7 +111,8 @@ export async function POST(req: NextRequest) {
         type,
         actionUrl,
         sendEmail,
-        sendPush
+        // Only send push if VAPID keys are configured
+        sendPush && isWebPushConfigured
       );
       
       return NextResponse.json({

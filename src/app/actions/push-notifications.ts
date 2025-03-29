@@ -16,17 +16,33 @@ interface WebPushSubscription {
   keys: PushSubscriptionKeys;
 }
 
-// Configure VAPID details
-webpush.setVapidDetails(
-  'mailto:admin@stratwealth-capital.com',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+// Check if VAPID keys are configured
+const isWebPushConfigured = !!(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
+
+// Configure VAPID details only if the keys are available
+if (isWebPushConfigured) {
+  try {
+    webpush.setVapidDetails(
+      'mailto:admin@stratwealth-capital.com',
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+      process.env.VAPID_PRIVATE_KEY!
+    );
+    console.log('Web Push configured successfully');
+  } catch (error) {
+    console.error('Failed to configure Web Push:', error);
+  }
+}
 
 /**
  * Store push subscription for a user
  */
 export async function subscribeUserToPush(userId: string, subscription: WebPushSubscription) {
+  // If web push is not configured, return early
+  if (!isWebPushConfigured) {
+    console.log('Web Push not configured, skipping subscription');
+    return { success: false, error: 'Web Push not configured' };
+  }
+
   try {
     console.log("Saving push subscription for user:", userId);
     
@@ -130,6 +146,12 @@ export async function subscribeUserToPush(userId: string, subscription: WebPushS
  * Remove push subscription for a user
  */
 export async function unsubscribeUserFromPush(userId: string) {
+  // If web push is not configured, return early
+  if (!isWebPushConfigured) {
+    console.log('Web Push not configured, skipping unsubscription');
+    return { success: false, error: 'Web Push not configured' };
+  }
+
   try {
     console.log("Removing push subscription for user:", userId);
     
@@ -189,6 +211,12 @@ export async function sendPushNotification(
   icon: string = '/logo.png',
   data: unknown = {}
 ) {
+  // If web push is not configured, return early
+  if (!isWebPushConfigured) {
+    console.log('Web Push not configured, skipping notification');
+    return { success: false, error: 'Web Push not configured' };
+  }
+
   try {
     // Get user subscription using raw SQL to avoid Prisma issues
     let userSubscription: unknown = null;
@@ -199,47 +227,63 @@ export async function sendPushNotification(
         where: { userId },
       });
       
+      if (!userSubscription) {
+        console.log(`No push subscription found for user: ${userId}`);
+        return { success: false, error: 'No subscription found' };
+      }
     } catch (prismaError) {
-      console.error('Error getting push subscription with Prisma:', prismaError);
+      console.error('Error using Prisma to find push subscription:', prismaError);
       
       // Fallback to raw SQL
       try {
         const result = await prisma.$queryRaw`
-          SELECT * FROM "PushSubscription" WHERE "userId" = ${userId}
+          SELECT * FROM "PushSubscription" WHERE "userId" = ${userId} LIMIT 1
         `;
         
         // Type assertion for result
         const subscriptions = result as any[];
-        if (subscriptions.length > 0) {
-          userSubscription = subscriptions[0];
+        
+        if (subscriptions.length === 0) {
+          console.log(`No push subscription found for user: ${userId}`);
+          return { success: false, error: 'No subscription found' };
         }
-      } catch (error) {
-        console.error('Error getting push subscription with raw SQL:', error);
-        return { success: false, error: 'Could not retrieve push subscription' };
+        
+        userSubscription = subscriptions[0];
+      } catch (sqlError) {
+        console.error('Error with raw SQL to find push subscription:', sqlError);
+        return { success: false, error: 'Failed to find subscription' };
       }
     }
     
-    if (!userSubscription) {
-      return { success: false, error: 'No subscription found for user' };
+    // Extract the subscription JSON
+    const subscription = typeof userSubscription === 'object' && userSubscription !== null
+      ? (userSubscription as any).subscription
+      : null;
+      
+    if (!subscription) {
+      console.error('Invalid subscription format for user:', userId);
+      return { success: false, error: 'Invalid subscription format' };
     }
     
-    const subscription = JSON.parse(userSubscription.subscription) as WebPushSubscription;
+    // Parse the subscription JSON if it's a string
+    const parsedSubscription = typeof subscription === 'string'
+      ? JSON.parse(subscription)
+      : subscription;
     
-    // Prepare notification payload
+    // Prepare the notification payload
     const payload = JSON.stringify({
       title,
       body,
       icon,
-      badge: '/badge.png',
-      data: {
-        ...data,
-        dateOfArrival: Date.now(),
-      },
+      data,
+      badge: '/logo-small.png',
+      timestamp: Date.now(),
     });
     
-    // Send notification
-    await webpush.sendNotification(subscription as any, payload);
+    // Send the notification
+    const result = await webpush.sendNotification(parsedSubscription, payload);
     
+    console.log(`Push notification sent to user ${userId}:`, result.statusCode);
     return { success: true };
   } catch (error) {
     console.error('Error sending push notification:', error);
@@ -256,14 +300,21 @@ export async function sendPushNotificationToAll(
   icon: string = '/logo.png',
   data: Record<string, any> = {}
 ) {
+  // If web push is not configured, return early
+  if (!isWebPushConfigured) {
+    console.log('Web Push not configured, skipping notification to all users');
+    return { success: false, error: 'Web Push not configured' };
+  }
+
   try {
-    let subscriptions: unknown[] = [];
+    // Get all push subscriptions
+    let subscriptions: any[] = [];
     
-    // Try to get subscriptions with Prisma first
     try {
+      // Try using Prisma first
       subscriptions = await prisma.pushSubscription.findMany();
     } catch (prismaError) {
-      console.error('Error getting push subscriptions with Prisma:', prismaError);
+      console.error('Error using Prisma to find all push subscriptions:', prismaError);
       
       // Fallback to raw SQL
       try {
@@ -274,51 +325,65 @@ export async function sendPushNotificationToAll(
         // Type assertion for result
         subscriptions = result as any[];
       } catch (sqlError) {
-        console.error('Error getting push subscriptions with raw SQL:', sqlError);
-        return { success: false, error: 'Could not retrieve push subscriptions' };
+        console.error('Error with raw SQL to find all push subscriptions:', sqlError);
+        return { success: false, error: 'Failed to find subscriptions' };
       }
     }
     
     if (subscriptions.length === 0) {
+      console.log('No push subscriptions found');
       return { success: false, error: 'No subscriptions found' };
     }
     
-    // Prepare notification payload
+    // Prepare the notification payload
     const payload = JSON.stringify({
       title,
       body,
       icon,
-      badge: '/badge.png',
-      data: {
-        ...data,
-        dateOfArrival: Date.now(),
-      },
+      data,
+      badge: '/logo-small.png',
+      timestamp: Date.now(),
     });
     
-    // Send notifications
+    // Send notifications to all subscriptions
     const results = await Promise.allSettled(
       subscriptions.map(async (sub) => {
         try {
-          const subscription = JSON.parse(sub.subscription) as WebPushSubscription;
-          await webpush.sendNotification(subscription as any, payload);
-          return { userId: sub.userId, success: true };
+          // Extract the subscription JSON
+          const subscription = typeof sub === 'object' && sub !== null
+            ? sub.subscription
+            : null;
+            
+          if (!subscription) {
+            throw new Error('Invalid subscription format');
+          }
+          
+          // Parse the subscription JSON if it's a string
+          const parsedSubscription = typeof subscription === 'string'
+            ? JSON.parse(subscription)
+            : subscription;
+          
+          // Send the notification
+          return await webpush.sendNotification(parsedSubscription, payload);
         } catch (error) {
-          console.error(`Error sending notification to user ${sub.userId}:`, error);
-          return { userId: sub.userId, success: false, error };
+          console.error('Error sending individual push notification:', error);
+          throw error;
         }
       })
     );
     
-    const successful = results.filter(r => r.status === 'fulfilled' && (r.value as any).success).length;
+    // Count successful notifications
+    const successful = results.filter(r => r.status === 'fulfilled').length;
     
+    console.log(`Push notifications sent to ${successful}/${subscriptions.length} users`);
     return { 
-      success: true, 
-      sent: successful, 
+      success: true,
       total: subscriptions.length,
+      successful,
       failed: subscriptions.length - successful
     };
   } catch (error) {
-    console.error('Error sending push notifications:', error);
+    console.error('Error sending push notifications to all users:', error);
     return { success: false, error: 'Failed to send notifications' };
   }
 }

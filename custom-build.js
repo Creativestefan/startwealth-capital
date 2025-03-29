@@ -51,12 +51,10 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   // Fix module resolution issues
   experimental: { largePageDataBytes: 256 * 1024 },
-  // Disable static optimization completely
-  output: 'export',
-  distDir: '.next',
   // Other settings
   reactStrictMode: true,
   poweredByHeader: false,
+  distDir: '.next',
 };
 
 module.exports = nextConfig;
