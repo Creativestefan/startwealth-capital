@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node custom-build.js",
+    "build": "npx prisma generate && next build",
     "build:local": "node custom-build.js",
-    "build:vercel": "node vercel-build.js",
+    "build:vercel": "npx prisma generate && next build",
     "build:production": "npx prisma generate && npx prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",

@@ -8,6 +8,7 @@ const nextConfig = {
       { protocol: "https", hostname: "3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com" },
       { protocol: "https", hostname: "stratwealth.r2.cloudflarestorage.com" },
       { protocol: "http", hostname: "localhost" },
+      { protocol: "https", hostname: "startwealth-capital.vercel.app" },
     ],
   },
   // Disable ESLint during build
