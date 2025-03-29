@@ -1,0 +1,19 @@
+[
+  {
+    "id": "cm82iv2uv0001ukijiexz5w18",
+    "propertyId": "cm82byqwk0001uk71sxl6r269",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "amount": "200000",
+    "type": "FULL",
+    "status": "COMPLETED",
+    "installments": null,
+    "installmentAmount": null,
+    "nextPaymentDue": null,
+    "createdAt": "2025-03-10T03:48:04.280Z",
+    "updatedAt": "2025-03-10T03:48:04.280Z",
+    "paidInstallments": 0,
+    "referralId": null,
+    "commissionAmount": null,
+    "commissionPaid": false
+  }
+]

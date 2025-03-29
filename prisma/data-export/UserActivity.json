@@ -1,0 +1,542 @@
+[
+  {
+    "id": "cm8s3hh3d0002ukfb7ay8bytm",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "type": "login",
+    "description": "User logged in successfully",
+    "status": "success",
+    "amount": null,
+    "timestamp": "2025-03-28T00:19:35.880Z",
+    "metadata": {
+      "browser": "Chrome 121.0.0",
+      "location": "New York, USA",
+      "ipAddress": "192.168.1.100",
+      "deviceInfo": "Windows Desktop"
+    }
+  },
+  {
+    "id": "cm8s3hh3d0003ukfbkl1p1qxt",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "type": "login",
+    "description": "User logged in from new device",
+    "status": "success",
+    "amount": null,
+    "timestamp": "2025-03-27T01:19:35.880Z",
+    "metadata": {
+      "browser": "Safari 17.0",
+      "location": "Los Angeles, USA",
+      "ipAddress": "107.22.44.21",
+      "deviceInfo": "iPhone 13"
+    }
+  },
+  {
+    "id": "cm8s3hh3d0004ukfb1flfsk8h",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "type": "login",
+    "description": "Failed login attempt",
+    "status": "failed",
+    "amount": null,
+    "timestamp": "2025-03-26T01:19:35.880Z",
+    "metadata": {
+      "browser": "Firefox 115.0",
+      "location": "Unknown Location",
+      "ipAddress": "84.177.12.55",
+      "deviceInfo": "Android Tablet"
+    }
+  },
+  {
+    "id": "cm8s3hh3i0005ukfbjupdjt4s",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "type": "investment",
+    "description": "Real Estate investment of $5,000",
+    "status": "success",
+    "amount": 5000,
+    "timestamp": "2025-03-25T01:19:35.886Z",
+    "metadata": {
+      "propertyId": "prop123",
+      "investmentType": "real_estate"
+    }
+  },
+  {
+    "id": "cm8s3hh3i0006ukfblzbligy6",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "type": "investment",
+    "description": "Green Energy investment of $3,000",
+    "status": "success",
+    "amount": 3000,
+    "timestamp": "2025-03-23T01:19:35.886Z",
+    "metadata": {
+      "projectId": "green456",
+      "investmentType": "green_energy"
+    }
+  },
+  {
+    "id": "cm8s3hh3i0007ukfbtxwccwib",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "type": "investment",
+    "description": "Market investment of $2,500",
+    "status": "pending",
+    "amount": 2500,
+    "timestamp": "2025-03-27T17:19:35.886Z",
+    "metadata": {
+      "planId": "market789",
+      "investmentType": "market"
+    }
+  },
+  {
+    "id": "cm8s3hh3l0008ukfb38kq24zu",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "type": "withdrawal",
+    "description": "Withdrawal to bank account",
+    "status": "success",
+    "amount": 1200,
+    "timestamp": "2025-03-21T01:19:35.889Z",
+    "metadata": {
+      "bankName": "Chase",
+      "accountEnding": "1234"
+    }
+  },
+  {
+    "id": "cm8s3hh3l0009ukfbgao4cdpc",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "type": "withdrawal",
+    "description": "Withdrawal request submitted",
+    "status": "pending",
+    "amount": 3500,
+    "timestamp": "2025-03-27T13:19:35.889Z",
+    "metadata": {
+      "bankName": "Bank of America",
+      "accountEnding": "5678"
+    }
+  },
+  {
+    "id": "cm8s3hh3n000aukfbfc9ffu7q",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "type": "transaction",
+    "description": "Dividend payment received",
+    "status": "success",
+    "amount": 350,
+    "timestamp": "2025-03-18T01:19:35.890Z",
+    "metadata": {
+      "source": "real_estate_investment",
+      "reference": "div123"
+    }
+  },
+  {
+    "id": "cm8s3hh3n000bukfbyx28f3k4",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "type": "transaction",
+    "description": "Referral bonus credited",
+    "status": "success",
+    "amount": 100,
+    "timestamp": "2025-03-14T01:19:35.890Z",
+    "metadata": {
+      "referralCode": "FRIEND50"
+    }
+  },
+  {
+    "id": "cm8s3hh3o000cukfb56iud638",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "login",
+    "description": "User logged in successfully",
+    "status": "success",
+    "amount": null,
+    "timestamp": "2025-03-28T00:19:35.891Z",
+    "metadata": {
+      "browser": "Chrome 121.0.0",
+      "location": "New York, USA",
+      "ipAddress": "192.168.1.100",
+      "deviceInfo": "Windows Desktop"
+    }
+  },
+  {
+    "id": "cm8s3hh3o000dukfbik1ncqn9",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "login",
+    "description": "User logged in from new device",
+    "status": "success",
+    "amount": null,
+    "timestamp": "2025-03-27T01:19:35.891Z",
+    "metadata": {
+      "browser": "Safari 17.0",
+      "location": "Los Angeles, USA",
+      "ipAddress": "107.22.44.21",
+      "deviceInfo": "iPhone 13"
+    }
+  },
+  {
+    "id": "cm8s3hh3o000eukfbo4tfira8",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "login",
+    "description": "Failed login attempt",
+    "status": "failed",
+    "amount": null,
+    "timestamp": "2025-03-26T01:19:35.891Z",
+    "metadata": {
+      "browser": "Firefox 115.0",
+      "location": "Unknown Location",
+      "ipAddress": "84.177.12.55",
+      "deviceInfo": "Android Tablet"
+    }
+  },
+  {
+    "id": "cm8s3hh3p000fukfbi702k0dg",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "investment",
+    "description": "Real Estate investment of $5,000",
+    "status": "success",
+    "amount": 5000,
+    "timestamp": "2025-03-25T01:19:35.892Z",
+    "metadata": {
+      "propertyId": "prop123",
+      "investmentType": "real_estate"
+    }
+  },
+  {
+    "id": "cm8s3hh3p000gukfbcdn03830",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "investment",
+    "description": "Green Energy investment of $3,000",
+    "status": "success",
+    "amount": 3000,
+    "timestamp": "2025-03-23T01:19:35.892Z",
+    "metadata": {
+      "projectId": "green456",
+      "investmentType": "green_energy"
+    }
+  },
+  {
+    "id": "cm8s3hh3p000hukfb33g6egie",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "investment",
+    "description": "Market investment of $2,500",
+    "status": "pending",
+    "amount": 2500,
+    "timestamp": "2025-03-27T17:19:35.892Z",
+    "metadata": {
+      "planId": "market789",
+      "investmentType": "market"
+    }
+  },
+  {
+    "id": "cm8s3hh3q000iukfb7umcuacc",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "withdrawal",
+    "description": "Withdrawal to bank account",
+    "status": "success",
+    "amount": 1200,
+    "timestamp": "2025-03-21T01:19:35.894Z",
+    "metadata": {
+      "bankName": "Chase",
+      "accountEnding": "1234"
+    }
+  },
+  {
+    "id": "cm8s3hh3q000jukfblo3a1bzw",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "withdrawal",
+    "description": "Withdrawal request submitted",
+    "status": "pending",
+    "amount": 3500,
+    "timestamp": "2025-03-27T13:19:35.894Z",
+    "metadata": {
+      "bankName": "Bank of America",
+      "accountEnding": "5678"
+    }
+  },
+  {
+    "id": "cm8s3hh3r000kukfbqwxapuyx",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "transaction",
+    "description": "Dividend payment received",
+    "status": "success",
+    "amount": 350,
+    "timestamp": "2025-03-18T01:19:35.895Z",
+    "metadata": {
+      "source": "real_estate_investment",
+      "reference": "div123"
+    }
+  },
+  {
+    "id": "cm8s3hh3r000lukfbxaxdciu7",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "transaction",
+    "description": "Referral bonus credited",
+    "status": "success",
+    "amount": 100,
+    "timestamp": "2025-03-14T01:19:35.895Z",
+    "metadata": {
+      "referralCode": "FRIEND50"
+    }
+  },
+  {
+    "id": "cm8s3hh3s000mukfbz1x7akw2",
+    "userId": "cm81wbcc50000ukvx0ahkku3p",
+    "type": "login",
+    "description": "User logged in successfully",
+    "status": "success",
+    "amount": null,
+    "timestamp": "2025-03-28T00:19:35.896Z",
+    "metadata": {
+      "browser": "Chrome 121.0.0",
+      "location": "New York, USA",
+      "ipAddress": "192.168.1.100",
+      "deviceInfo": "Windows Desktop"
+    }
+  },
+  {
+    "id": "cm8s3hh3s000nukfbnrn6m5bc",
+    "userId": "cm81wbcc50000ukvx0ahkku3p",
+    "type": "login",
+    "description": "User logged in from new device",
+    "status": "success",
+    "amount": null,
+    "timestamp": "2025-03-27T01:19:35.896Z",
+    "metadata": {
+      "browser": "Safari 17.0",
+      "location": "Los Angeles, USA",
+      "ipAddress": "107.22.44.21",
+      "deviceInfo": "iPhone 13"
+    }
+  },
+  {
+    "id": "cm8s3hh3s000oukfbf35avzzo",
+    "userId": "cm81wbcc50000ukvx0ahkku3p",
+    "type": "login",
+    "description": "Failed login attempt",
+    "status": "failed",
+    "amount": null,
+    "timestamp": "2025-03-26T01:19:35.896Z",
+    "metadata": {
+      "browser": "Firefox 115.0",
+      "location": "Unknown Location",
+      "ipAddress": "84.177.12.55",
+      "deviceInfo": "Android Tablet"
+    }
+  },
+  {
+    "id": "cm8s3hh3t000pukfbcmmaw78x",
+    "userId": "cm81wbcc50000ukvx0ahkku3p",
+    "type": "investment",
+    "description": "Real Estate investment of $5,000",
+    "status": "success",
+    "amount": 5000,
+    "timestamp": "2025-03-25T01:19:35.897Z",
+    "metadata": {
+      "propertyId": "prop123",
+      "investmentType": "real_estate"
+    }
+  },
+  {
+    "id": "cm8s3hh3t000qukfbyr1bny0p",
+    "userId": "cm81wbcc50000ukvx0ahkku3p",
+    "type": "investment",
+    "description": "Green Energy investment of $3,000",
+    "status": "success",
+    "amount": 3000,
+    "timestamp": "2025-03-23T01:19:35.897Z",
+    "metadata": {
+      "projectId": "green456",
+      "investmentType": "green_energy"
+    }
+  },
+  {
+    "id": "cm8s3hh3t000rukfbcpb58at9",
+    "userId": "cm81wbcc50000ukvx0ahkku3p",
+    "type": "investment",
+    "description": "Market investment of $2,500",
+    "status": "pending",
+    "amount": 2500,
+    "timestamp": "2025-03-27T17:19:35.897Z",
+    "metadata": {
+      "planId": "market789",
+      "investmentType": "market"
+    }
+  },
+  {
+    "id": "cm8s3hh3u000sukfb9z34ouy6",
+    "userId": "cm81wbcc50000ukvx0ahkku3p",
+    "type": "withdrawal",
+    "description": "Withdrawal to bank account",
+    "status": "success",
+    "amount": 1200,
+    "timestamp": "2025-03-21T01:19:35.897Z",
+    "metadata": {
+      "bankName": "Chase",
+      "accountEnding": "1234"
+    }
+  },
+  {
+    "id": "cm8s3hh3u000tukfbwdevdkdu",
+    "userId": "cm81wbcc50000ukvx0ahkku3p",
+    "type": "withdrawal",
+    "description": "Withdrawal request submitted",
+    "status": "pending",
+    "amount": 3500,
+    "timestamp": "2025-03-27T13:19:35.897Z",
+    "metadata": {
+      "bankName": "Bank of America",
+      "accountEnding": "5678"
+    }
+  },
+  {
+    "id": "cm8s3hh3v000uukfb8ijs9qef",
+    "userId": "cm81wbcc50000ukvx0ahkku3p",
+    "type": "transaction",
+    "description": "Dividend payment received",
+    "status": "success",
+    "amount": 350,
+    "timestamp": "2025-03-18T01:19:35.898Z",
+    "metadata": {
+      "source": "real_estate_investment",
+      "reference": "div123"
+    }
+  },
+  {
+    "id": "cm8s3hh3v000vukfbftkyukl1",
+    "userId": "cm81wbcc50000ukvx0ahkku3p",
+    "type": "transaction",
+    "description": "Referral bonus credited",
+    "status": "success",
+    "amount": 100,
+    "timestamp": "2025-03-14T01:19:35.898Z",
+    "metadata": {
+      "referralCode": "FRIEND50"
+    }
+  },
+  {
+    "id": "cm8s3hh3w000wukfb6v14qmar",
+    "userId": "cm8s2zjzr0000uktgppc7ihis",
+    "type": "login",
+    "description": "User logged in successfully",
+    "status": "success",
+    "amount": null,
+    "timestamp": "2025-03-28T00:19:35.899Z",
+    "metadata": {
+      "browser": "Chrome 121.0.0",
+      "location": "New York, USA",
+      "ipAddress": "192.168.1.100",
+      "deviceInfo": "Windows Desktop"
+    }
+  },
+  {
+    "id": "cm8s3hh3w000xukfb6skl6jua",
+    "userId": "cm8s2zjzr0000uktgppc7ihis",
+    "type": "login",
+    "description": "User logged in from new device",
+    "status": "success",
+    "amount": null,
+    "timestamp": "2025-03-27T01:19:35.899Z",
+    "metadata": {
+      "browser": "Safari 17.0",
+      "location": "Los Angeles, USA",
+      "ipAddress": "107.22.44.21",
+      "deviceInfo": "iPhone 13"
+    }
+  },
+  {
+    "id": "cm8s3hh3w000yukfbv2cuffb0",
+    "userId": "cm8s2zjzr0000uktgppc7ihis",
+    "type": "login",
+    "description": "Failed login attempt",
+    "status": "failed",
+    "amount": null,
+    "timestamp": "2025-03-26T01:19:35.899Z",
+    "metadata": {
+      "browser": "Firefox 115.0",
+      "location": "Unknown Location",
+      "ipAddress": "84.177.12.55",
+      "deviceInfo": "Android Tablet"
+    }
+  },
+  {
+    "id": "cm8s3hh3w000zukfb8k3xacvu",
+    "userId": "cm8s2zjzr0000uktgppc7ihis",
+    "type": "investment",
+    "description": "Real Estate investment of $5,000",
+    "status": "success",
+    "amount": 5000,
+    "timestamp": "2025-03-25T01:19:35.900Z",
+    "metadata": {
+      "propertyId": "prop123",
+      "investmentType": "real_estate"
+    }
+  },
+  {
+    "id": "cm8s3hh3w0010ukfbio81fa5n",
+    "userId": "cm8s2zjzr0000uktgppc7ihis",
+    "type": "investment",
+    "description": "Green Energy investment of $3,000",
+    "status": "success",
+    "amount": 3000,
+    "timestamp": "2025-03-23T01:19:35.900Z",
+    "metadata": {
+      "projectId": "green456",
+      "investmentType": "green_energy"
+    }
+  },
+  {
+    "id": "cm8s3hh3w0011ukfbqmn060e9",
+    "userId": "cm8s2zjzr0000uktgppc7ihis",
+    "type": "investment",
+    "description": "Market investment of $2,500",
+    "status": "pending",
+    "amount": 2500,
+    "timestamp": "2025-03-27T17:19:35.900Z",
+    "metadata": {
+      "planId": "market789",
+      "investmentType": "market"
+    }
+  },
+  {
+    "id": "cm8s3hh3x0012ukfbz6l18s6z",
+    "userId": "cm8s2zjzr0000uktgppc7ihis",
+    "type": "withdrawal",
+    "description": "Withdrawal to bank account",
+    "status": "success",
+    "amount": 1200,
+    "timestamp": "2025-03-21T01:19:35.901Z",
+    "metadata": {
+      "bankName": "Chase",
+      "accountEnding": "1234"
+    }
+  },
+  {
+    "id": "cm8s3hh3x0013ukfbqebzh96r",
+    "userId": "cm8s2zjzr0000uktgppc7ihis",
+    "type": "withdrawal",
+    "description": "Withdrawal request submitted",
+    "status": "pending",
+    "amount": 3500,
+    "timestamp": "2025-03-27T13:19:35.901Z",
+    "metadata": {
+      "bankName": "Bank of America",
+      "accountEnding": "5678"
+    }
+  },
+  {
+    "id": "cm8s3hh3y0014ukfbz5bdra67",
+    "userId": "cm8s2zjzr0000uktgppc7ihis",
+    "type": "transaction",
+    "description": "Dividend payment received",
+    "status": "success",
+    "amount": 350,
+    "timestamp": "2025-03-18T01:19:35.901Z",
+    "metadata": {
+      "source": "real_estate_investment",
+      "reference": "div123"
+    }
+  },
+  {
+    "id": "cm8s3hh3y0015ukfbw0jjdv58",
+    "userId": "cm8s2zjzr0000uktgppc7ihis",
+    "type": "transaction",
+    "description": "Referral bonus credited",
+    "status": "success",
+    "amount": 100,
+    "timestamp": "2025-03-14T01:19:35.901Z",
+    "metadata": {
+      "referralCode": "FRIEND50"
+    }
+  }
+]

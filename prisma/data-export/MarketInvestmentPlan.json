@@ -1,0 +1,14 @@
+[
+  {
+    "id": "cm8bkfoid0000ukww5u4keoml",
+    "name": "Pro plan",
+    "description": "invest in global markets",
+    "type": "SEMI_ANNUAL",
+    "minAmount": "30000",
+    "maxAmount": "500000",
+    "returnRate": "15",
+    "durationMonths": 6,
+    "createdAt": "2025-03-16T11:42:00.661Z",
+    "updatedAt": "2025-03-16T11:42:00.661Z"
+  }
+]

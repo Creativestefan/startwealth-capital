@@ -1,0 +1,15 @@
+[
+  {
+    "id": "cm8blmc2y0001ukwwdbg5dyv0",
+    "name": "Pro plan",
+    "description": "New investments",
+    "type": "SEMI_ANNUAL",
+    "minAmount": "300000",
+    "maxAmount": "700000",
+    "returnRate": "0.15",
+    "image": "",
+    "createdAt": "2025-03-16T12:15:10.759Z",
+    "updatedAt": "2025-03-16T12:15:10.759Z",
+    "durationMonths": 6
+  }
+]

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "cm83r0a3x0001uke4unlkcx6i",
+    "name": "Tesla Powerwall",
+    "description": "A rechargeable lithium-ion battery designed to store solar energy for home use, reducing reliance on the grid.",
+    "type": "BATTERY_STORAGE",
+    "price": "8500",
+    "status": "AVAILABLE",
+    "createdAt": "2025-03-11T00:23:49.859Z",
+    "updatedAt": "2025-03-11T02:21:21.612Z",
+    "features": [
+      "13.5 kWh capacity",
+      "time-based control",
+      "seamless backup power",
+      "scalable system",
+      "mobile app monitoring"
+    ],
+    "stockQuantity": 9,
+    "images": [
+      "/api/image-proxy?url=https%3A%2F%2Fstartwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com%2Fuploads%2F1741652542265-9s5108etuzo.jpg",
+      "/api/image-proxy?url=https%3A%2F%2Fstartwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com%2Fuploads%2F1741652579631-8s6ymwida3s.jpg"
+    ]
+  }
+]

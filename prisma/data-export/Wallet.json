@@ -1,0 +1,38 @@
+[
+  {
+    "id": "cm80ok6p10001ukb2qy9mvyvb",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "balance": 0,
+    "createdAt": "2025-03-08T20:52:01.381Z",
+    "updatedAt": "2025-03-08T20:52:01.381Z",
+    "btcAddress": null,
+    "usdtAddress": null
+  },
+  {
+    "id": "cm81wbcc60001ukvxp09abe0i",
+    "userId": "cm81wbcc50000ukvx0ahkku3p",
+    "balance": 0,
+    "createdAt": "2025-03-09T17:16:51.890Z",
+    "updatedAt": "2025-03-09T17:16:51.890Z",
+    "btcAddress": null,
+    "usdtAddress": null
+  },
+  {
+    "id": "cm8s2zjzs0001uktgnbhmcnch",
+    "userId": "cm8s2zjzr0000uktgppc7ihis",
+    "balance": 0,
+    "createdAt": "2025-03-28T01:05:39.831Z",
+    "updatedAt": "2025-03-28T01:05:39.831Z",
+    "btcAddress": null,
+    "usdtAddress": null
+  },
+  {
+    "id": "cm80pfry30001ukbungxlkr7u",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "balance": 269226621,
+    "createdAt": "2025-03-08T21:16:35.259Z",
+    "updatedAt": "2025-03-28T15:02:04.447Z",
+    "btcAddress": null,
+    "usdtAddress": null
+  }
+]

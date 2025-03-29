@@ -1,0 +1,18 @@
+[
+  {
+    "id": "521822b4-a661-4cc6-8ace-82d60ec4b6c3",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "emailEnabled": true,
+    "pushEnabled": true,
+    "investmentNotifications": true,
+    "paymentNotifications": true,
+    "kycNotifications": true,
+    "referralNotifications": true,
+    "walletNotifications": true,
+    "systemNotifications": true,
+    "commissionNotifications": true,
+    "securityNotifications": true,
+    "createdAt": "2025-03-28T14:29:46.554Z",
+    "updatedAt": "2025-03-28T14:43:19.875Z"
+  }
+]
