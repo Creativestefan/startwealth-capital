@@ -8,9 +8,11 @@
   const prisma = new PrismaClient();
   
   try {
-    // Create admin user
-    const adminPassword = await bcrypt.hash("admin123456", 10);
-    // admin123456
+    // Create admin user with password from environment variable or fallback to a default for development
+    const adminPasswordRaw = process.env.SEED_ADMIN_PASSWORD || "admin123456";
+    const adminPassword = await bcrypt.hash(adminPasswordRaw, 10);
+    
+    // Note: In production, always use environment variables for credentials
     const admin = await prisma.user.upsert({
       where: { email: "admin@stratwealth.com" },
       update: {},
@@ -177,4 +179,3 @@
     await prisma.$disconnect();
   }
 })();
-

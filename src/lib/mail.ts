@@ -83,13 +83,10 @@ export async function sendVerificationEmail(email: string, otp: string) {
   }
 
   try {
-    // Log SMTP configuration (without password)
-    console.log("SMTP Configuration:", {
-      host: emailConfig.host,
-      port: emailConfig.port,
-      secure: emailConfig.secure,
-      user: emailConfig.auth.user,
-    })
+    // Only log SMTP connection attempt in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Attempting SMTP connection to:", emailConfig.host)
+    }
 
     // Verify SMTP connection before sending
     try {
@@ -200,10 +197,15 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
   try {
     const info = await transporter.sendMail(mailOptions)
-    console.log("Password reset email sent:", info.messageId)
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Password reset email sent to user")
+    } else {
+      // In production, only log that an email was sent without details
+      console.log("Password reset email sent successfully")
+    }
     return info
   } catch (error) {
-    console.error("Failed to send password reset email:", error)
+    console.error("Failed to send password reset email")
     throw new Error(`Failed to send password reset email: ${error instanceof Error ? error.message : "Unknown error"}`)
   }
 }
@@ -254,6 +256,11 @@ export async function sendNotificationEmail(email: string, title: string, messag
   }
 
   try {
+    // Only log SMTP connection attempt in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Attempting SMTP connection to:", emailConfig.host)
+    }
+
     // Verify SMTP connection before sending
     try {
       await transporter.verify()

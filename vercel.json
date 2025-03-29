@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "buildCommand": "npx prisma generate && next build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "regions": ["cdg1"],
+  "env": {
+    "NEXTAUTH_URL": "${NEXTAUTH_URL}",
+    "NEXTAUTH_SECRET": "${NEXTAUTH_SECRET}",
+    "DATABASE_URL": "${DATABASE_URL}"
+  }
+}

@@ -201,13 +201,22 @@ async function sendEmail(options: EmailOptions) {
       html: options.html,
     });
     
-    console.log(`Email sent to ${options.to} with subject: ${options.subject}`);
+    if (process.env.NODE_ENV === 'development') {
+      // In development, log with redacted email address
+      const redactedEmail = options.to.replace(/(.{2})(.*)(@.*)/, '$1***$3');
+      console.log(`Email sent to ${redactedEmail}`);
+    } else {
+      // In production, only log that an email was sent without recipient details
+      console.log(`Notification email sent successfully`);
+    }
     return true;
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error sending email');
     
-    // Log the email details for debugging
-    console.log(`Email would be sent from ${options.from || defaultFrom} to ${options.to} with subject "${options.subject}"`);
+    if (process.env.NODE_ENV === 'development') {
+      // Only log minimal debugging info in development
+      console.log(`Failed to send notification email`);
+    }
     
     return false;
   }
