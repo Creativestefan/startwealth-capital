@@ -1,12 +1,20 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const colors = require('colors/safe');
+
+// Simple colored console output
+const colors = {
+  reset: '\x1b[0m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  cyan: '\x1b[36m',
+  red: '\x1b[31m'
+};
 
 // Helper function to log with timestamp
-function log(message, colorFn = colors.white) {
+function log(message, color = colors.reset) {
   const timestamp = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-  console.log(colorFn(`[${timestamp}] ${message}`));
+  console.log(`${color}[${timestamp}] ${message}${colors.reset}`);
 }
 
 log('Starting Vercel build process...', colors.green);
@@ -16,42 +24,30 @@ log('Generating Prisma client...', colors.cyan);
 execSync('npx prisma generate', { stdio: 'inherit' });
 log('✅ Prisma client generated successfully!', colors.green);
 
-// Step 2: Setup SQLite database for deployment
-log('Setting up SQLite database for deployment...', colors.cyan);
+// Step 2: Setup database for deployment
+log('Setting up database for deployment...', colors.cyan);
 
-// Check if we're using SQLite (for Vercel deployment) or PostgreSQL (for production with Supabase)
-const isDatabaseUrlSet = !!process.env.DATABASE_URL && process.env.DATABASE_URL.includes('supabase');
+// Check if we're using Supabase or local PostgreSQL
+const isSupabaseUrlSet = !!process.env.DATABASE_URL && process.env.DATABASE_URL.includes('supabase');
+const isLocalPostgresUrlSet = !!process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost');
 
-if (!isDatabaseUrlSet) {
-  log('No Supabase DATABASE_URL detected, using SQLite for deployment', colors.yellow);
+// If no database URL is set, use the local PostgreSQL connection
+if (!process.env.DATABASE_URL) {
+  log('No DATABASE_URL detected, using local PostgreSQL for deployment', colors.yellow);
   
-  // Create a temporary .env file with SQLite configuration if it doesn't exist
+  // Create a temporary .env file with PostgreSQL configuration if it doesn't exist
   const envPath = path.join(process.cwd(), '.env');
   if (!fs.existsSync(envPath) || !fs.readFileSync(envPath, 'utf8').includes('DATABASE_URL')) {
-    log('Creating temporary .env with SQLite configuration...', colors.cyan);
-    fs.appendFileSync(envPath, '\nDATABASE_URL="file:./dev.db"\n');
-    log('✅ Temporary .env created with SQLite configuration', colors.green);
+    log('Creating temporary .env with local PostgreSQL configuration...', colors.cyan);
+    fs.appendFileSync(envPath, '\nDATABASE_URL="postgresql://startwealth:password123@localhost:5432/startwealth?schema=public"\n');
+    log('✅ Temporary .env created with local PostgreSQL configuration', colors.green);
   }
-  
-  // Create a temporary schema.prisma file with SQLite provider
-  const schemaPath = path.join(process.cwd(), 'prisma', 'schema.prisma');
-  let schemaContent = fs.readFileSync(schemaPath, 'utf8');
-  
-  // Replace PostgreSQL provider with SQLite
-  schemaContent = schemaContent.replace(
-    'provider = "postgresql"',
-    'provider = "sqlite"'
-  );
-  
-  // Create a backup of the original schema
-  fs.writeFileSync(`${schemaPath}.backup`, fs.readFileSync(schemaPath));
-  
-  // Write the modified schema
-  fs.writeFileSync(schemaPath, schemaContent);
-  log('✅ Modified schema.prisma to use SQLite provider', colors.green);
-  
-  // Run Prisma migrations
-  log('Running Prisma migrations for SQLite...', colors.cyan);
+}
+
+// Run database migrations if using local PostgreSQL
+if (isLocalPostgresUrlSet) {
+  log('Using local PostgreSQL database', colors.green);
+  log('Running Prisma migrations...', colors.cyan);
   try {
     execSync('npx prisma migrate deploy', { stdio: 'inherit' });
     log('✅ Prisma migrations applied successfully!', colors.green);
@@ -66,10 +62,12 @@ if (!isDatabaseUrlSet) {
       log('Continuing with the build process...', colors.yellow);
     }
   }
-} else {
+} else if (isSupabaseUrlSet) {
   log('Using Supabase PostgreSQL database', colors.green);
   // Skip migrations for now when using Supabase to avoid connection issues during build
   log('Skipping database migrations during build for Supabase deployment', colors.yellow);
+} else {
+  log('No valid database connection detected, build may fail', colors.red);
 }
 
 // Step 3: Create a temporary next.config.js without 'output: export'
@@ -95,15 +93,5 @@ log('Restoring original configuration files...', colors.cyan);
 
 // Restore next.config.js
 fs.writeFileSync(nextConfigPath, originalConfig);
-
-// Restore schema.prisma if we modified it
-if (!isDatabaseUrlSet) {
-  const schemaBackupPath = path.join(process.cwd(), 'prisma', 'schema.prisma.backup');
-  if (fs.existsSync(schemaBackupPath)) {
-    fs.copyFileSync(schemaBackupPath, path.join(process.cwd(), 'prisma', 'schema.prisma'));
-    fs.unlinkSync(schemaBackupPath);
-  }
-}
-
 log('✅ Original configuration files restored successfully!', colors.green);
 log('Build process completed successfully! 🎉', colors.green);
