@@ -41,16 +41,16 @@ if (process.env.DATABASE_URL) {
     }
   }
 } else {
-  log('No DATABASE_URL detected, setting Supabase connection string...');
-  // Set the Supabase connection string directly
-  process.env.DATABASE_URL = "postgresql://postgres:gybtag-5qemwe-kujViq@db.utctjrzcisanoxackbdt.supabase.co:5432/postgres";
-  log('Supabase connection string set successfully');
+  log('No DATABASE_URL detected, setting Supabase connection string with connection pooling...');
+  // Set the Supabase connection string directly with connection pooling
+  process.env.DATABASE_URL = "postgres://postgres:gybtag-5qemwe-kujViq@db.utctjrzcisanoxackbdt.supabase.co:6543/postgres?pgbouncer=true&connection_limit=1";
+  log('Supabase connection string with connection pooling set successfully');
   
   // Create a temporary .env file with the connection string
   const envPath = path.join(process.cwd(), '.env');
   if (!fs.existsSync(envPath) || !fs.readFileSync(envPath, 'utf8').includes('DATABASE_URL')) {
     log('Creating temporary .env with Supabase configuration...');
-    fs.appendFileSync(envPath, '\nDATABASE_URL="postgresql://postgres:gybtag-5qemwe-kujViq@db.utctjrzcisanoxackbdt.supabase.co:5432/postgres"\n');
+    fs.appendFileSync(envPath, '\nDATABASE_URL="postgres://postgres:gybtag-5qemwe-kujViq@db.utctjrzcisanoxackbdt.supabase.co:6543/postgres?pgbouncer=true&connection_limit=1"\n');
     log('✅ Temporary .env created with Supabase configuration');
   }
 }
