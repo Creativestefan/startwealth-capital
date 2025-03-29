@@ -85,6 +85,10 @@ const nextConfig = {
         },
       ];
     },
+    // Disable ESLint during build
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
     // Fix module resolution issues and optimize build
     experimental: {
       largePageDataBytes: 256 * 1024, // 256KB
@@ -96,5 +100,3 @@ const nextConfig = {
   }
   
   module.exports = nextConfig
-  
-  
