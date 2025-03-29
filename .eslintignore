@@ -21,3 +21,10 @@ postcss.config.js
 
 # Prisma
 prisma/seed.ts
+
+# Ignore all source files during build
+src/**/*
+*.ts
+*.tsx
+*.js
+*.jsx
