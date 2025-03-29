@@ -70,6 +70,7 @@ export const authConfig: NextAuthOptions = {
       },
       async authorize(credentials) {
         console.log("Authorize attempt for:", credentials?.email);
+        console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set (first 10 chars): " + process.env.DATABASE_URL.substring(0, 10) + "..." : "Not set");
         
         if (!credentials?.email || !credentials?.password) {
           console.log("Missing credentials");
@@ -77,6 +78,7 @@ export const authConfig: NextAuthOptions = {
         }
 
         try {
+          console.log("Attempting to find user in database...");
           const user = await prisma.user.findUnique({
             where: {
               email: credentials.email,
@@ -95,7 +97,7 @@ export const authConfig: NextAuthOptions = {
 
           // Log the password comparison (don't log actual passwords in production)
           console.log("Comparing password for:", user.email);
-          console.log(credentials.password, user.password);
+          console.log("Password hash in DB:", user.password ? user.password.substring(0, 10) + "..." : "No password hash");
           
           const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
           console.log("Password valid:", isPasswordValid);
@@ -169,4 +171,3 @@ export const authConfig: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 }
-
