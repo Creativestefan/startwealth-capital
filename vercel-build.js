@@ -13,7 +13,7 @@ log('Starting Vercel build process...');
 // Step 1: Generate Prisma client
 log('Generating Prisma client...');
 execSync('npx prisma generate', { stdio: 'inherit' });
-log(' Prisma client generated successfully!');
+log('✅ Prisma client generated successfully!');
 
 // Step 2: Setup database for deployment
 log('Setting up database for deployment...');
@@ -31,7 +31,7 @@ if (!process.env.DATABASE_URL) {
   if (!fs.existsSync(envPath) || !fs.readFileSync(envPath, 'utf8').includes('DATABASE_URL')) {
     log('Creating temporary .env with local PostgreSQL configuration...');
     fs.appendFileSync(envPath, '\nDATABASE_URL="postgresql://startwealth:password123@localhost:5432/startwealth?schema=public"\n');
-    log(' Temporary .env created with local PostgreSQL configuration');
+    log('✅ Temporary .env created with local PostgreSQL configuration');
   }
 }
 
@@ -41,13 +41,13 @@ if (isLocalPostgresUrlSet) {
   log('Running Prisma migrations...');
   try {
     execSync('npx prisma migrate deploy', { stdio: 'inherit' });
-    log(' Prisma migrations applied successfully!');
+    log('✅ Prisma migrations applied successfully!');
   } catch (error) {
     log(` Warning: Prisma migrations failed: ${error.message}`);
     log('Attempting to create database schema from scratch...');
     try {
       execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
-      log(' Database schema created successfully!');
+      log('✅ Database schema created successfully!');
     } catch (pushError) {
       log(` Error creating database schema: ${pushError.message}`);
       log('Continuing with the build process...');
@@ -75,11 +75,11 @@ let modifiedConfig = originalConfig.replace(/output: ['"]export['"],?\n?/g, '');
 // Add more debugging options to the Next.js config
 modifiedConfig = modifiedConfig.replace(
   /const nextConfig = {/,
-  'const nextConfig = {\n  // Added for debugging build issues\n  distDir: ".next",\n  typescript: { ignoreBuildErrors: true },\n  eslint: { ignoreDuringBuilds: true },'
+  'const nextConfig = {\n  // Added for debugging build issues\n  distDir: ".next",\n  typescript: { ignoreBuildErrors: true },\n  eslint: { ignoreDuringBuilds: true },\n  output: "standalone",'
 );
 
 fs.writeFileSync(nextConfigPath, modifiedConfig);
-log(' Temporary Next.js configuration created successfully!');
+log('✅ Temporary Next.js configuration created successfully!');
 
 // Step 4: Run the Next.js build
 log('Running Next.js build...');
@@ -90,14 +90,57 @@ try {
     if (fs.existsSync(path.join(process.cwd(), '.next'))) {
       execSync('rm -rf .next', { stdio: 'inherit' });
     }
-    log(' Build directory cleaned');
+    log('✅ Build directory cleaned');
   } catch (cleanError) {
     log(`Warning: Failed to clean build directory: ${cleanError.message}`);
   }
 
   // Run the build with more verbose output
   execSync('NODE_OPTIONS="--max-old-space-size=4096" next build', { stdio: 'inherit' });
-  log(' Next.js build completed successfully!');
+  log('✅ Next.js build completed successfully!');
+  
+  // Fix for missing client-reference-manifest.js files
+  log('Checking for missing client reference manifest files...');
+  const marketingDir = path.join(process.cwd(), '.next', 'server', 'app', '(marketing)');
+  
+  if (fs.existsSync(marketingDir)) {
+    // Create empty client reference manifest files if they don't exist
+    const manifestFiles = [
+      'page_client-reference-manifest.js',
+      'green-energy-investments/page_client-reference-manifest.js',
+      'markets-investments/page_client-reference-manifest.js',
+      'property-investments/page_client-reference-manifest.js'
+    ];
+    
+    manifestFiles.forEach(file => {
+      const filePath = path.join(marketingDir, file);
+      const dirPath = path.dirname(filePath);
+      
+      if (!fs.existsSync(dirPath)) {
+        try {
+          fs.mkdirSync(dirPath, { recursive: true });
+          log(`Created directory: ${dirPath}`);
+        } catch (mkdirError) {
+          log(`Warning: Failed to create directory ${dirPath}: ${mkdirError.message}`);
+        }
+      }
+      
+      if (!fs.existsSync(filePath)) {
+        try {
+          // Create an empty client reference manifest file
+          fs.writeFileSync(filePath, 'module.exports = {\n  ssrModuleMapping: {},\n  edgeSSRModuleMapping: {},\n  clientModules: {},\n  entryCSSFiles: {}\n};');
+          log(`Created missing manifest file: ${file}`);
+        } catch (writeError) {
+          log(`Warning: Failed to create manifest file ${file}: ${writeError.message}`);
+        }
+      }
+    });
+    
+    log('✅ Client reference manifest files checked and fixed');
+  } else {
+    log(`Warning: Marketing directory not found at ${marketingDir}`);
+  }
+  
 } catch (buildError) {
   log(`Error during Next.js build: ${buildError.message}`);
   
@@ -123,5 +166,5 @@ log('Restoring original configuration files...');
 
 // Restore next.config.js
 fs.writeFileSync(nextConfigPath, originalConfig);
-log(' Original configuration files restored successfully!');
-log('Build process completed successfully! ');
+log('✅ Original configuration files restored successfully!');
+log('Build process completed! 🎉');
