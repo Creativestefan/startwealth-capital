@@ -19,11 +19,17 @@ log('✅ Prisma client generated successfully!');
 log('Setting up database for deployment...');
 
 // Check if we're using Supabase or local PostgreSQL
-const isSupabaseUrlSet = !!process.env.DATABASE_URL && process.env.DATABASE_URL.includes('supabase');
+const isSupabaseUrlSet = !!process.env.DATABASE_URL && 
+  (process.env.DATABASE_URL.includes('supabase') || process.env.DATABASE_URL.includes('utctjrzcisanoxackbdt'));
 const isLocalPostgresUrlSet = !!process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost');
 
-// If no database URL is set, use the local PostgreSQL connection
-if (!process.env.DATABASE_URL) {
+// Log database connection information (without exposing full credentials)
+if (process.env.DATABASE_URL) {
+  const dbUrlStart = process.env.DATABASE_URL.substring(0, 15);
+  const dbUrlEnd = process.env.DATABASE_URL.substring(process.env.DATABASE_URL.length - 15);
+  log(`Database URL detected: ${dbUrlStart}...${dbUrlEnd}`);
+  log(`Is Supabase URL: ${isSupabaseUrlSet}, Is Local URL: ${isLocalPostgresUrlSet}`);
+} else {
   log('No DATABASE_URL detected, using local PostgreSQL for deployment');
   
   // Create a temporary .env file with PostgreSQL configuration if it doesn't exist
