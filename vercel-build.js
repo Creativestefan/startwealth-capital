@@ -29,15 +29,29 @@ if (process.env.DATABASE_URL) {
   const dbUrlEnd = process.env.DATABASE_URL.substring(process.env.DATABASE_URL.length - 15);
   log(`Database URL detected: ${dbUrlStart}...${dbUrlEnd}`);
   log(`Is Supabase URL: ${isSupabaseUrlSet}, Is Local URL: ${isLocalPostgresUrlSet}`);
+
+  // Check if DATABASE_URL starts with the correct protocol
+  if (!process.env.DATABASE_URL.startsWith('postgresql://') && !process.env.DATABASE_URL.startsWith('postgres://')) {
+    log('WARNING: DATABASE_URL does not start with postgresql:// or postgres://');
+    // Try to fix it by prepending the protocol
+    if (process.env.DATABASE_URL.includes('@') && process.env.DATABASE_URL.includes(':')) {
+      log('Attempting to fix DATABASE_URL by adding protocol...');
+      process.env.DATABASE_URL = `postgresql://${process.env.DATABASE_URL}`;
+      log(`Fixed DATABASE_URL: ${process.env.DATABASE_URL.substring(0, 15)}...`);
+    }
+  }
 } else {
-  log('No DATABASE_URL detected, using local PostgreSQL for deployment');
+  log('No DATABASE_URL detected, setting Supabase connection string...');
+  // Set the Supabase connection string directly
+  process.env.DATABASE_URL = "postgresql://postgres:gybtag-5qemwe-kujViq@db.utctjrzcisanoxackbdt.supabase.co:5432/postgres";
+  log('Supabase connection string set successfully');
   
-  // Create a temporary .env file with PostgreSQL configuration if it doesn't exist
+  // Create a temporary .env file with the connection string
   const envPath = path.join(process.cwd(), '.env');
   if (!fs.existsSync(envPath) || !fs.readFileSync(envPath, 'utf8').includes('DATABASE_URL')) {
-    log('Creating temporary .env with local PostgreSQL configuration...');
-    fs.appendFileSync(envPath, '\nDATABASE_URL="postgresql://startwealth:password123@localhost:5432/startwealth?schema=public"\n');
-    log('✅ Temporary .env created with local PostgreSQL configuration');
+    log('Creating temporary .env with Supabase configuration...');
+    fs.appendFileSync(envPath, '\nDATABASE_URL="postgresql://postgres:gybtag-5qemwe-kujViq@db.utctjrzcisanoxackbdt.supabase.co:5432/postgres"\n');
+    log('✅ Temporary .env created with Supabase configuration');
   }
 }
 
