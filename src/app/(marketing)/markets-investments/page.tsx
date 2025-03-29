@@ -8,15 +8,21 @@ import { BarChart3, TrendingUp, LineChart, PieChart, DollarSign, Percent } from 
 import { getInvestmentPlans } from '@/lib/real-estate/actions/investments'
 import { InvestmentStatus } from '@prisma/client'
 
+// Force dynamic rendering to ensure we get fresh data on each request
+export const dynamic = 'force-dynamic';
+
 export default async function MarketsInvestmentsPage() {
-  // Fetch available investment plans from the database
-  const plansResponse = await getInvestmentPlans()
+  let featuredPlans = [];
   
-  // Get up to 6 investment plans for display
-  const featuredPlans = plansResponse.success && plansResponse.data ? 
-    plansResponse.data
-      .filter((plan: any) => plan.status === InvestmentStatus.ACTIVE)
-      .slice(0, 6) : []
+  try {
+    const plansResponse = await getInvestmentPlans()
+    featuredPlans = plansResponse.success && plansResponse.data ? 
+      plansResponse.data
+        .filter((plan: any) => plan.status === InvestmentStatus.ACTIVE)
+        .slice(0, 6) : []
+  } catch (error) {
+    console.error('Error fetching investment plans:', error)
+  }
 
   return (
     <MarketingLayout>

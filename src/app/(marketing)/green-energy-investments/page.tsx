@@ -7,16 +7,23 @@ import { greenEnergyImage, placeholderImage } from '@/lib/marketing-images'
 import { BatteryCharging, Wind, Sun, Leaf, BarChart3, Zap } from 'lucide-react'
 import { getAllEquipment } from '@/lib/green-energy/actions/equipment'
 import { EquipmentStatus } from '@prisma/client'
+import type { SerializedEquipment } from '@/lib/green-energy/types'
+
+// Force dynamic rendering to ensure we get fresh data on each request
+export const dynamic = 'force-dynamic';
 
 export default async function GreenEnergyInvestmentsPage() {
-  // Fetch available equipment from the database
-  const equipmentResponse = await getAllEquipment()
+  let featuredEquipment: SerializedEquipment[] = [];
   
-  // Get up to 6 equipment items for display
-  const featuredEquipment = equipmentResponse.success && equipmentResponse.data ? 
-    equipmentResponse.data
-      .filter(equipment => equipment.status === EquipmentStatus.AVAILABLE)
-      .slice(0, 6) : []
+  try {
+    const equipmentResponse = await getAllEquipment()
+    featuredEquipment = equipmentResponse.success && equipmentResponse.data ? 
+      equipmentResponse.data
+        .filter(equipment => equipment.status === EquipmentStatus.AVAILABLE)
+        .slice(0, 6) : []
+  } catch (error) {
+    console.error('Error fetching equipment:', error)
+  }
 
   return (
     <MarketingLayout>
@@ -32,10 +39,10 @@ export default async function GreenEnergyInvestmentsPage() {
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <Button asChild size="lg" className="bg-white hover:bg-white/90 text-primary font-semibold">
-                <Link href="/green-energy-investments/register">Start Investing</Link>
+                <Link href="/register">Start Investing</Link>
               </Button>
               <Button asChild variant="secondary" size="lg" className="bg-green-500 hover:bg-green-600 text-white font-semibold border-0">
-                <Link href="/green-energy-investments/contact">Contact Our Team</Link>
+                <Link href="/contact">Contact Our Team</Link>
               </Button>
             </div>
           </div>
@@ -325,10 +332,10 @@ export default async function GreenEnergyInvestmentsPage() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
               <Button asChild size="lg" className="bg-white hover:bg-white/90 text-primary font-semibold">
-                <Link href="/green-energy-investments/register">Start Investing</Link>
+                <Link href="/register">Start Investing</Link>
               </Button>
               <Button asChild variant="secondary" size="lg" className="bg-green-500 hover:bg-green-600 text-white font-semibold border-0">
-                <Link href="/green-energy-investments/contact">Schedule a Consultation</Link>
+                <Link href="/contact">Schedule a Consultation</Link>
               </Button>
             </div>
           </div>

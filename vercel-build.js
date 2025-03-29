@@ -1,117 +1,109 @@
-const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
+const colors = require('colors/safe');
 
-// Colors for console output
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m',
-};
-
-// Helper function to log with colors
-function log(message, color = colors.reset) {
-  console.log(`${color}${message}${colors.reset}`);
+// Helper function to log with timestamp
+function log(message, colorFn = colors.white) {
+  const timestamp = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+  console.log(colorFn(`[${timestamp}] ${message}`));
 }
 
-// Create a temporary next.config.js that works with dynamic routes
-function createTempConfig() {
-  log('Creating temporary Next.js configuration...', colors.cyan);
+log('Starting Vercel build process...', colors.green);
+
+// Step 1: Generate Prisma client
+log('Generating Prisma client...', colors.cyan);
+execSync('npx prisma generate', { stdio: 'inherit' });
+log('✅ Prisma client generated successfully!', colors.green);
+
+// Step 2: Setup SQLite database for deployment
+log('Setting up SQLite database for deployment...', colors.cyan);
+
+// Check if we're using SQLite (for Vercel deployment) or PostgreSQL (for production with Supabase)
+const isDatabaseUrlSet = !!process.env.DATABASE_URL && process.env.DATABASE_URL.includes('supabase');
+
+if (!isDatabaseUrlSet) {
+  log('No Supabase DATABASE_URL detected, using SQLite for deployment', colors.yellow);
   
-  // Backup the original config
-  const configPath = path.join(process.cwd(), 'next.config.js');
-  const backupPath = path.join(process.cwd(), 'next.config.backup.js');
-  
-  if (fs.existsSync(configPath)) {
-    fs.copyFileSync(configPath, backupPath);
-    log('Original Next.js configuration backed up', colors.cyan);
+  // Create a temporary .env file with SQLite configuration if it doesn't exist
+  const envPath = path.join(process.cwd(), '.env');
+  if (!fs.existsSync(envPath) || !fs.readFileSync(envPath, 'utf8').includes('DATABASE_URL')) {
+    log('Creating temporary .env with SQLite configuration...', colors.cyan);
+    fs.appendFileSync(envPath, '\nDATABASE_URL="file:./dev.db"\n');
+    log('✅ Temporary .env created with SQLite configuration', colors.green);
   }
   
-  // Create a simplified config that works with dynamic routes
-  const tempConfig = `
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "**.r2.cloudflarestorage.com" },
-      { protocol: "https", hostname: "placehold.co" },
-      { protocol: "https", hostname: "stratwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com" },
-      { protocol: "https", hostname: "3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com" },
-      { protocol: "https", hostname: "stratwealth.r2.cloudflarestorage.com" },
-      { protocol: "http", hostname: "localhost" },
-    ],
-  },
-  // Disable ESLint during build
-  eslint: { ignoreDuringBuilds: true },
-  // Disable TypeScript checking during build
-  typescript: { ignoreBuildErrors: true },
-  // Fix module resolution issues
-  experimental: { largePageDataBytes: 256 * 1024 },
-  // Other settings
-  reactStrictMode: true,
-  poweredByHeader: false,
-  distDir: '.next',
-};
-
-module.exports = nextConfig;
-  `;
+  // Create a temporary schema.prisma file with SQLite provider
+  const schemaPath = path.join(process.cwd(), 'prisma', 'schema.prisma');
+  let schemaContent = fs.readFileSync(schemaPath, 'utf8');
   
-  fs.writeFileSync(configPath, tempConfig, 'utf8');
-  log('Temporary Next.js configuration created', colors.cyan);
-}
-
-// Restore the original next.config.js
-function restoreOriginalConfig() {
-  log('Restoring original Next.js configuration...', colors.cyan);
+  // Replace PostgreSQL provider with SQLite
+  schemaContent = schemaContent.replace(
+    'provider = "postgresql"',
+    'provider = "sqlite"'
+  );
   
-  const configPath = path.join(process.cwd(), 'next.config.js');
-  const backupPath = path.join(process.cwd(), 'next.config.backup.js');
+  // Create a backup of the original schema
+  fs.writeFileSync(`${schemaPath}.backup`, fs.readFileSync(schemaPath));
   
-  if (fs.existsSync(backupPath)) {
-    fs.copyFileSync(backupPath, configPath);
-    fs.unlinkSync(backupPath);
-    log('Original Next.js configuration restored', colors.cyan);
-  }
-}
-
-// Main build function
-async function build() {
+  // Write the modified schema
+  fs.writeFileSync(schemaPath, schemaContent);
+  log('✅ Modified schema.prisma to use SQLite provider', colors.green);
+  
+  // Run Prisma migrations
+  log('Running Prisma migrations for SQLite...', colors.cyan);
   try {
-    // Step 1: Generate Prisma client
-    log('Generating Prisma client...', colors.cyan);
-    execSync('npx prisma generate', { stdio: 'inherit' });
-    log('u2705 Prisma client generated successfully!', colors.green);
-
-    // Step 2: Create temporary Next.js configuration
-    createTempConfig();
-
-    // Skip database migrations for now
-    log('Skipping database migrations for deployment..', colors.yellow);
-    
-    // Step 3: Run the Next.js build with environment variables set
-    log('Building Next.js application...', colors.cyan);
-    execSync('next build', { 
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        NEXT_DISABLE_ESLINT: 'true',
-        NEXT_DISABLE_TYPECHECK: 'true'
-      }
-    });
-    
-    log('u2705 Build completed successfully!', colors.green);
+    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+    log('✅ Prisma migrations applied successfully!', colors.green);
   } catch (error) {
-    log(`u274c Build failed: ${error.message}`, colors.yellow);
-    process.exit(1);
-  } finally {
-    // Always restore the original configuration
-    restoreOriginalConfig();
+    log(`⚠️ Warning: Prisma migrations failed: ${error.message}`, colors.yellow);
+    log('Attempting to create database schema from scratch...', colors.yellow);
+    try {
+      execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
+      log('✅ Database schema created successfully!', colors.green);
+    } catch (pushError) {
+      log(`❌ Error creating database schema: ${pushError.message}`, colors.red);
+      log('Continuing with the build process...', colors.yellow);
+    }
+  }
+} else {
+  log('Using Supabase PostgreSQL database', colors.green);
+  // Skip migrations for now when using Supabase to avoid connection issues during build
+  log('Skipping database migrations during build for Supabase deployment', colors.yellow);
+}
+
+// Step 3: Create a temporary next.config.js without 'output: export'
+log('Creating temporary Next.js configuration...', colors.cyan);
+const nextConfigPath = path.join(process.cwd(), 'next.config.js');
+const originalConfig = fs.readFileSync(nextConfigPath, 'utf8');
+
+// Create a backup of the original config
+fs.writeFileSync(`${nextConfigPath}.backup`, originalConfig);
+
+// Create a modified config without 'output: export'
+const modifiedConfig = originalConfig.replace(/output: ['"]export['"],?\n?/g, '');
+fs.writeFileSync(nextConfigPath, modifiedConfig);
+log('✅ Temporary Next.js configuration created successfully!', colors.green);
+
+// Step 4: Run the Next.js build
+log('Running Next.js build...', colors.cyan);
+execSync('next build', { stdio: 'inherit' });
+log('✅ Next.js build completed successfully!', colors.green);
+
+// Step 5: Restore original files
+log('Restoring original configuration files...', colors.cyan);
+
+// Restore next.config.js
+fs.writeFileSync(nextConfigPath, originalConfig);
+
+// Restore schema.prisma if we modified it
+if (!isDatabaseUrlSet) {
+  const schemaBackupPath = path.join(process.cwd(), 'prisma', 'schema.prisma.backup');
+  if (fs.existsSync(schemaBackupPath)) {
+    fs.copyFileSync(schemaBackupPath, path.join(process.cwd(), 'prisma', 'schema.prisma'));
+    fs.unlinkSync(schemaBackupPath);
   }
 }
 
-// Run the build
-build();
+log('✅ Original configuration files restored successfully!', colors.green);
+log('Build process completed successfully! 🎉', colors.green);
