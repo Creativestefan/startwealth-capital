@@ -26,7 +26,8 @@
   },
   "build": {
     "env": {
-      "DATABASE_URL": "postgresql://postgres.utctjrzcisanoxackbdt:AXdBBB1Y8umPhZzj@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+      "DATABASE_URL": "postgresql://postgres.utctjrzcisanoxackbdt:AXdBBB1Y8umPhZzj@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true",
+      "NODE_OPTIONS": "--max-old-space-size=4096"
     }
   }
 }
