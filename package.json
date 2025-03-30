@@ -6,11 +6,12 @@
     "dev": "next dev",
     "build": "node custom-build.js",
     "build:local": "node custom-build.js",
-    "build:vercel": "node vercel-build.js",
+    "build:vercel": "node fix-env.js && node vercel-build.js",
     "build:production": "npx prisma generate && npx prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "npx prisma generate"
+    "postinstall": "npx prisma generate",
+    "fix-env": "node fix-env.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.758.0",

@@ -43,66 +43,40 @@ if (process.env.DATABASE_URL) {
 } else {
   log('No DATABASE_URL detected, setting Supabase connection string with connection pooling...');
   // Set the Supabase connection string directly with connection pooling
-  process.env.DATABASE_URL = "postgres://postgres:gybtag-5qemwe-kujViq@db.utctjrzcisanoxackbdt.supabase.co:6543/postgres?pgbouncer=true&connection_limit=1";
+  process.env.DATABASE_URL = "postgresql://postgres.utctjrzcisanoxackbdt:AXdBBB1Y8umPhZzj@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true";
   log('Supabase connection string with connection pooling set successfully');
-  
-  // Create a temporary .env file with the connection string
-  const envPath = path.join(process.cwd(), '.env');
-  if (!fs.existsSync(envPath) || !fs.readFileSync(envPath, 'utf8').includes('DATABASE_URL')) {
-    log('Creating temporary .env with Supabase configuration...');
-    fs.appendFileSync(envPath, '\nDATABASE_URL="postgres://postgres:gybtag-5qemwe-kujViq@db.utctjrzcisanoxackbdt.supabase.co:6543/postgres?pgbouncer=true&connection_limit=1"\n');
-    log('✅ Temporary .env created with Supabase configuration');
-  }
 }
 
-// Run database migrations if using local PostgreSQL
-if (isLocalPostgresUrlSet) {
-  log('Using local PostgreSQL database');
-  log('Running Prisma migrations...');
-  try {
-    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
-    log('✅ Prisma migrations applied successfully!');
-  } catch (error) {
-    log(` Warning: Prisma migrations failed: ${error.message}`);
-    log('Attempting to create database schema from scratch...');
-    try {
-      execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
-      log('✅ Database schema created successfully!');
-    } catch (pushError) {
-      log(` Error creating database schema: ${pushError.message}`);
-      log('Continuing with the build process...');
-    }
+// Step 3: Ensure Cloudflare R2 environment variables are set
+log('Checking Cloudflare R2 environment variables...');
+const requiredR2Vars = [
+  'CLOUDFLARE_R2_ACCESS_KEY_ID',
+  'CLOUDFLARE_R2_SECRET_ACCESS_KEY',
+  'CLOUDFLARE_R2_ENDPOINT',
+  'CLOUDFLARE_R2_BUCKET_NAME',
+  'CLOUDFLARE_PUBLIC_DOMAIN'
+];
+
+requiredR2Vars.forEach(varName => {
+  if (!process.env[varName]) {
+    log(`WARNING: ${varName} is not set in environment variables`);
+  } else {
+    log(`✅ ${varName} is set`);
   }
-} else if (isSupabaseUrlSet) {
-  log('Using Supabase PostgreSQL database');
-  // Skip migrations for now when using Supabase to avoid connection issues during build
-  log('Skipping database migrations during build for Supabase deployment');
-} else {
-  log('No valid database connection detected, build may fail');
+});
+
+// Step 4: Run database migrations
+log('Running database migrations...');
+try {
+  execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+  log('✅ Database migrations completed successfully!');
+} catch (error) {
+  log(`⚠️ Error running migrations: ${error.message}`);
+  log('Continuing with build process despite migration error...');
 }
 
-// Step 3: Create a temporary next.config.js without 'output: export'
-log('Creating temporary Next.js configuration...');
-const nextConfigPath = path.join(process.cwd(), 'next.config.js');
-const originalConfig = fs.readFileSync(nextConfigPath, 'utf8');
-
-// Create a backup of the original config
-fs.writeFileSync(`${nextConfigPath}.backup`, originalConfig);
-
-// Create a modified config without 'output: export' and with more debug options
-let modifiedConfig = originalConfig.replace(/output: ['"]export['"],?\n?/g, '');
-
-// Add more debugging options to the Next.js config
-modifiedConfig = modifiedConfig.replace(
-  /const nextConfig = {/,
-  'const nextConfig = {\n  // Added for debugging build issues\n  distDir: ".next",\n  typescript: { ignoreBuildErrors: true },\n  eslint: { ignoreDuringBuilds: true },\n  output: "standalone",'
-);
-
-fs.writeFileSync(nextConfigPath, modifiedConfig);
-log('✅ Temporary Next.js configuration created successfully!');
-
-// Step 4: Run the Next.js build
-log('Running Next.js build...');
+// Step 5: Build the Next.js application
+log('Building Next.js application...');
 try {
   // First, try cleaning the .next directory
   try {
@@ -110,81 +84,22 @@ try {
     if (fs.existsSync(path.join(process.cwd(), '.next'))) {
       execSync('rm -rf .next', { stdio: 'inherit' });
     }
-    log('✅ Build directory cleaned');
+    log('✅ Previous build artifacts cleaned successfully!');
   } catch (cleanError) {
-    log(`Warning: Failed to clean build directory: ${cleanError.message}`);
+    log(`⚠️ Warning: Could not clean previous build artifacts: ${cleanError.message}`);
+    // Continue anyway
   }
 
-  // Run the build with more verbose output
-  execSync('NODE_OPTIONS="--max-old-space-size=4096" next build', { stdio: 'inherit' });
-  log('✅ Next.js build completed successfully!');
-  
-  // Fix for missing client-reference-manifest.js files
-  log('Checking for missing client reference manifest files...');
-  const marketingDir = path.join(process.cwd(), '.next', 'server', 'app', '(marketing)');
-  
-  if (fs.existsSync(marketingDir)) {
-    // Create empty client reference manifest files if they don't exist
-    const manifestFiles = [
-      'page_client-reference-manifest.js',
-      'green-energy-investments/page_client-reference-manifest.js',
-      'markets-investments/page_client-reference-manifest.js',
-      'property-investments/page_client-reference-manifest.js'
-    ];
-    
-    manifestFiles.forEach(file => {
-      const filePath = path.join(marketingDir, file);
-      const dirPath = path.dirname(filePath);
-      
-      if (!fs.existsSync(dirPath)) {
-        try {
-          fs.mkdirSync(dirPath, { recursive: true });
-          log(`Created directory: ${dirPath}`);
-        } catch (mkdirError) {
-          log(`Warning: Failed to create directory ${dirPath}: ${mkdirError.message}`);
-        }
-      }
-      
-      if (!fs.existsSync(filePath)) {
-        try {
-          // Create an empty client reference manifest file
-          fs.writeFileSync(filePath, 'module.exports = {\n  ssrModuleMapping: {},\n  edgeSSRModuleMapping: {},\n  clientModules: {},\n  entryCSSFiles: {}\n};');
-          log(`Created missing manifest file: ${file}`);
-        } catch (writeError) {
-          log(`Warning: Failed to create manifest file ${file}: ${writeError.message}`);
-        }
-      }
-    });
-    
-    log('✅ Client reference manifest files checked and fixed');
-  } else {
-    log(`Warning: Marketing directory not found at ${marketingDir}`);
-  }
-  
+  // Set NODE_OPTIONS to increase memory limit
+  process.env.NODE_OPTIONS = '--max-old-space-size=4096';
+  log('Set NODE_OPTIONS to increase memory limit to 4GB');
+
+  // Run the Next.js build
+  execSync('next build', { stdio: 'inherit' });
+  log('✅ Next.js application built successfully!');
 } catch (buildError) {
-  log(`Error during Next.js build: ${buildError.message}`);
-  
-  // Try to list the contents of the .next directory for debugging
-  try {
-    if (fs.existsSync(path.join(process.cwd(), '.next'))) {
-      log('Contents of .next directory:');
-      const nextDirContents = execSync('find .next -type f -name "*.js" | sort', { encoding: 'utf8' });
-      console.log(nextDirContents);
-    } else {
-      log('The .next directory does not exist');
-    }
-  } catch (listError) {
-    log(`Could not list .next directory contents: ${listError.message}`);
-  }
-  
-  // Continue despite the error to see if we can complete the deployment
-  log('Continuing with the build process despite errors...');
+  log(`❌ ERROR: Failed to build Next.js application: ${buildError.message}`);
+  process.exit(1); // Exit with error code
 }
 
-// Step 5: Restore original files
-log('Restoring original configuration files...');
-
-// Restore next.config.js
-fs.writeFileSync(nextConfigPath, originalConfig);
-log('✅ Original configuration files restored successfully!');
-log('Build process completed! 🎉');
+log('✅ Vercel build process completed successfully!');
