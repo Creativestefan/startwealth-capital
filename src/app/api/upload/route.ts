@@ -4,20 +4,24 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getServerSession } from "next-auth";
 import { authConfig } from "@/lib/auth.config";
 
-// Initialize S3 client for Cloudflare R2
+// Initialize S3 client for Cloudflare R2 following official documentation
+const ACCOUNT_ID = '3c3049b93386c9d1425392ee596bc359';
+const ACCESS_KEY_ID = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || "";
+const SECRET_ACCESS_KEY = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || "";
+
 const s3Client = new S3Client({
   region: "auto",
-  endpoint: `https://${process.env.CLOUDFLARE_R2_ENDPOINT}`,
+  endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,
   credentials: {
-    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || "",
+    accessKeyId: ACCESS_KEY_ID,
+    secretAccessKey: SECRET_ACCESS_KEY,
   },
 });
 
 const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || "";
 
 /**
- * Generates a unique filename for uploading to R2
+ * Generates a unique filename for uploading
  */
 function generateUniqueFilename(originalFilename: string): string {
   const extension = originalFilename.split('.').pop() || 'jpg';
@@ -42,6 +46,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    // Log the file details for debugging
+    console.log('Uploading file:', {
+      name: file.name,
+      type: file.type,
+      size: file.size
+    });
+
     // Generate a unique filename
     const uniqueFilename = generateUniqueFilename(file.name);
     const key = `uploads/${uniqueFilename}`;
@@ -56,19 +67,28 @@ export async function POST(request: NextRequest) {
       Key: key,
       Body: buffer,
       ContentType: file.type,
+      // Make the object publicly accessible
+      ACL: 'public-read'
+    });
+
+    console.log('Uploading to R2 with:', {
+      bucket: bucketName,
+      key: key,
+      endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`
     });
 
     await s3Client.send(command);
     
-    // Generate the public URL
-    const publicUrl = `https://${bucketName}.${process.env.CLOUDFLARE_R2_ENDPOINT}/uploads/${uniqueFilename}`;
+    // Generate the public URL - use the public bucket URL format
+    const publicUrl = `https://${bucketName}.${ACCOUNT_ID}.r2.dev/${key}`;
     
-    // Generate a proxied URL that goes through our API
-    const proxiedUrl = `/api/image-proxy?url=${encodeURIComponent(publicUrl)}`;
+    // For debugging
+    console.log('Generated public URL:', publicUrl);
     
+    // Return the direct URL
     return NextResponse.json({ 
       success: true, 
-      url: proxiedUrl,
+      url: publicUrl,
       originalUrl: publicUrl
     });
   } catch (error) {
@@ -79,4 +99,3 @@ export async function POST(request: NextRequest) {
     }, { status: 500 });
   }
 }
-

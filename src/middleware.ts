@@ -36,14 +36,14 @@ export default withAuth(
     }
 
     // Special handling for login page with admin user
-    if (pathname === "/login" && token?.role === "ADMIN") {
+    if (pathname === "/login" && (token?.role === "ADMIN" || token?.role?.toUpperCase() === "ADMIN")) {
       console.log("Admin user already logged in and trying to access login page")
       return NextResponse.redirect(new URL("/admin/dashboard", request.url))
     }
 
     // Admin users handling - special case for admin users
-    if (token?.role === "ADMIN") {
-      console.log("Admin user detected")
+    if (token?.role === "ADMIN" || token?.role?.toUpperCase() === "ADMIN") {
+      console.log("Admin user detected - Role:", token?.role, "Type:", typeof token?.role)
       
       // If admin is trying to access any dashboard routes, redirect to admin dashboard
       if (pathname === "/dashboard" || pathname.startsWith("/dashboard/") || pathname === "/" || pathname === "/login") {
@@ -130,7 +130,10 @@ export default withAuth(
 
       // Verify admin role - handle different role types safely
       const userRole = token.role as UserRole
-      if (userRole !== "ADMIN") {
+      console.log("Admin route access - user role:", userRole, "Type:", typeof userRole)
+      
+      // More permissive check for admin role
+      if (userRole !== "ADMIN" && userRole?.toUpperCase() !== "ADMIN") {
         console.log("Unauthorized access to admin route, redirecting to dashboard")
         return NextResponse.redirect(new URL("/dashboard", request.url))
       }

@@ -12,9 +12,14 @@ if (!process.env.CLOUDFLARE_R2_ENDPOINT) {
   throw new Error("CLOUDFLARE_R2_ENDPOINT is not defined")
 }
 
+// Ensure the endpoint has the correct format
+const endpoint = process.env.CLOUDFLARE_R2_ENDPOINT.startsWith('http')
+  ? process.env.CLOUDFLARE_R2_ENDPOINT
+  : `https://${process.env.CLOUDFLARE_R2_ENDPOINT}`
+
 export const r2Client = new S3Client({
   region: "auto",
-  endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
+  endpoint,
   credentials: {
     accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
@@ -22,4 +27,3 @@ export const r2Client = new S3Client({
 })
 
 export const R2_BUCKET_NAME = process.env.CLOUDFLARE_R2_BUCKET_NAME || "stratwealth"
-
