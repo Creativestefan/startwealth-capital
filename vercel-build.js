@@ -13,17 +13,10 @@ log('Generating Prisma client...');
 execSync('npx prisma generate', { stdio: 'inherit' });
 log('✅ Prisma client generated successfully!');
 
-// Step 2: Run database migrations
-log('Running database migrations...');
-try {
-  execSync('npx prisma migrate deploy', { stdio: 'inherit' });
-  log('✅ Database migrations completed successfully!');
-} catch (error) {
-  log(`⚠️ Error running migrations: ${error.message}`);
-  log('Continuing with build process despite migration error...');
-}
+// Skip migrations as they've already been applied to Supabase
+log('Skipping database migrations as they have already been applied to Supabase...');
 
-// Step 3: Build the Next.js application
+// Step 2: Build the Next.js application
 log('Building Next.js application...');
 try {
   // Set NODE_OPTIONS to increase memory limit
