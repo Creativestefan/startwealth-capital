@@ -38,7 +38,7 @@ yarn-error.log*
 .env.staging
 .env.migration
 .env.backup
-
+.env.production
 
 
 # vercel
