@@ -28,8 +28,7 @@ const nextConfig = {
   // Other settings
   reactStrictMode: true,
   poweredByHeader: false,
-  // Use standard output instead of standalone to fix route group issues
-  output: 'export',
+  // Remove the output configuration entirely
 };
 
 module.exports = nextConfig;

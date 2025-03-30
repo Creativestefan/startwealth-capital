@@ -3,6 +3,9 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// This makes the route compatible with static exports
+export const dynamic = 'force-static';
+
 export async function GET() {
   try {
     // Update admin user to ensure emailVerified is set
