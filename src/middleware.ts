@@ -84,6 +84,12 @@ export default withAuth(
         return NextResponse.redirect(new URL("/dashboard", request.url))
       }
 
+      // For admin routes, we'll check email verification but log it without redirecting
+      if (!token.emailVerified || token.emailVerified === null) {
+        console.log("Admin user's email is not verified, but allowing access to admin routes")
+        // We don't redirect admins, just log the issue
+      }
+
       // Allow access to admin routes
       return NextResponse.next()
     }
@@ -110,4 +116,3 @@ export const config = {
     "/api/admin/:path*", // Protect admin API routes
   ],
 }
-
