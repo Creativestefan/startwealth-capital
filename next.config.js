@@ -19,13 +19,17 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   // Fix module resolution issues
   experimental: { 
-    largePageDataBytes: 256 * 1024
+    largePageDataBytes: 256 * 1024,
+    // Add this to fix route group issues
+    serverComponentsExternalPackages: []
   },
   // Config for server-side functionality
   distDir: '.next',
   // Other settings
   reactStrictMode: true,
   poweredByHeader: false,
+  // Add output configuration to fix build issues
+  output: 'standalone',
 };
 
 module.exports = nextConfig;
