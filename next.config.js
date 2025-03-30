@@ -18,12 +18,20 @@ const nextConfig = {
   // Disable TypeScript checking during build
   typescript: { ignoreBuildErrors: true },
   // Fix module resolution issues
-  experimental: { largePageDataBytes: 256 * 1024 },
+  experimental: { 
+    largePageDataBytes: 256 * 1024,
+    // Disable environment variable loading optimization that's causing the stack overflow
+    optimizePackageImports: false
+  },
   // Config for server-side functionality
   distDir: '.next',
   // Other settings
   reactStrictMode: true,
   poweredByHeader: false,
+  // Increase Node.js memory limit for Vercel deployments
+  env: {
+    NODE_OPTIONS: '--max-old-space-size=4096'
+  }
 };
 
 module.exports = nextConfig;
