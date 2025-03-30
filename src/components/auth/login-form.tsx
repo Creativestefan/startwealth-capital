@@ -72,7 +72,14 @@ export function LoginForm() {
       await updateSession()
       
       // Redirect based on role
-      router.push("/dashboard")
+      const session = await fetch('/api/auth/session').then(res => res.json())
+      if (session?.user?.role === 'ADMIN') {
+        console.log('Redirecting admin user to /admin/dashboard')
+        router.push('/admin/dashboard')
+      } else {
+        console.log('Redirecting regular user to /dashboard')
+        router.push('/dashboard')
+      }
       router.refresh()
     } catch (error) {
       console.log("Login error:", error)
@@ -176,4 +183,3 @@ export function LoginForm() {
     </div>
   )
 }
-
