@@ -1,8 +1,11 @@
+export const dynamic = 'force-dynamic';
+
 import React from 'react'
 import { MarketingLayout } from '@/components/shared/marketing-layout'
 import { HeroSection } from '@/components/marketing/HeroSection'
 import { ServicesSection } from '@/components/marketing/ServicesSection'
 import { WhyChooseUsSection } from '@/components/marketing/WhyChooseUsSection'
+import { EnvironmentalImpactSection } from '@/components/marketing/EnvironmentalImpactSection'
 import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
 import { CTASection } from '@/components/marketing/CTASection'
 import {
@@ -13,7 +16,7 @@ import {
   partnerLogo5
 } from '@/lib/marketing-images'
 
-export default function HomePage() {
+export default function MarketingPage() {
   return (
     <MarketingLayout>
       {/* Hero Section */}
@@ -50,7 +53,15 @@ export default function HomePage() {
       {/* Why Choose Us Section */}
       <WhyChooseUsSection 
         title="Why Choose StratWealth Capital"
-        description="We combine financial expertise with innovative technology to deliver a superior investment experience."
+        description="We combine sustainable investing principles with robust financial strategies to provide our investors with superior returns and peace of mind."
+      />
+
+      {/* Environmental Impact Section */}
+      <EnvironmentalImpactSection 
+        title="Our Environmental Impact"
+        description="Our investments have helped reduce carbon emissions by over 500,000 tons while providing sustainable returns to our investors."
+        buttonText="Learn More"
+        buttonLink="/about"
       />
 
       {/* Testimonials Section */}
@@ -62,11 +73,11 @@ export default function HomePage() {
       {/* CTA Section */}
       <CTASection 
         title="Ready to Start Your Investment Journey?"
-        description="Join thousands of investors who are already building wealth with StratWealth Capital."
+        description="Join thousands of investors who are already growing their wealth sustainably with StratWealth Capital. Create your account today and access our full range of investment opportunities."
         primaryButtonText="Create Account"
         primaryButtonLink="/register"
-        secondaryButtonText="Contact Us"
-        secondaryButtonLink="/contact"
+        secondaryButtonText="Login"
+        secondaryButtonLink="/login"
       />
     </MarketingLayout>
   )

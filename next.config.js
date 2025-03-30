@@ -28,7 +28,8 @@ const nextConfig = {
   // Other settings
   reactStrictMode: true,
   poweredByHeader: false,
-  // Remove the output configuration entirely
+  // Use standalone output for Vercel deployment
+  output: 'standalone',
 };
 
 module.exports = nextConfig;
