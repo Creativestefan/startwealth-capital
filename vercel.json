@@ -8,7 +8,7 @@
   "env": {
     "NEXTAUTH_URL": "${NEXTAUTH_URL}",
     "NEXTAUTH_SECRET": "${NEXTAUTH_SECRET}",
-    "DATABASE_URL": "postgres://postgres:gybtag-5qemwe-kujViq@db.utctjrzcisanoxackbdt.supabase.co:6543/postgres?pgbouncer=true&connection_limit=1",
+    "DATABASE_URL": "postgresql://postgres.utctjrzcisanoxackbdt:AXdBBB1Y8umPhZzj@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1",
     "SMTP_HOST": "${SMTP_HOST}",
     "SMTP_PORT": "${SMTP_PORT}",
     "SMTP_USER": "${SMTP_USER}",
@@ -23,5 +23,10 @@
     "VAPID_PRIVATE_KEY": "${VAPID_PRIVATE_KEY}",
     "NEXT_DISABLE_ESLINT": "true",
     "NEXT_DISABLE_TYPECHECK": "true"
+  },
+  "build": {
+    "env": {
+      "DATABASE_URL": "postgresql://postgres.utctjrzcisanoxackbdt:AXdBBB1Y8umPhZzj@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+    }
   }
 }
