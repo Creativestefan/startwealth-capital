@@ -23,7 +23,7 @@ export function ClientHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   
   // Don't show the shared header on admin pages
-  if (session?.user?.role === "ADMIN") {
+  if (session?.user?.role === "ADMIN" && window.location.pathname.startsWith('/admin')) {
     return null;
   }
   

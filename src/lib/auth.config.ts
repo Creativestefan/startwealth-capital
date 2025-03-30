@@ -62,11 +62,10 @@ export const authConfig: NextAuthOptions = {
         email: {
           label: "Email",
           type: "email",
+          placeholder: "hello@example.com",
         },
-        password: {
-          label: "Password",
-          type: "password",
-        },
+        password: { label: "Password", type: "password" },
+        callbackUrl: { type: "text", label: "Callback URL" },
       },
       async authorize(credentials) {
         console.log("Authorize attempt for:", credentials?.email);
@@ -121,7 +120,17 @@ export const authConfig: NextAuthOptions = {
             kycStatus: user.kyc?.status || null,
           };
           
-          console.log("Auth successful, returning user with role:", returnUser.role);
+          console.log("Auth successful, returning user with role:", returnUser.role)
+          
+          // For admin users, we'll handle special redirection in the login form
+          if (user.role === "ADMIN") {
+            console.log("Admin user detected, will be redirected to admin dashboard by login form")
+            // Admin users should NEVER access regular dashboard
+            if (returnUser.role === "ADMIN") {
+              console.log("Ensuring admin user has proper role set")
+            }
+          }
+          
           return returnUser;
         } catch (error) {
           console.error("Error in authorize:", error);
@@ -138,27 +147,86 @@ export const authConfig: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        console.log("JWT callback - adding user data to token:", {
+          id: user.id,
+          email: user.email,
+          role: user.role
+        })
         token.id = user.id
         token.firstName = user.firstName
         token.lastName = user.lastName
         token.dateOfBirth = user.dateOfBirth
         token.role = user.role
         token.kycStatus = user.kycStatus
-        token.emailVerified = user.emailVerified // Make sure this is being passed
+        token.emailVerified = user.emailVerified
       }
       return token
     },
     async session({ session, token }) {
       if (token && session.user) {
+        console.log("Session callback - adding token data to session:", {
+          id: token.id,
+          email: session.user.email,
+          role: token.role
+        })
         session.user.id = token.id as string
         session.user.firstName = token.firstName as string
         session.user.lastName = token.lastName as string
         session.user.dateOfBirth = token.dateOfBirth as Date
         session.user.role = token.role as any
         session.user.kycStatus = token.kycStatus as any
-        session.user.emailVerified = token.emailVerified as Date // Make sure this is being passed
+        session.user.emailVerified = token.emailVerified as Date
       }
       return session
+    },
+    async redirect({ url, baseUrl }) {
+      console.log("NextAuth redirect callback:", { url, baseUrl })
+      
+      // Special handling for admin users - always redirect to admin dashboard
+      if (url.includes('/dashboard') && !url.includes('/admin/dashboard')) {
+        try {
+          // Check if the URL contains admin token in the query params
+          const urlObj = new URL(url.startsWith('http') ? url : `${baseUrl}${url}`)
+          const token = urlObj.searchParams.get('token')
+          
+          if (token) {
+            try {
+              // Basic check for admin role in the token (simplified)
+              const tokenData = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+              if (tokenData?.role === 'ADMIN') {
+                console.log("Admin user detected in token, forcing admin dashboard")
+                return '/admin/dashboard'
+              }
+            } catch (e) {
+              console.error("Error parsing token:", e)
+            }
+          }
+        } catch (error) {
+          console.error("Error in redirect callback:", error)
+          // Continue with normal redirect flow if check fails
+        }
+      }
+      
+      // Check if this is a callback from a successful login
+      if (url.includes('/api/auth/callback/credentials')) {
+        console.log("Credential callback detected, will handle role-based redirection in login form")
+        return url
+      }
+      
+      // Always allow relative URLs
+      const isRelativeUrl = url.startsWith('/')
+      if (isRelativeUrl) {
+        console.log("Allowing relative URL redirect:", url)
+        return url
+      }
+      // Allow redirects to the same site
+      if (url.startsWith(baseUrl)) {
+        console.log("Allowing same-site URL redirect:", url)
+        return url
+      }
+      // Default fallback
+      console.log("Fallback to base URL:", baseUrl)
+      return baseUrl
     },
   },
   session: {

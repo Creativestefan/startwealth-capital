@@ -24,6 +24,8 @@ export function LoginForm() {
   const { update: updateSession } = useSession()
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState("")
+  
+  // Get the callback URL from search params or use default
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
 
   // Check for banned user error from query params
@@ -49,15 +51,12 @@ export function LoginForm() {
     setError("")
 
     try {
-      console.log("Login attempt for:", values.email)
-      
+      // Sign in with credentials
       const result = await signIn("credentials", {
         email: values.email.trim(),
         password: values.password,
         redirect: false,
       })
-
-      console.log("Login result:", result)
 
       if (result?.error) {
         if (result.error === "CredentialsSignin") {
@@ -68,33 +67,47 @@ export function LoginForm() {
         return
       }
 
+      if (!result?.ok) {
+        setError("Something went wrong. Please try again.")
+        return
+      }
+
       // Update the session to get the latest data
       await updateSession()
       
-      // Redirect based on role
-      const session = await fetch('/api/auth/session').then(res => res.json())
-      if (session?.user?.role === 'ADMIN') {
-        console.log('Redirecting admin user to /admin/dashboard')
-        router.push('/admin/dashboard')
-      } else {
-        console.log('Redirecting regular user to /dashboard')
+      try {
+        // Get the user session to determine role
+        const sessionResponse = await fetch('/api/auth/session')
+        if (!sessionResponse.ok) {
+          throw new Error("Failed to fetch session")
+        }
+        
+        const session = await sessionResponse.json()
+        
+        // Determine redirect path based on user role
+        if (session?.user?.role === 'ADMIN') {
+          // For admin users, redirect to admin dashboard
+          toast.success("Welcome, Administrator!")
+          router.push('/admin/dashboard')
+        } else {
+          // For regular users, redirect to the dashboard
+          toast.success("Login successful!")
+          router.push('/dashboard')
+        }
+        
+        // Refresh the router
+        router.refresh()
+      } catch (sessionError) {
+        // Fallback to default redirection if session fetch fails
         router.push('/dashboard')
       }
-      router.refresh()
     } catch (error) {
-      console.log("Login error:", error)
+      // Don't log the error details to avoid data leaks
       setError("Something went wrong. Please try again.")
     } finally {
       setIsLoading(false)
     }
   }
-
-  // Log form errors when they occur
-  React.useEffect(() => {
-    if (Object.keys(form.formState.errors).length > 0) {
-      console.log("Form validation errors:", form.formState.errors)
-    }
-  }, [form.formState.errors])
 
   return (
     <div className="flex flex-col gap-6">
