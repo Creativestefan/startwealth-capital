@@ -157,7 +157,7 @@ interface EmailOptions {
  * Send email using your email service provider
  */
 async function sendEmail(options: EmailOptions) {
-  const defaultFrom = process.env.NOTIFICATION_EMAIL_FROM || 'noreply@stratwealthcapital.com';
+  const defaultFrom = process.env.NOTIFICATION_EMAIL_FROM || 'noreply@stratwealthcapital.online';
   
   try {
     // Import nodemailer dynamically to avoid server-side issues

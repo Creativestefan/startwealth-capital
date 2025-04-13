@@ -103,7 +103,7 @@ export function InvestmentForm({ plans }: InvestmentFormProps) {
       if (!response.success) {
         if (response.requiresKyc) {
           toast.error("KYC verification is required to make investments")
-          router.push("/dashboard/profile?tab=kyc")
+          router.push("/profile/kyc")
           return
         }
         

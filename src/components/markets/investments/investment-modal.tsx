@@ -92,7 +92,7 @@ export function InvestmentModal({ plan, open, onOpenChange }: InvestmentModalPro
         if (response.error?.includes("KYC verification required")) {
           toast.error("KYC verification is required to make investments")
           onOpenChange(false)
-          router.push("/dashboard/profile?tab=kyc")
+          router.push("/profile/kyc")
           return
         }
         
@@ -128,7 +128,7 @@ export function InvestmentModal({ plan, open, onOpenChange }: InvestmentModalPro
       if (errorMessage.includes("KYC verification required")) {
         toast.error("KYC verification is required to make investments")
         onOpenChange(false)
-        router.push("/dashboard/profile?tab=kyc")
+        router.push("/profile/kyc")
         return
       }
       

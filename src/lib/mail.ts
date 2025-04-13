@@ -54,7 +54,7 @@ export async function sendVerificationEmail(email: string, otp: string) {
       <html>
         <head>
           <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale: 1.0">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Verify your StratWealth Capital account</title>
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0;">
@@ -165,7 +165,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
       <html>
         <head>
           <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale: 1.0">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Reset your StratWealth Capital password</title>
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0;">
@@ -226,7 +226,7 @@ export async function sendNotificationEmail(email: string, title: string, messag
       <html>
         <head>
           <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale: 1.0">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>${title}</title>
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0;">

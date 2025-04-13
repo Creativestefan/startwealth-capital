@@ -71,7 +71,7 @@ export function KycModal({ autoOpen = false, open: externalOpen, onOpenChange }:
 
   const handleCompleteKyc = () => {
     // Navigate to the KYC completion page
-    router.push("/dashboard/profile?tab=kyc")
+    router.push("/profile/kyc")
     handleOpenChange(false)
   }
 
