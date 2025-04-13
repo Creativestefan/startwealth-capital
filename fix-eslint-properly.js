@@ -56,7 +56,7 @@ function fixUnescapedEntities(filePath) {
     if (!line.includes('eslint-disable')) {
       const beforeLine = content.substring(0, lineStart);
       const afterLine = content.substring(lineStart);
-      newContent = beforeLine + '// eslint-disable-next-line react/no-unescaped-entities\n' + afterLine;
+      newContent = beforeLine + ' \n' + afterLine;
     }
   }
   
@@ -70,7 +70,7 @@ function fixUnescapedEntities(filePath) {
     if (!line.includes('eslint-disable')) {
       const beforeLine = content.substring(0, lineStart);
       const afterLine = content.substring(lineStart);
-      newContent = beforeLine + '// eslint-disable-next-line react/no-unescaped-entities\n' + afterLine;
+      newContent = beforeLine + ' \n' + afterLine;
     }
   }
   

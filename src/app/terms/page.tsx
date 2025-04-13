@@ -33,7 +33,7 @@ export default function TermsPage() {
                 </p>
 
                 <h2>2. Definitions</h2>
-// eslint-disable-next-line react/no-unescaped-entities
+ 
                 <p>
                   "Platform" refers to the StratWealth Capital website and investment services.
                   "User," "you," and "your" refers to the individual or entity using our Platform.

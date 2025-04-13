@@ -254,7 +254,7 @@ export default async function GreenEnergyInvestmentsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold mb-6">Environmental Impact</h2>
-// eslint-disable-next-line react/no-unescaped-entities
+ 
               <p className="text-gray-700 mb-6">
                 When you invest in green energy with StratWealth Capital, you're not just earning returns – you're also making a positive impact on the environment and helping to combat climate change.
               </p>

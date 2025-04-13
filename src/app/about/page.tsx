@@ -110,7 +110,7 @@ export default function AboutPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold mb-4">Our Leadership Team</h2>
-// eslint-disable-next-line react/no-unescaped-entities
+
               <p className="text-gray-700 max-w-3xl mx-auto">
                 Meet the experienced professionals guiding StratWealth Capital's investment strategy and operations.
               </p>
@@ -128,7 +128,7 @@ export default function AboutPage() {
                     unoptimized
                   />
                 </div>
-                <h3 className="text-xl font-bold mb-1">Jonathan Reynolds</h3>
+                <h3 className="text-xl font-bold mb-1">Sophia Chen</h3>
                 <p className="text-primary mb-4">Chief Executive Officer</p>
                 <p className="text-gray-700">
                   Former investment banker with 20+ years of experience in sustainable finance and asset management.
@@ -146,7 +146,7 @@ export default function AboutPage() {
                     unoptimized
                   />
                 </div>
-                <h3 className="text-xl font-bold mb-1">Sophia Chen</h3>
+                <h3 className="text-xl font-bold mb-1">Jonathan Reynolds</h3>
                 <p className="text-primary mb-4">Chief Investment Officer</p>
                 <p className="text-gray-700">
                   Seasoned portfolio manager specializing in ESG investments and alternative asset classes.
@@ -164,7 +164,7 @@ export default function AboutPage() {
                     unoptimized
                   />
                 </div>
-                <h3 className="text-xl font-bold mb-1">Marcus Williams</h3>
+                <h3 className="text-xl font-bold mb-1">Cristina Rocíos</h3>
                 <p className="text-primary mb-4">Head of Sustainability</p>
                 <p className="text-gray-700">
                   Environmental scientist and financial analyst ensuring our investments meet rigorous ESG criteria.

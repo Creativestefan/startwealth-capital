@@ -236,7 +236,7 @@ export default async function PortfolioPage() {
                                 <Progress value={progress} className="h-2" />
                                 <div className="flex justify-between text-xs text-muted-foreground">
                                   <span>{progress}%</span>
-// eslint-disable-next-line react/no-unescaped-entities
+ 
                                   <span>
                                     {investment.endDate ? formatDate(investment.endDate) : "In progress"}
                                   </span>

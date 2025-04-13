@@ -25,11 +25,11 @@ export const ctaBackgroundImage = '/images/marketing/cta-background.jpg';
 export const placeholderImage = '/images/marketing/placeholder.jpg';
 
 // Partner logos
-export const partnerLogo1 = '/images/marketing/partner-1.png';
-export const partnerLogo2 = '/images/marketing/partner-2.png';
+export const partnerLogo1 = '/images/marketing/partner-1.svg';
+export const partnerLogo2 = '/images/marketing/partner-2.svg';
 export const partnerLogo3 = '/images/marketing/partner-3.png';
-export const partnerLogo4 = '/images/marketing/partner-4.png';
-export const partnerLogo5 = '/images/marketing/partner-5.png';
+export const partnerLogo4 = '/images/marketing/partner-4.svg';
+export const partnerLogo5 = '/images/marketing/partner-5.svg';
 
 // Testimonial avatars
 export const testimonialAvatar1 = '/images/marketing/testimonial-1.jpg';

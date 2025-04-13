@@ -47,11 +47,15 @@ export const ResetPasswordSchema = z
   async function generateNewHash() {
     const plainPassword = "admin123456";
     const newHash = await bcrypt.hash(plainPassword, 10);
-    console.log("New hash:", newHash);
+    if (process.env.NODE_ENV === 'development') {
+      console.log("New hash:", newHash);
+    }
     
     // Test the new hash
     const isMatch = await bcrypt.compare(plainPassword, newHash);
-    console.log("New hash works:", isMatch);
+    if (process.env.NODE_ENV === 'development') {
+      console.log("New hash works:", isMatch);
+    }
   }
 
 // The existing NextAuth configuration with updated pages
@@ -68,16 +72,22 @@ export const authConfig: NextAuthOptions = {
         callbackUrl: { type: "text", label: "Callback URL" },
       },
       async authorize(credentials) {
-        console.log("Authorize attempt for:", credentials?.email);
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Authorize attempt for:", credentials?.email);
+        }
         console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set (first 10 chars): " + process.env.DATABASE_URL.substring(0, 10) + "..." : "Not set");
         
         if (!credentials?.email || !credentials?.password) {
-          console.log("Missing credentials");
+          if (process.env.NODE_ENV === 'development') {
+            console.log("Missing credentials");
+          }
           return null;
         }
 
         try {
-          console.log("Attempting to find user in database...");
+          if (process.env.NODE_ENV === 'development') {
+            console.log("Attempting to find user in database...");
+          }
           const user = await prisma.user.findUnique({
             where: {
               email: credentials.email,
@@ -87,24 +97,34 @@ export const authConfig: NextAuthOptions = {
             },
           });
 
-          console.log("User found:", !!user, "Role:", user?.role);
+          if (process.env.NODE_ENV === 'development') {
+            console.log("User found:", !!user, "Role:", user?.role);
+          }
           
           if (!user) {
-            console.log("User not found");
+            if (process.env.NODE_ENV === 'development') {
+              console.log("User not found");
+            }
             return null;
           }
 
           // Log the password comparison (don't log actual passwords in production)
-          console.log("Comparing password for:", user.email);
-          console.log("Password hash in DB:", user.password ? user.password.substring(0, 10) + "..." : "No password hash");
+          if (process.env.NODE_ENV === 'development') {
+            console.log("Comparing password for:", user.email);
+            console.log("Password hash in DB:", user.password ? user.password.substring(0, 10) + "..." : "No password hash");
+          }
           
           const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
-          console.log("Password valid:", isPasswordValid);
+          if (process.env.NODE_ENV === 'development') {
+            console.log("Password valid:", isPasswordValid);
+          }
 
           // await generateNewHash();
 
           if (!isPasswordValid) {
-            console.log("Invalid password");
+            if (process.env.NODE_ENV === 'development') {
+              console.log("Invalid password");
+            }
             return null;
           }
 
@@ -120,20 +140,28 @@ export const authConfig: NextAuthOptions = {
             kycStatus: user.kyc?.status || null,
           };
           
-          console.log("Auth successful, returning user with role:", returnUser.role)
+          if (process.env.NODE_ENV === 'development') {
+            console.log("Auth successful, returning user with role:", returnUser.role)
+          }
           
           // For admin users, we'll handle special redirection in the login form
           if (user.role === "ADMIN") {
-            console.log("Admin user detected, will be redirected to admin dashboard by login form")
-            // Admin users should NEVER access regular dashboard
-            if (returnUser.role === "ADMIN") {
-              console.log("Ensuring admin user has proper role set")
+            if (process.env.NODE_ENV === 'development') {
+              console.log("Admin user detected, will be redirected to admin dashboard by login form")
+              // Admin users should NEVER access regular dashboard
+              if (returnUser.role === "ADMIN") {
+                if (process.env.NODE_ENV === 'development') {
+                  console.log("Ensuring admin user has proper role set")
+                }
+              }
             }
           }
           
           return returnUser;
         } catch (error) {
-          console.error("Error in authorize:", error);
+          if (process.env.NODE_ENV === 'development') {
+            console.error("Error in authorize:", error);
+          }
           return null;
         }
       },
@@ -147,11 +175,13 @@ export const authConfig: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        console.log("JWT callback - adding user data to token:", {
-          id: user.id,
-          email: user.email,
-          role: user.role
-        })
+        if (process.env.NODE_ENV === 'development') {
+          console.log("JWT callback - adding user data to token:", {
+            id: user.id,
+            email: user.email,
+            role: user.role
+          })
+        }
         token.id = user.id
         token.firstName = user.firstName
         token.lastName = user.lastName
@@ -164,11 +194,13 @@ export const authConfig: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token && session.user) {
-        console.log("Session callback - adding token data to session:", {
-          id: token.id,
-          email: session.user.email,
-          role: token.role
-        })
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Session callback - adding token data to session:", {
+            id: token.id,
+            email: session.user.email,
+            role: token.role
+          })
+        }
         session.user.id = token.id as string
         session.user.firstName = token.firstName as string
         session.user.lastName = token.lastName as string
@@ -180,7 +212,9 @@ export const authConfig: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      console.log("NextAuth redirect callback:", { url, baseUrl })
+      if (process.env.NODE_ENV === 'development') {
+        console.log("NextAuth redirect callback:", { url, baseUrl })
+      }
       
       // Special handling for admin users - always redirect to admin dashboard
       if (url.includes('/dashboard') && !url.includes('/admin/dashboard')) {
@@ -194,38 +228,52 @@ export const authConfig: NextAuthOptions = {
               // Basic check for admin role in the token (simplified)
               const tokenData = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
               if (tokenData?.role === 'ADMIN') {
-                console.log("Admin user detected in token, forcing admin dashboard")
+                if (process.env.NODE_ENV === 'development') {
+                  console.log("Admin user detected in token, forcing admin dashboard")
+                }
                 return '/admin/dashboard'
               }
             } catch (e) {
-              console.error("Error parsing token:", e)
+              if (process.env.NODE_ENV === 'development') {
+                console.error("Error parsing token:", e)
+              }
             }
           }
         } catch (error) {
-          console.error("Error in redirect callback:", error)
+          if (process.env.NODE_ENV === 'development') {
+            console.error("Error in redirect callback:", error)
+          }
           // Continue with normal redirect flow if check fails
         }
       }
       
       // Check if this is a callback from a successful login
       if (url.includes('/api/auth/callback/credentials')) {
-        console.log("Credential callback detected, will handle role-based redirection in login form")
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Credential callback detected, will handle role-based redirection in login form")
+        }
         return url
       }
       
       // Always allow relative URLs
       const isRelativeUrl = url.startsWith('/')
       if (isRelativeUrl) {
-        console.log("Allowing relative URL redirect:", url)
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Allowing relative URL redirect:", url)
+        }
         return url
       }
       // Allow redirects to the same site
       if (url.startsWith(baseUrl)) {
-        console.log("Allowing same-site URL redirect:", url)
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Allowing same-site URL redirect:", url)
+        }
         return url
       }
       // Default fallback
-      console.log("Fallback to base URL:", baseUrl)
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Fallback to base URL:", baseUrl)
+      }
       return baseUrl
     },
   },
