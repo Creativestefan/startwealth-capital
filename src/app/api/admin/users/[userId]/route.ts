@@ -332,15 +332,118 @@ export async function DELETE(
       )
     }
     
-    // Delete user and all associated data (the Prisma relations with cascade delete will handle related tables)
-    await prisma.user.delete({
-      where: { id: userId }
-    })
+    // Begin a transaction to ensure all operations succeed or fail together
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Delete PropertyTransactions
+      await tx.propertyTransaction.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 2. Delete RealEstateInvestments
+      await tx.realEstateInvestment.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 3. Delete EquipmentTransactions
+      await tx.equipmentTransaction.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 4. Delete GreenEnergyInvestments
+      await tx.greenEnergyInvestment.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 5. Delete MarketInvestments
+      await tx.marketInvestment.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 6. Delete user's ReferralCommissions
+      await tx.referralCommission.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 7. Delete Referrals given by the user
+      await tx.referral.deleteMany({
+        where: { referrerId: userId }
+      });
+      
+      // 8. Delete Referrals received by the user
+      await tx.referral.deleteMany({
+        where: { referredId: userId }
+      });
+      
+      // 9. Delete UserActivities
+      await tx.userActivity.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 10. Delete Notifications
+      await tx.notification.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 11. Delete NotificationPreference
+      await tx.notificationPreference.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 12. Delete PushSubscription
+      await tx.pushSubscription.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 13. Delete KYC
+      await tx.kYC.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 14. Delete Wallet Transactions
+      if (await tx.wallet.findUnique({ where: { userId: userId } })) {
+        const wallet = await tx.wallet.findUnique({
+          where: { userId: userId },
+          select: { id: true }
+        });
+        
+        if (wallet) {
+          await tx.walletTransaction.deleteMany({
+            where: { walletId: wallet.id }
+          });
+        }
+      }
+      
+      // 15. Delete Wallet
+      await tx.wallet.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 16. Delete Sessions
+      await tx.session.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 17. Delete Accounts
+      await tx.account.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // 18. Finally, delete the User
+      return await tx.user.delete({
+        where: { id: userId }
+      });
+    }, {
+      timeout: 30000 // 30 second timeout for this complex transaction
+    });
     
     return NextResponse.json({
       success: true,
-      message: `User ${userExists.firstName} ${userExists.lastName} has been permanently deleted`
-    })
+      message: `User ${userExists.firstName} ${userExists.lastName} has been permanently deleted`,
+      user: {
+        id: result.id,
+        email: result.email
+      }
+    });
   } catch (error: any) {
     // Safely log error without using console.error directly
     try {

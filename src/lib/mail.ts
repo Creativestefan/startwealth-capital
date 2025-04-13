@@ -8,6 +8,9 @@ interface EmailConfig {
     user: string
     pass: string
   }
+  connectionTimeout: number
+  greetingTimeout: number
+  socketTimeout: number
 }
 
 interface SendMailOptions {
@@ -29,11 +32,14 @@ for (const envVar of requiredEnvVars) {
 const emailConfig: EmailConfig = {
   host: process.env.SMTP_HOST!,
   port: Number(process.env.SMTP_PORT),
-  secure: true,
+  secure: Number(process.env.SMTP_PORT) === 465,
   auth: {
     user: process.env.SMTP_USER!,
     pass: process.env.SMTP_PASSWORD!,
   },
+  connectionTimeout: 10000,
+  greetingTimeout: 5000,
+  socketTimeout: 10000
 }
 
 const transporter = nodemailer.createTransport(emailConfig)
