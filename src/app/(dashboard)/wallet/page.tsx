@@ -45,7 +45,7 @@ export default async function WalletPage() {
   const kycVerified = user.kyc?.status === "APPROVED"
   
   if (!kycVerified) {
-    return <KycRequired />
+    redirect("/profile/kyc")
   }
   
   if (!user.wallet) {

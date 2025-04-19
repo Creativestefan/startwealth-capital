@@ -45,7 +45,7 @@ export default async function SharesPage() {
 
   // Check KYC status
   if (!session.user.kycStatus || session.user.kycStatus === "PENDING") {
-    redirect("/dashboard?kyc=required")
+    redirect("/profile/kyc")
   }
 
   // Fetch investment plans

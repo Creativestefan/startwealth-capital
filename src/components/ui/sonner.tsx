@@ -8,13 +8,13 @@ export function Sonner(props: React.ComponentProps<typeof SonnerToaster>) {
 
   return (
     <SonnerToaster
-      theme={theme as "light" | "dark" | "system"}
+      theme="light"
       className="toaster group"
       toastOptions={{
         classNames: {
           toast:
             "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
-          description: "group-[.toast]:text-foreground group-[.toast]:font-normal",
+          description: "group-[.toast]:text-gray-800 group-[.toast]:text-sm group-[.toast]:font-medium group-[.toast]:opacity-100",
           actionButton:
             "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
           cancelButton:

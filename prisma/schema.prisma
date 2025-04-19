@@ -53,6 +53,8 @@ model User {
   updatedAt              DateTime                @updatedAt
   resetToken             String?
   resetTokenExpires      DateTime?
+  resetOtp               String?
+  resetOtpExpires        DateTime?
   referralCode           String?                 @unique
   accounts               Account[]
   equipmentTransactions  EquipmentTransaction[]

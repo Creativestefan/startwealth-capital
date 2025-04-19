@@ -8,6 +8,16 @@ type UserRole = "ADMIN" | "USER" | string | undefined
 export default withAuth(
   async function middleware(request: NextRequestWithAuth) {
     const token = request.nextauth.token
+
+    // Log all cookies
+    console.log("All request cookies:", request.cookies.getAll());
+
+    // Log the raw session token cookie (if present)
+    console.log("Raw session token cookie:", request.cookies.get("next-auth.session-token"));
+
+    // Log the token object as parsed by NextAuth
+    console.log("Parsed NextAuth token:", token);
+
     const pathname = request.nextUrl.pathname
     const searchParams = request.nextUrl.searchParams
     const callbackUrl = searchParams.get("callbackUrl")

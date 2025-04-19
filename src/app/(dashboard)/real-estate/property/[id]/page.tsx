@@ -46,7 +46,7 @@ export default async function PropertyDetailPage(props: { params: Promise<{ id: 
 
   // Check KYC status
   if (!session.user.kycStatus || session.user.kycStatus === "PENDING") {
-    redirect("/dashboard?kyc=required")
+    redirect("/profile/kyc")
   }
 
   // Get the property ID from params

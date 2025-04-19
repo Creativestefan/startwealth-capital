@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { getServerSession } from "next-auth"
 import { authConfig } from "@/lib/auth.config"
 import { prisma } from "@/lib/prisma"
+import { sendKycStatusEmail } from "@/lib/mail"
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
@@ -32,6 +33,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
         rejectionReason: null,
       },
     })
+
+    // Send KYC approval email to the user
+    if (kyc.user?.email) {
+      await sendKycStatusEmail(kyc.user.email, "APPROVED")
+    }
 
     // No need to update user's KYC status as it's in a separate model
     // The KYC status will be checked via the KYC model when needed

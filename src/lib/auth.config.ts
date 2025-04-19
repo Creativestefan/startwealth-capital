@@ -193,21 +193,24 @@ export const authConfig: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      if (token && session.user) {
+      // Ensure session.user exists
+      if (!session.user) session.user = {} as any;
+      if (token) {
         if (process.env.NODE_ENV === 'development') {
           console.log("Session callback - adding token data to session:", {
             id: token.id,
-            email: session.user.email,
+            email: token.email,
             role: token.role
           })
         }
-        session.user.id = token.id as string
-        session.user.firstName = token.firstName as string
-        session.user.lastName = token.lastName as string
-        session.user.dateOfBirth = token.dateOfBirth as Date
-        session.user.role = token.role as any
-        session.user.kycStatus = token.kycStatus as any
-        session.user.emailVerified = token.emailVerified as Date
+        (session.user as any).id = token.id as string
+        (session.user as any).email = token.email as string
+        (session.user as any).firstName = token.firstName as string
+        (session.user as any).lastName = token.lastName as string
+        (session.user as any).dateOfBirth = token.dateOfBirth as Date
+        (session.user as any).role = token.role as any
+        (session.user as any).kycStatus = token.kycStatus as any
+        (session.user as any).emailVerified = token.emailVerified as Date
       }
       return session
     },

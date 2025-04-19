@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/prisma"
-import { generateResetToken } from "@/lib/auth-utils"
-import { sendPasswordResetEmail } from "@/lib/mail"
+import { sendPasswordResetOtpEmail } from "@/lib/mail"
 
 export async function POST(request: Request) {
   try {
@@ -17,26 +16,27 @@ export async function POST(request: Request) {
 
     if (!user) {
       // Return success even if user doesn't exist for security
-      return Response.json({ message: "If a user exists with this email, they will receive a password reset link." })
+      return Response.json({ message: "If a user exists with this email, they will receive a password reset OTP." })
     }
 
-    const token = generateResetToken()
-    const expires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour from now
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString()
+    const expires = new Date(Date.now() + 10 * 60 * 1000) // 10 min expiry
 
     await prisma.user.update({
       where: { email },
       data: {
-        verificationToken: token,
-        verificationExpires: expires,
+        resetOtp: otp,
+        resetOtpExpires: expires,
       },
     })
 
-    await sendPasswordResetEmail(email, token)
+    await sendPasswordResetOtpEmail(email, otp)
 
-    return Response.json({ message: "Password reset email sent successfully" })
+    return Response.json({ message: "Password reset OTP sent successfully" })
   } catch (error) {
-    console.error("Failed to send password reset email:", error)
-    return Response.json({ error: "Failed to send password reset email" }, { status: 500 })
+    console.error("Failed to send password reset OTP:", error)
+    return Response.json({ error: "Failed to send password reset OTP" }, { status: 500 })
   }
 }
 

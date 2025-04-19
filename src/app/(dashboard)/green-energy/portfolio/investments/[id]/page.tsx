@@ -64,7 +64,7 @@ export default async function InvestmentDetailPage({ params }: InvestmentDetailP
 
   // Check KYC status
   if (!session.user.kycStatus || session.user.kycStatus === "PENDING") {
-    redirect("/dashboard?kyc=required")
+    redirect("/profile/kyc")
   }
 
   // Get investment details

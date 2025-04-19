@@ -4,33 +4,34 @@ import bcrypt from "bcryptjs"
 
 export async function POST(request: Request) {
   try {
-    const { token, password } = await request.json()
+    const { email, otp, password } = await request.json()
 
-    if (!token || !password) {
-      return Response.json({ error: "Token and password are required" }, { status: 400 })
+    if (!email || !otp || !password) {
+      return Response.json({ error: "Email, OTP, and password are required" }, { status: 400 })
     }
 
-    const user = await prisma.user.findFirst({
-      where: {
-        verificationToken: token,
-        verificationExpires: {
-          gt: new Date(),
-        },
-      },
-    })
+    const user = await prisma.user.findUnique({ where: { email } })
 
-    if (!user) {
-      return Response.json({ error: "Invalid or expired reset token" }, { status: 400 })
+    if (!user || !user.resetOtp || !user.resetOtpExpires) {
+      return Response.json({ error: "Invalid or expired OTP" }, { status: 400 })
+    }
+
+    if (user.resetOtp !== otp) {
+      return Response.json({ error: "Invalid OTP" }, { status: 400 })
+    }
+
+    if (user.resetOtpExpires < new Date()) {
+      return Response.json({ error: "OTP has expired" }, { status: 400 })
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
     await prisma.user.update({
-      where: { id: user.id },
+      where: { email },
       data: {
         password: hashedPassword,
-        verificationToken: null,
-        verificationExpires: null,
+        resetOtp: null,
+        resetOtpExpires: null,
       },
     })
 

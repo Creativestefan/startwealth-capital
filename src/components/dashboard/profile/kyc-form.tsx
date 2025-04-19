@@ -119,6 +119,9 @@ export function KycForm({ user }: KycFormProps) {
       const newStatus = await refreshKycStatus()
       if (newStatus && newStatus !== currentKycStatus) {
         setCurrentKycStatus(newStatus as KycStatus)
+        // Force session update so the new KYC status is available everywhere
+        await update()
+        router.refresh()
       }
     } catch (error) {
       console.error("Error refreshing KYC status:", error)

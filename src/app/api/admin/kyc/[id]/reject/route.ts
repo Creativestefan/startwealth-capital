@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authConfig } from "@/lib/auth.config"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { sendKycStatusEmail } from "@/lib/mail"
 
 const rejectSchema = z.object({
   reason: z.string().min(1, { message: "Rejection reason is required" }),
@@ -46,6 +47,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
         rejectionReason: reason,
       },
     })
+
+    // Send KYC rejection email to the user
+    if (kyc.user?.email) {
+      await sendKycStatusEmail(kyc.user.email, "REJECTED")
+    }
 
     // No need to update user's KYC status as it's in a separate model
     // The KYC status will be checked via the KYC model when needed

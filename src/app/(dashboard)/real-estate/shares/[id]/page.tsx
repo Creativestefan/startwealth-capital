@@ -66,7 +66,7 @@ export default async function InvestmentDetailPage(props: InvestmentDetailPagePr
 
   // Check KYC status
   if (!session.user.kycStatus || session.user.kycStatus === "PENDING") {
-    redirect("/dashboard?kyc=required")
+    redirect("/profile/kyc")
   }
 
   const { data: investment, success, error } = await getUserInvestmentById(investmentId)

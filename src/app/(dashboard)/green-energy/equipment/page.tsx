@@ -56,7 +56,7 @@ export default async function EquipmentPage({
 
   // Check KYC status
   if (!session.user.kycStatus || session.user.kycStatus === "PENDING") {
-    redirect("/dashboard?kyc=required")
+    redirect("/profile/kyc")
   }
 
   // Parse filter parameters - properly await searchParams in Next.js 15
@@ -90,7 +90,7 @@ export default async function EquipmentPage({
   const maxPrice = Math.max(...prices, 10000)
   
   // Filter equipment based on user selections
-const equipment = [...allEquipment]
+  let equipment = [...allEquipment]
   
   // Apply additional filters if provided
   if (filters.type && filters.type !== "all") {

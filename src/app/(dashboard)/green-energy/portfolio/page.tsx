@@ -83,7 +83,7 @@ export default async function PortfolioPage() {
 
   // Check KYC status
   if (!session.user.kycStatus || session.user.kycStatus === "PENDING") {
-    redirect("/dashboard?kyc=required")
+    redirect("/profile/kyc")
   }
 
   const investmentsResponse = await getUserGreenEnergyInvestments()

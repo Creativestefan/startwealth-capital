@@ -25,6 +25,7 @@ docs
 .prettierrc*
 .env.local
 .env.development
+.env
 
 # Large directories not needed for production
 node_modules

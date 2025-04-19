@@ -25,7 +25,7 @@ export default async function EquipmentPortfolioPage() {
 
   // Check KYC status
   if (!session.user.kycStatus || session.user.kycStatus === "PENDING") {
-    redirect("/dashboard?kyc=required")
+    redirect("/profile/kyc")
   }
 
   // Get user's equipment transactions

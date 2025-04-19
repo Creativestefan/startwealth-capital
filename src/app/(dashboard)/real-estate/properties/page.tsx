@@ -9,6 +9,7 @@ import { PropertyFilters } from "@/components/real-estate/property/property-filt
 import { getProperties } from "@/lib/real-estate/actions/properties"
 import { PropertyStatus } from "@prisma/client"
 import { ErrorHandler } from "@/components/real-estate/property/error-handler"
+import { prisma } from "@/lib/prisma"
 
 /**
  * Loading component for the property page
@@ -46,8 +47,14 @@ export default async function PropertiesPage(props: {
     redirect(`/verify-email?email=${session.user.email}`)
   }
 
-  // Check KYC status
-  if (!session.user.kycStatus || session.user.kycStatus === "PENDING") {
+  // Fetch the latest user from the database
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { kyc: true },
+  })
+
+  // Check KYC status from the database, not the session
+  if (!user?.kyc || user.kyc.status !== "APPROVED") {
     redirect("/dashboard?kyc=required")
   }
 
