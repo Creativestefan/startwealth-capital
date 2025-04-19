@@ -3,14 +3,10 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.r2.cloudflarestorage.com" },
-      { protocol: "https", hostname: "**.r2.dev" },
       { protocol: "https", hostname: "placehold.co" },
-      { protocol: "https", hostname: "stratwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com" },
-      { protocol: "https", hostname: "3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com" },
-      { protocol: "https", hostname: "stratwealth.r2.cloudflarestorage.com" },
-      { protocol: "https", hostname: "startwealth.3c3049b93386c9d1425392ee596bc359.r2.dev" },
+      { protocol: "https", hostname: "*.r2.dev" },
       { protocol: "http", hostname: "localhost" },
-      { protocol: "https", hostname: "startwealth-capital.vercel.app" },
+      { protocol: "https", hostname: "stratwealth-capital.vercel.app" },
     ],
   },
   // Disable ESLint during build

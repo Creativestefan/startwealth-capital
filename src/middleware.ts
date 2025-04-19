@@ -167,5 +167,6 @@ export const config = {
     "/real-estate/:path*",
     "/admin/:path*",     // Protect admin routes
     "/api/admin/:path*", // Protect admin API routes
+    "/api/upload",       // Protect the upload route
   ],
 }

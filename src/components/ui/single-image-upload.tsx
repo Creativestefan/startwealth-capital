@@ -87,7 +87,7 @@ export function SingleImageUpload({
   return (
     <div className={cn("space-y-2", className)}>
       {value ? (
-        <div className="relative h-[72px] w-[72px] overflow-hidden rounded-full border border-border mx-auto">
+        <div className="relative h-[250px] w-[250px] overflow-hidden rounded-md border border-border mx-auto">
           {imageError ? (
             <div className="flex h-full w-full items-center justify-center bg-muted">
               <Camera className="h-8 w-8 text-muted-foreground" />

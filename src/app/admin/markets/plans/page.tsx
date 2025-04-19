@@ -23,14 +23,16 @@ export default async function MarketPlansPage() {
   }))
   
   return (
-    <div className="container py-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Market Investment Plans</h1>
-        <p className="text-muted-foreground">
-          Create and manage market investment plans for users.
-        </p>
+    <div className="min-h-screen flex flex-col bg-muted/50">
+      <div className="container mx-auto py-8 flex-1 flex flex-col space-y-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">Market Investment Plans</h1>
+          <p className="text-muted-foreground">
+            Create and manage market investment plans for users.
+          </p>
+        </div>
+        <PlansList initialPlans={plans} />
       </div>
-      <PlansList initialPlans={plans} />
     </div>
   )
 } 

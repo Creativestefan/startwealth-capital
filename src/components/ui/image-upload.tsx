@@ -134,7 +134,7 @@ export function ImageUpload({
                 alt={`Gallery image ${index + 1}`}
                 fill
                 className="object-cover"
-                unoptimized={url.startsWith('/api/image-proxy')}
+                unoptimized={url.includes('.r2.dev/')}
                 onError={() => handleImageError(index)}
               />
             )}

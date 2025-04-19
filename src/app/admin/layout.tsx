@@ -21,12 +21,13 @@ export default async function AdminLayout({
   }
   
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Admin sidebar */}
-      <div className="hidden md:flex md:w-64 md:flex-col">
+    <div className="flex h-screen bg-background">
+      {/* Admin sidebar - fixed on desktop */}
+      <div className="fixed inset-y-0 left-0 z-30 w-64 hidden md:flex flex-col">
         <AdminSidebar />
       </div>
-      <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Main content */}
+      <div className="flex-1 flex flex-col md:ml-64 min-h-screen">
         <DashboardHeader user={session.user} isAdmin={true} />
         <main className="flex-1 overflow-y-auto p-6">
           {children}

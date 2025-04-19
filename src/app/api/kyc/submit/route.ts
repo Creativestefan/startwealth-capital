@@ -5,12 +5,16 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { prisma } from "@/lib/prisma"
 
 // Initialize S3 client for Cloudflare R2
+const ACCOUNT_ID = '3c3049b93386c9d1425392ee596bc359';
+const ACCESS_KEY_ID = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || "";
+const SECRET_ACCESS_KEY = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || "";
+
 const s3Client = new S3Client({
   region: "auto",
-  endpoint: `https://${process.env.CLOUDFLARE_R2_ENDPOINT}`,
+  endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,
   credentials: {
-    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || "",
+    accessKeyId: ACCESS_KEY_ID,
+    secretAccessKey: SECRET_ACCESS_KEY,
   },
 });
 
@@ -69,7 +73,7 @@ export async function POST(request: Request) {
     await s3Client.send(command)
     
     // Generate the public URL
-    const publicUrl = `https://${bucketName}.${process.env.CLOUDFLARE_R2_ENDPOINT}/${key}`
+    const publicUrl = `https://pub-110556be74cf4690bc644c36f8e6e882.r2.dev/${key}`
     
     // Generate a proxied URL that goes through our API
     const proxiedUrl = `/api/image-proxy?url=${encodeURIComponent(publicUrl)}`
@@ -82,7 +86,7 @@ export async function POST(request: Request) {
           upsert: {
             create: {
               status: "PENDING",
-              documentImage: proxiedUrl,
+              documentImage: publicUrl,
               documentType,
               documentNumber,
               country,
@@ -90,7 +94,7 @@ export async function POST(request: Request) {
             },
             update: {
               status: "PENDING",
-              documentImage: proxiedUrl,
+              documentImage: publicUrl,
               documentType,
               documentNumber,
               country,
@@ -103,10 +107,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("KYC submission error:", error)
+    console.error("KYC submission error:", error);
+    if (error instanceof Error) {
+      console.error(error.stack);
+    }
     return NextResponse.json(
-      { error: "Failed to submit KYC" },
+      { error: "Failed to submit KYC", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
-    )
+    );
   }
 }

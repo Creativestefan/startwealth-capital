@@ -68,7 +68,6 @@ export async function POST(request: NextRequest) {
       Body: buffer,
       ContentType: file.type,
       // Make the object publicly accessible
-      ACL: 'public-read'
     });
 
     console.log('Uploading to R2 with:', {
@@ -79,8 +78,8 @@ export async function POST(request: NextRequest) {
 
     await s3Client.send(command);
     
-    // Generate the public URL - use the public bucket URL format
-    const publicUrl = `https://${bucketName}.${ACCOUNT_ID}.r2.dev/${key}`;
+    // Generate the public URL - use the correct public bucket URL
+    const publicUrl = `https://pub-110556be74cf4690bc644c36f8e6e882.r2.dev/${key}`;
     
     // For debugging
     console.log('Generated public URL:', publicUrl);

@@ -270,14 +270,14 @@ export function KycReviewList() {
           <div className="flex justify-center py-4">
             {selectedSubmission?.documentImage && 
              selectedSubmission.documentImage !== "placeholder-url" &&
-             selectedSubmission.documentImage.startsWith("/") ? (
+             (selectedSubmission.documentImage.startsWith("/") || selectedSubmission.documentImage.startsWith("https://")) ? (
               <div className="relative w-full h-[400px] border rounded-md overflow-hidden">
                 <Image
                   src={selectedSubmission.documentImage}
                   alt="Document"
                   fill
                   className="object-contain"
-                  unoptimized={selectedSubmission.documentImage.includes('image-proxy')}
+                  unoptimized={selectedSubmission.documentImage.includes('image-proxy') || selectedSubmission.documentImage.startsWith('https://')}
                   onError={() => toast.error("Failed to load document image")}
                 />
               </div>

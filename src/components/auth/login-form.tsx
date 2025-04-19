@@ -35,6 +35,7 @@ export function LoginForm() {
     
     if (errorType === "banned" && email) {
       setError(`This account (${email}) has been banned. Please contact support for assistance.`)
+      toast.error(`Your account (${email}) has been banned. Please contact support.`)
     }
   }, [searchParams])
 
