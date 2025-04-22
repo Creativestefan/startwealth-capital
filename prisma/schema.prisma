@@ -1,10 +1,18 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./node_modules/@prisma/client"
+  previewFeatures = []
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  
+  connectionTimeoutMillis = 30000
+  maxConnections = 20
+  minConnections = 1
+  idleTimeoutMillis = 600000
 }
 
 model Account {
