@@ -16,7 +16,7 @@ export default async function ReferralsPage({
 }: {
   searchParams?: Promise<any>
 }) {
-  // Require authentication for this page
+  
   const session = await requireAuth()
   
   // Fetch the latest user data from the database

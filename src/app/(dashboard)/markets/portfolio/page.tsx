@@ -12,9 +12,7 @@ import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
-/**
- * Loading component for the portfolio page
- */
+
 function PortfolioLoading() {
   return (
     <div className="space-y-6">
