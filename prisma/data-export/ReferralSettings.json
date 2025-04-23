@@ -1,0 +1,13 @@
+[
+  {
+    "id": "97aeadf6-c355-41d7-a092-bce32d28b913",
+    "propertyCommissionRate": "1",
+    "equipmentCommissionRate": "1",
+    "marketCommissionRate": "1",
+    "greenEnergyCommissionRate": "2",
+    "createdAt": "2025-03-24T03:47:43.413Z",
+    "updatedAt": "2025-03-24T10:53:44.437Z",
+    "createdBy": null,
+    "updatedBy": "cm81wbcc50000ukvx0ahkku3p"
+  }
+]

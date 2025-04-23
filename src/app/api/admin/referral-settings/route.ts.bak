@@ -1,0 +1,263 @@
+import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authConfig } from "@/lib/auth.config"
+import { 
+  getReferralSettings, 
+  updateReferralSettings, 
+  ensureDefaultReferralSettings 
+} from "@/lib/referrals/settings"
+import { z } from "zod"
+import { prisma } from "@/lib/prisma"
+
+// Schema for validating the update request
+const updateSettingsSchema = z.object({
+  propertyCommissionRate: z.number().min(0).max(20).optional(),
+  equipmentCommissionRate: z.number().min(0).max(20).optional(),
+  marketCommissionRate: z.number().min(0).max(20).optional(),
+  greenEnergyCommissionRate: z.number().min(0).max(20).optional(),
+})
+
+// Helper function to initialize the database table if needed
+async function initializeDatabase() {
+  try {
+    // Check if the ReferralSettings table exists by running a raw query
+    try {
+      await prisma.$queryRaw`SELECT 1 FROM "ReferralSettings" LIMIT 1;`
+    } catch (err) {
+      if (err instanceof Error && err.message.includes('relation "ReferralSettings" does not exist')) {
+        console.log("Creating ReferralSettings table via raw SQL");
+        // Create the table manually if it doesn't exist
+        await prisma.$executeRaw`
+          CREATE TABLE IF NOT EXISTS "ReferralSettings" (
+            "id" TEXT NOT NULL,
+            "propertyCommissionRate" DECIMAL(5,2) NOT NULL DEFAULT 0,
+            "equipmentCommissionRate" DECIMAL(5,2) NOT NULL DEFAULT 0,
+            "marketCommissionRate" DECIMAL(5,2) NOT NULL DEFAULT 0,
+            "greenEnergyCommissionRate" DECIMAL(5,2) NOT NULL DEFAULT 0,
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" TIMESTAMP(3) NOT NULL,
+            "createdBy" TEXT,
+            "updatedBy" TEXT,
+            CONSTRAINT "ReferralSettings_pkey" PRIMARY KEY ("id")
+          );
+        `;
+      }
+    }
+    
+    // Check if any settings exist and create default if not
+    const settingsResult = await prisma.$queryRaw`SELECT COUNT(*) FROM "ReferralSettings";`;
+    // Type assertion for the result
+    const settingsArray = settingsResult as Array<{ count: string | number }>;
+    const count = Number(settingsArray[0]?.count || 0);
+    
+    if (count === 0) {
+      console.log("No settings found, creating default");
+      // Insert default settings
+      const now = new Date().toISOString();
+      await prisma.$executeRaw`
+        INSERT INTO "ReferralSettings" (
+          "id", 
+          "propertyCommissionRate", 
+          "equipmentCommissionRate", 
+          "marketCommissionRate", 
+          "greenEnergyCommissionRate", 
+          "createdAt", 
+          "updatedAt"
+        ) 
+        VALUES (
+          ${crypto.randomUUID()}, 
+          2.5, 
+          3.0, 
+          1.5, 
+          2.0, 
+          ${now}, 
+          ${now}
+        );
+      `;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error initializing database:", error);
+    return false;
+  }
+}
+
+// GET to retrieve current referral settings
+export async function GET() {
+  try {
+    const session = await getServerSession(authConfig)
+
+    // Check if user is authenticated and is an admin
+    if (!session?.user || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Make sure the database is properly initialized
+    await initializeDatabase();
+
+    try {
+      // Try to ensure default settings exist, but don't fail if there's an error
+      await ensureDefaultReferralSettings()
+    } catch (err) {
+      console.error("Error ensuring default settings, continuing with GET:", err)
+    }
+
+    // Get current settings directly from database with raw SQL
+    let settings;
+    try {
+      const result = await prisma.$queryRaw`
+        SELECT 
+          "propertyCommissionRate", 
+          "equipmentCommissionRate", 
+          "marketCommissionRate", 
+          "greenEnergyCommissionRate", 
+          "createdAt", 
+          "updatedAt" 
+        FROM "ReferralSettings" 
+        ORDER BY "createdAt" DESC 
+        LIMIT 1;
+      `;
+      
+      // Type assertion for the result
+      const settingsArray = result as Array<{
+        propertyCommissionRate: number;
+        equipmentCommissionRate: number;
+        marketCommissionRate: number;
+        greenEnergyCommissionRate: number;
+        createdAt: Date;
+        updatedAt: Date;
+      }>;
+      
+      if (settingsArray.length > 0) {
+        settings = settingsArray[0];
+      } else {
+        // Fallback to library function which will return defaults
+        settings = await getReferralSettings();
+      }
+    } catch (err) {
+      console.error("Error fetching settings with raw SQL:", err);
+      // Fallback to library function which will return defaults
+      settings = await getReferralSettings();
+    }
+
+    return NextResponse.json({ settings })
+  } catch (error) {
+    console.error("[API_ADMIN_REFERRAL_SETTINGS_GET]", error)
+    // Return default values on error
+    return NextResponse.json({ 
+      settings: {
+        propertyCommissionRate: 2.5,
+        equipmentCommissionRate: 3.0,
+        marketCommissionRate: 1.5,
+        greenEnergyCommissionRate: 2.0,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      } 
+    })
+  }
+}
+
+// PUT to update referral settings
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await getServerSession(authConfig)
+
+    // Check if user is authenticated and is an admin
+    if (!session?.user || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Parse and validate request body
+    const body = await request.json()
+    const validation = updateSettingsSchema.safeParse(body)
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: validation.error.format() },
+        { status: 400 }
+      )
+    }
+
+    // Make sure the database is properly initialized
+    await initializeDatabase();
+
+    try {
+      // Extract validated data
+      const { 
+        propertyCommissionRate, 
+        equipmentCommissionRate, 
+        marketCommissionRate, 
+        greenEnergyCommissionRate 
+      } = validation.data;
+      
+      // Update settings using raw SQL directly
+      const now = new Date().toISOString();
+      await prisma.$executeRaw`
+        INSERT INTO "ReferralSettings" (
+          "id", 
+          "propertyCommissionRate", 
+          "equipmentCommissionRate", 
+          "marketCommissionRate", 
+          "greenEnergyCommissionRate", 
+          "createdAt", 
+          "updatedAt",
+          "updatedBy"
+        ) 
+        VALUES (
+          ${crypto.randomUUID()}, 
+          ${propertyCommissionRate ?? 2.5}, 
+          ${equipmentCommissionRate ?? 3.0}, 
+          ${marketCommissionRate ?? 1.5}, 
+          ${greenEnergyCommissionRate ?? 2.0}, 
+          ${now}, 
+          ${now},
+          ${session.user.id}
+        );
+      `;
+      
+      // Return updated settings
+      const updatedSettings = {
+        propertyCommissionRate: propertyCommissionRate ?? 2.5,
+        equipmentCommissionRate: equipmentCommissionRate ?? 3.0,
+        marketCommissionRate: marketCommissionRate ?? 1.5,
+        greenEnergyCommissionRate: greenEnergyCommissionRate ?? 2.0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        updatedBy: session.user.id
+      };
+
+      return NextResponse.json({ 
+        message: "Settings updated successfully", 
+        settings: updatedSettings 
+      })
+    } catch (err) {
+      console.error("Error updating settings:", err)
+      
+      // Try the library method as fallback
+      try {
+        const updatedSettings = await updateReferralSettings({
+          ...validation.data,
+          adminId: session.user.id,
+        })
+
+        return NextResponse.json({ 
+          message: "Settings updated successfully", 
+          settings: updatedSettings 
+        })
+      } catch (secondError) {
+        console.error("Both update methods failed:", secondError);
+        return NextResponse.json(
+          { error: "Database error: Could not update settings" },
+          { status: 500 }
+        )
+      }
+    }
+  } catch (error) {
+    console.error("[API_ADMIN_REFERRAL_SETTINGS_PUT]", error)
+    return NextResponse.json(
+      { error: "Failed to update referral settings" },
+      { status: 500 }
+    )
+  }
+} 

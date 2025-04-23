@@ -1,0 +1,28 @@
+[
+  {
+    "id": "cm812j5kg0003ukbuca2c9e70",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "status": "APPROVED",
+    "country": "nigeria",
+    "documentType": "DRIVING_LICENSE",
+    "documentNumber": "12345677807",
+    "documentImage": "placeholder-url",
+    "submittedAt": "2025-03-09T03:23:07.872Z",
+    "reviewedAt": "2025-03-09T03:23:10.872Z",
+    "rejectionReason": null,
+    "reviewedBy": "ADMIN"
+  },
+  {
+    "id": "cm8rxpmbq0000uktxohrsncx2",
+    "userId": "cm80ok6p10000ukb2zeff7ja6",
+    "status": "APPROVED",
+    "country": "NG",
+    "documentType": "PASSPORT",
+    "documentNumber": "123456789",
+    "documentImage": "/api/image-proxy?url=https%3A%2F%2Fstartwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com%2Fkyc%2Fcm80ok6p10000ukb2zeff7ja6%2F1743115076761-nrt6659oqv.png",
+    "submittedAt": "2025-03-27T22:37:58.196Z",
+    "reviewedAt": "2025-03-27T22:48:54.230Z",
+    "rejectionReason": null,
+    "reviewedBy": null
+  }
+]

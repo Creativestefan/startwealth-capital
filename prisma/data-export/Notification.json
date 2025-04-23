@@ -1,0 +1,167 @@
+[
+  {
+    "id": "cm8s64pcr0001ukwm8inqtfv8",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "SYSTEM_UPDATE",
+    "title": "Account Updated",
+    "message": "Your account details have been updated by an administrator.",
+    "read": true,
+    "createdAt": "2025-03-28T02:33:38.907Z",
+    "updatedAt": "2025-03-28T14:10:24.789Z",
+    "actionUrl": null
+  },
+  {
+    "id": "cm8bwy4zf000dukfyyz548lvr",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "WALLET_UPDATED",
+    "title": "Deposit Approved",
+    "message": "Your deposit of 90001 USD has been approved.",
+    "read": true,
+    "createdAt": "2025-03-16T17:32:17.212Z",
+    "updatedAt": "2025-03-28T14:17:05.750Z",
+    "actionUrl": null
+  },
+  {
+    "id": "cm83i2g800007uk0twx6u8pjx",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "SYSTEM_UPDATE",
+    "title": "Investment Cancelled",
+    "message": "Your investment of $300,000.00 has been cancelled. A refund of $300,000.00 has been credited to your wallet.",
+    "read": true,
+    "createdAt": "2025-03-10T20:13:34.752Z",
+    "updatedAt": "2025-03-28T14:18:55.575Z",
+    "actionUrl": "/dashboard/real-estate/portfolio"
+  },
+  {
+    "id": "cm83i3pj7000buk0tisddd0v8",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "SYSTEM_UPDATE",
+    "title": "Investment Cancelled",
+    "message": "Your investment of $300,000.00 has been cancelled. A refund of $300,000.00 has been credited to your wallet.",
+    "read": true,
+    "createdAt": "2025-03-10T20:14:33.475Z",
+    "updatedAt": "2025-03-28T14:18:55.575Z",
+    "actionUrl": "/dashboard/real-estate/portfolio"
+  },
+  {
+    "id": "cm83i7f0d000fuk0t3mcyxbgb",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "SYSTEM_UPDATE",
+    "title": "Investment Cancelled",
+    "message": "Your investment of $300,000.00 has been cancelled. A refund of $300,000.00 has been credited to your wallet.",
+    "read": true,
+    "createdAt": "2025-03-10T20:17:26.462Z",
+    "updatedAt": "2025-03-28T14:18:55.575Z",
+    "actionUrl": "/dashboard/real-estate/portfolio"
+  },
+  {
+    "id": "cm83ifa7a000huk0tz2vmifx0",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "INVESTMENT_MATURED",
+    "title": "Investment Matured",
+    "message": "Your investment of $300,012.00 has matured and is ready for withdrawal.",
+    "read": true,
+    "createdAt": "2025-03-10T20:23:33.478Z",
+    "updatedAt": "2025-03-28T14:18:55.575Z",
+    "actionUrl": "/dashboard/real-estate/portfolio"
+  },
+  {
+    "id": "cm83igwda000juk0tgke8axd7",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "INVESTMENT_MATURED",
+    "title": "Investment Matured",
+    "message": "Your investment of $1,500,000.00 has matured and is ready for withdrawal.",
+    "read": true,
+    "createdAt": "2025-03-10T20:24:48.862Z",
+    "updatedAt": "2025-03-28T14:18:55.575Z",
+    "actionUrl": "/dashboard/real-estate/portfolio"
+  },
+  {
+    "id": "cm83il2ci000luk0t7w1tk5m8",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "INVESTMENT_MATURED",
+    "title": "Investment Matured",
+    "message": "Your investment of $300,014.00 has matured and is ready for withdrawal.",
+    "read": true,
+    "createdAt": "2025-03-10T20:28:03.235Z",
+    "updatedAt": "2025-03-28T14:18:55.575Z",
+    "actionUrl": "/dashboard/real-estate/portfolio"
+  },
+  {
+    "id": "cm83ilnux000puk0tdsgdn3j8",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "SYSTEM_UPDATE",
+    "title": "Investment Cancelled",
+    "message": "Your investment of $300,014.00 has been cancelled. A refund of $300,014.00 has been credited to your wallet.",
+    "read": true,
+    "createdAt": "2025-03-10T20:28:31.113Z",
+    "updatedAt": "2025-03-28T14:18:55.575Z",
+    "actionUrl": "/dashboard/real-estate/portfolio"
+  },
+  {
+    "id": "cm83xgrj20001ukxaf7ltpg9o",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "INVESTMENT_MATURED",
+    "title": "Investment Matured",
+    "message": "Your investment of $300,014.00 has matured and is ready for withdrawal.",
+    "read": true,
+    "createdAt": "2025-03-11T03:24:36.830Z",
+    "updatedAt": "2025-03-28T14:18:55.575Z",
+    "actionUrl": "/dashboard/real-estate/portfolio"
+  },
+  {
+    "id": "cm8bvsgfv0003ukfyaw4wgpae",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "WALLET_UPDATED",
+    "title": "Wallet Deduction",
+    "message": "1000 USD has been deducted from your wallet. Reason: testing ",
+    "read": true,
+    "createdAt": "2025-03-16T16:59:52.508Z",
+    "updatedAt": "2025-03-28T14:18:55.575Z",
+    "actionUrl": null
+  },
+  {
+    "id": "cm8bw06130007ukfyxb3o2cjf",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "WALLET_UPDATED",
+    "title": "Wallet Funded",
+    "message": "Your wallet has been funded with 50 USD. Reason: funding",
+    "read": true,
+    "createdAt": "2025-03-16T17:05:52.263Z",
+    "updatedAt": "2025-03-28T14:18:55.575Z",
+    "actionUrl": null
+  },
+  {
+    "id": "cm8bwumpm000bukfyxyqfsxyb",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "WALLET_UPDATED",
+    "title": "New Deposit Request",
+    "message": "A new deposit request of 90001 USD has been submitted.",
+    "read": true,
+    "createdAt": "2025-03-16T17:29:33.563Z",
+    "updatedAt": "2025-03-28T14:18:55.575Z",
+    "actionUrl": null
+  },
+  {
+    "id": "cm8swsdle000bukwm1o7y0gfq",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "WALLET_UPDATED",
+    "title": "New Deposit Request",
+    "message": "A new deposit request of 8000 USD has been submitted.",
+    "read": false,
+    "createdAt": "2025-03-28T14:59:53.426Z",
+    "updatedAt": "2025-03-28T14:59:53.426Z",
+    "actionUrl": null
+  },
+  {
+    "id": "cm8swv6p5000dukwm6p621l4q",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "WALLET_UPDATED",
+    "title": "Deposit Approved",
+    "message": "Your deposit of 8000 BTC has been approved.",
+    "read": false,
+    "createdAt": "2025-03-28T15:02:04.458Z",
+    "updatedAt": "2025-03-28T15:02:04.458Z",
+    "actionUrl": null
+  }
+]

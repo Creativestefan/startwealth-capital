@@ -1,0 +1,20 @@
+[
+  {
+    "id": "cm83w1q1b000ruk7e0dz20txb",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "type": "SEMI_ANNUAL",
+    "amount": "300000",
+    "status": "MATURED",
+    "startDate": "2025-03-11T02:44:55.438Z",
+    "endDate": "2025-03-14T02:28:38.549Z",
+    "expectedReturn": "45000",
+    "actualReturn": "45000",
+    "reinvest": false,
+    "createdAt": "2025-03-11T02:44:55.439Z",
+    "updatedAt": "2025-03-14T02:28:38.550Z",
+    "planId": "cm83q6h9l0000uke4jvrawhsn",
+    "referralId": null,
+    "commissionAmount": null,
+    "commissionPaid": false
+  }
+]

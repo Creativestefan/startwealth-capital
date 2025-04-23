@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1d7e4166-79e0-4363-8e62-636827d643d2",
+    "btcWalletAddress": "1FfmbHfnpaZjKFvyi1okTjJJusN455paPH",
+    "usdtWalletAddress": "0xD8da6bf26964aF9D7eEd9e03E53415D37aA96045",
+    "usdtWalletType": "BEP-20",
+    "isActive": true,
+    "createdAt": "2025-03-28T15:52:15.405Z",
+    "updatedAt": "2025-03-28T15:52:43.955Z"
+  },
+  {
+    "id": "7d29e152-8f85-40b6-b461-e277cffcaed2",
+    "btcWalletAddress": "",
+    "usdtWalletAddress": "",
+    "usdtWalletType": "BEP-20",
+    "isActive": true,
+    "createdAt": "2025-03-28T15:52:15.405Z",
+    "updatedAt": "2025-03-28T15:52:15.405Z"
+  }
+]

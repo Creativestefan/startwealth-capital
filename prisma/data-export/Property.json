@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cm82byqwk0001uk71sxl6r269",
+    "name": "Oceanview Villa",
+    "description": "A luxurious beachfront villa with panoramic ocean views, modern interiors, and a private infinity pool.",
+    "price": "200000",
+    "location": "Lagos, Nigeria",
+    "mapUrl": "https://google.com",
+    "features": {
+      "bedrooms": "4",
+      "bathrooms": "3",
+      "yearBuilt": "2025",
+      "squareFeet": "1234"
+    },
+    "images": [
+      "/api/image-proxy?url=https%3A%2F%2Fstartwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com%2Fuploads%2F1741566851575-qatd2qqo3sj.jpg",
+      "/api/image-proxy?url=https%3A%2F%2Fstartwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com%2Fuploads%2F1741566851777-n75iev5q40o.jpg",
+      "/api/image-proxy?url=https%3A%2F%2Fstartwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com%2Fuploads%2F1741566851738-nfkwija2am.jpg",
+      "/api/image-proxy?url=https%3A%2F%2Fstartwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com%2Fuploads%2F1741566851698-7yjmijvoe05.jpg"
+    ],
+    "status": "SOLD",
+    "createdAt": "2025-03-10T00:34:58.085Z",
+    "updatedAt": "2025-03-10T03:48:04.324Z",
+    "mainImage": "/api/image-proxy?url=https%3A%2F%2Fstartwealth.3c3049b93386c9d1425392ee596bc359.r2.cloudflarestorage.com%2Fuploads%2F1741566843519-tgm3dutqft.jpg"
+  }
+]

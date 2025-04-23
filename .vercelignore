@@ -1,0 +1,31 @@
+# Development files
+.git
+.github
+.vscode
+.idea
+
+# Build artifacts
+.next
+out
+
+# Test files
+__tests__
+*.test.*
+*.spec.*
+
+# Documentation
+docs
+*.md
+
+# Misc
+.DS_Store
+
+# Development configuration
+.eslintrc*
+.prettierrc*
+.env.local
+.env.development
+.env
+
+# Large directories not needed for production
+node_modules

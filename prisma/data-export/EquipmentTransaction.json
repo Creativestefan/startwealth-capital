@@ -1,0 +1,25 @@
+[
+  {
+    "id": "cm83suhd80001ukz72a6g34zx",
+    "equipmentId": "cm83r0a3x0001uke4unlkcx6i",
+    "userId": "cm80pfry30000ukbul13gej8p",
+    "status": "COMPLETED",
+    "createdAt": "2025-03-11T01:15:18.762Z",
+    "updatedAt": "2025-03-14T02:15:08.182Z",
+    "quantity": 1,
+    "trackingNumber": null,
+    "deliveryPin": "123ABC",
+    "deliveryDate": null,
+    "totalAmount": "8500",
+    "deliveryAddress": {
+      "city": "Middletown",
+      "state": "DE",
+      "street": "651 N Broad Street",
+      "country": "United States",
+      "postalCode": "19709"
+    },
+    "referralId": null,
+    "commissionAmount": null,
+    "commissionPaid": false
+  }
+]

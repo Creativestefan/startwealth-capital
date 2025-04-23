@@ -1,0 +1,15 @@
+[
+  {
+    "id": "cm83q6h9l0000uke4jvrawhsn",
+    "name": "Pro plan",
+    "description": "Invest in solar power",
+    "type": "SEMI_ANNUAL",
+    "minAmount": "300000",
+    "maxAmount": "700000",
+    "returnRate": "15",
+    "durationMonths": 6,
+    "image": "",
+    "createdAt": "2025-03-11T00:00:39.656Z",
+    "updatedAt": "2025-03-11T00:15:06.072Z"
+  }
+]
